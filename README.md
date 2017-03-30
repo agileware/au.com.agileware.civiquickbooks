@@ -1,8 +1,6 @@
-## What is this repository for?
-
-### Quick summary
-
 CiviCRM Extension for CiviCRM Contribution and Contact synchronization with [QuickBooks Online](http://www.intuit.com.au/).
+
+QuickBooks Online provides different Tax APIs for US and non-US countries. This extension has been developed and tested for QuickBooks Online, Australia. With initial development and testing to support QuickBooks Online, US.
 
 ### CiviCRM compatibility
 
