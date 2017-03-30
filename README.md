@@ -15,6 +15,11 @@ au.com.agileware.civiquickbooks :- 4.6+
 1. Ensure the CiviContribute component is enabled
 1. Requires CiviCRM extension '[nz.co.fuzion.accountsync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync)'.
 
+## Support and questions
+
+This CiviCRM extension was developed by Agileware, https://agileware.com.au
+Agileware can be contracted for CiviCRM development and support services. Email sales@agileware.com.au
+
 ## How do I get set up?
 
 ### Summary of set up
