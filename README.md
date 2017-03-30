@@ -18,6 +18,7 @@ au.com.agileware.civiquickbooks :- 4.6+
 ## Support and questions
 
 This CiviCRM extension was developed by Agileware, https://agileware.com.au
+
 Agileware can be contracted for CiviCRM development and support services. Email sales@agileware.com.au
 
 ## How do I get set up?
