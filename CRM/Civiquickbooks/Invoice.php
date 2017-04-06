@@ -625,7 +625,7 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
       }
     }
 
-    array_walk_recursive($new_invoice, function(&$item) { $item = html_entity_decode($item, (ENT_QUOTES | ENT_HTML401), 'UTF-8') });
+    array_walk_recursive($new_invoice, function(&$item) { $item = html_entity_decode($item, (ENT_QUOTES | ENT_HTML401), 'UTF-8'); });
 
     return $new_invoice;
   }
