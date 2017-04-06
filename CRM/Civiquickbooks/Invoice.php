@@ -40,9 +40,8 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
           $responseErrors = $this->savePushResponse($result, $record);
         }
         catch (CiviCRM_API3_Exception $e) {
-          $errors[] = ts('Failed to store ') . $record['contribution_id']
-            . ts(' with error ') . $e->getMessage() . print_r($responseErrors, TRUE)
-                                                    . ts('Invoice Push failed');
+          $this_error = $errors[] = ts('Failed to store %1 with error %2.', array(1 => $record['contribution_id'], 2 => $e->getMessage()));
+          CRM_Core_Error::debug_var($this_error, CRM_Core_Error::formatBacktrace($e->getTrace()));
         }
       }
 
