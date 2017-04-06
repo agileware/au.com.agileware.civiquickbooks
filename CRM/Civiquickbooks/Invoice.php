@@ -506,7 +506,7 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
               'ID: ' . $lineItem['financial_type_id'] . ' Inc_acctgcode: ' . $lineItem['acctgCode'];
           }
           else {
-            $_error_msg_for_item_acctgcode .= . ', ID: ' . $lineItem['financial_type_id'] . ' Inc_acctgcode: ' . $lineItem['acctgCode'] . ' ';
+            $_error_msg_for_item_acctgcode .= ', ID: ' . $lineItem['financial_type_id'] . ' Inc_acctgcode: ' . $lineItem['acctgCode'] . ' ';
           }
 
           continue;
