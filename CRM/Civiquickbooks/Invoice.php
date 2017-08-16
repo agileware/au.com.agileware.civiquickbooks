@@ -548,7 +548,7 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
           'Id' => $i + '',
           'LineNum' => $i,
           'Description' => $line_item_description,
-          'Amount' => sprintf('%-16.5f', $lineTotal),
+          'Amount' => sprintf('%.5f', $lineTotal),
           'DetailType' => 'SalesItemLineDetail',
           'SalesItemLineDetail' => array(
             'ItemRef' => array(
