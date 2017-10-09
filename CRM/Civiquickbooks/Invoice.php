@@ -159,6 +159,7 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
         }
 
         $record['accounts_needs_update'] = 0;
+        $record['accounts_status_id'] = 3;
 
         CRM_Core_DAO::setFieldValue(
           'CRM_Accountsync_DAO_AccountInvoice',
@@ -871,6 +872,14 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
     }
 
     $records = civicrm_api3('AccountInvoice', 'get', $criteria);
+
+    if(!isset($params['contribution_id'])){
+      $criteria['accounts_status_id'] = array('IS NULL' => 1);
+
+      $nullrec = civicrm_api3('AccountInvoice', 'get', $criteria);
+      $records['values'] = array_merge($records['values'], $nullrec['values']);
+    }
+
     return $records;
   }
 
@@ -878,8 +887,8 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
     $criteria = array(
       'plugin' => $this->_plugin,
       'connector_id' => 0,
-      'accounts_status_id' => array('NOT IN', 3),
-      'accounts_invoice_id' => array('IS NOT NULL' => 1),
+      'accounts_status_id' => array('NOT IN', array(1, 3)),
+      'accounts_invoice_id'=> array('IS NOT NULL' => 1),
       'accounts_data' => array('IS NOT NULL' => 1),
       'error_data' => array('IS NULL' => 1),
       'options' => array(
@@ -893,6 +902,14 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
     }
 
     $records = civicrm_api3('AccountInvoice', 'get', $criteria);
+
+    if(!isset($params['contribution_id'])){
+      $criteria['accounts_status_id'] = array('IS NULL' => 1);
+
+      $nullrec = civicrm_api3('AccountInvoice', 'get', $criteria);
+      $records['values'] = array_merge($records['values'], $nullrec['values']);
+    }
+
     return $records;
   }
 
