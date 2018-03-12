@@ -1,6 +1,6 @@
 <?php
 
-require_once 'CRM/Core/Form.php';
+use CRM_Civiquickbooks_ExtensionUtil as E;
 
 /**
  * Form controller class
@@ -24,13 +24,13 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
       if (isset($setting['quick_form_type'])) {
         $add = 'add' . $setting['quick_form_type'];
         if ($add == 'addElement') {
-          $this->$add($setting['html_type'], $name, ts($setting['title']), CRM_Utils_Array::value('html_attributes', $setting, array ()));
+          $this->$add($setting['html_type'], $name, $setting['title'], CRM_Utils_Array::value('html_attributes', $setting, array ()));
         }
         else {
-          $this->$add($name, ts($setting['title']));
+          $this->$add($name, $setting['title']);
         }
 
-        $description[$name] = ts($setting['description']);
+        $description[$name] = $setting['description'];
       }
     }
 
