@@ -53,6 +53,7 @@ class CRM_Civiquickbooks_Page_OAuthQBs extends CRM_Core_Page {
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
         curl_setopt($ch, CURLOPT_URL, $this->result['signed_url']);
         $r = curl_exec($ch);
         curl_close($ch);
@@ -90,6 +91,7 @@ class CRM_Civiquickbooks_Page_OAuthQBs extends CRM_Core_Page {
         // The final access token is different with the oauth_token in the query string in the callback url
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
         curl_setopt($ch, CURLOPT_URL, $this->result['signed_url']);
         $r = curl_exec($ch);
 
@@ -187,6 +189,7 @@ class CRM_Civiquickbooks_Page_OAuthQBs extends CRM_Core_Page {
         'Accept: application/json',
         'Content-Type: application/json',
       ));
+    curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
 
     curl_setopt($ch, CURLOPT_URL, $result['signed_url']);
 

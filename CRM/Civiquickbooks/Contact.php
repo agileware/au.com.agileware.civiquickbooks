@@ -267,6 +267,7 @@ class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
         'Accept: application/json',
         'Content-Type: application/json',
       ));
+    curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
 
     curl_setopt($ch, CURLOPT_URL, $result['signed_url']);
 
@@ -309,6 +310,7 @@ class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
         'Accept: application/json',
         'Content-Type: application/json',
       ));
+    curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
 
     curl_setopt($ch, CURLOPT_URL, $result['signed_url']);
 
