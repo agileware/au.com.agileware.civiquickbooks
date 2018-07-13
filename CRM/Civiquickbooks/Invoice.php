@@ -156,7 +156,7 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
                   ));
 
         if ($result['is_error']) {
-          throw new CiviCRM_API3_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id']);
+          throw new CiviCRM_API3_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status');
         }
 
         $record['accounts_needs_update'] = 0;
@@ -175,7 +175,7 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
         $result = CRM_Core_DAO::setFieldValue('CRM_Contribute_DAO_Contribution', $record['contribution_id'], 'contribution_status_id', $this->contribution_status_settings_lower_reverse['cancelled'], 'id');
 
         if ($result == false) {
-          throw new CiviCRM_API3_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id']);
+          throw new CiviCRM_API3_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status');
         }
 
         $record['accounts_needs_update'] = 0;
@@ -366,7 +366,7 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
                        ));
 
       if (empty($db_line_items['count'])) {
-        throw new CiviCRM_API3_Exception('No line item in contribution(ID:' . $contributionID . '). Invoice push for this one aborted!');
+        throw new CiviCRM_API3_Exception('No line item in contribution(ID:' . $contributionID . '). Invoice push for this one aborted!', 'qbo_contribution_line_item');
         return false;
       }
 
@@ -597,7 +597,7 @@ class CRM_Civiquickbooks_Invoice extends CRM_Civiquickbooks_OAuthBase {
       }
 
       if(empty($lineItems)){
-        throw new CiviCRM_API3_Exception('No vaild line items in the Invoice to push. ' . $_error_msg_to_QBs);
+        throw new CiviCRM_API3_Exception('No valid line items in the Invoice to push. ' . $_error_msg_to_QBs, 'qbo_invoice_line_items');
       }
 
       $new_invoice += array(
