@@ -2,22 +2,20 @@ CiviCRM Extension for CiviCRM Contribution and Contact synchronization with [Qui
 
 QuickBooks Online provides different Tax APIs for US and non-US countries. This extension has been developed and tested for QuickBooks Online, Australia. With initial development and testing to support QuickBooks Online, US.
 
-## CiviCRM compatibility
+About the Authors
+------
 
-[nz.co.fuzion.accountsync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync) :- 4.2+ 
+This CiviCRM extension was developed by the team at [Agileware](https://agileware.com.au).
 
-au.com.agileware.civiquickbooks :- 4.6+
+[Agileware](https://agileware.com.au) provide a range of CiviCRM services including:
+ - CiviCRM migration
+ - CiviCRM integration
+ - CiviCRM extension development
+ - CiviCRM support
+ - CiviCRM hosting
+ - CiviCRM remote training services.
 
-## Dependencies
-
-1. Ensure the CiviContribute component is enabled
-1. Requires CiviCRM extension '[nz.co.fuzion.accountsync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync)'.
-
-## Support and questions
-
-This CiviCRM extension was developed by Agileware, https://agileware.com.au
-
-Agileware can be contracted for CiviCRM development and support services. Email sales@agileware.com.au
+Support your CiviCRM developers. [Contact Agileware](https://agileware.com.au/contact) today!
 
 ## Installation and configuration
 
