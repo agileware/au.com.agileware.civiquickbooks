@@ -20,13 +20,12 @@ Support your CiviCRM developers. [Contact Agileware](https://agileware.com.au/co
 ## Installation and configuration
 
 1. Ensure the CiviContribute component is enabled
-1. Download the repository(whole extension folder) to your CiviCRM dedicated extension directory (available at 'System Settings / Resource URLs'). 
-1. This extension requires you to install and enable the '[nz.co.fuzion.accountsync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync)' extension.
-1. Then go to 'System Settings / Extensions', where you should be able to see the 'QuickBooks Online Integration' extension listed. 
-1. Enable the extension
+1. Download this repository(whole extension folder) to your CiviCRM dedicated extension directory (available at 'System Settings / Resource URLs').
+1. Download the CiviCRM extension, '[nz.co.fuzion.accountsync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync)'.
+1. In CiviCRM, go to 'System Settings / Extensions' and enable both the 'Account Sync' and 'QuickBooks Online Integration' extensions.
 1. 'QuickBooks' will now be available in the 'Administer' menu. 
 1. Click on the 'QuickBooks' menu to display the CiviQuickBooks Settings page.
-1. Update the CiviQuickBooks configuration.
+1. Update the CiviQuickBooks configuration as detailed below.
 
 ### Configuration
 
