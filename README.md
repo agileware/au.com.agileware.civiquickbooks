@@ -15,7 +15,7 @@ This CiviCRM extension was developed by the team at [Agileware](https://agilewar
  - CiviCRM hosting
  - CiviCRM remote training services.
 
-Support your CiviCRM developers. [Contact Agileware](https://agileware.com.au/contact) today!
+Support your Australian [CiviCRM](https://civicrm.org) developers, [contact Agileware](https://agileware.com.au/contact) today!
 
 ## Installation and configuration
 
