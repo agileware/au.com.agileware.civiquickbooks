@@ -17,7 +17,13 @@ This CiviCRM extension was developed by the team at [Agileware](https://agilewar
 
 Support your Australian [CiviCRM](https://civicrm.org) developers, [contact Agileware](https://agileware.com.au/contact) today!
 
-## Installation and configuration
+Prerequisites
+-------------
+
+  * [CiviCRM](https://www.civicrm.org) 4.7 or greater  
+
+Installation and configuration
+-------------
 
 1. Ensure the CiviContribute component is enabled
 1. Download this repository(whole extension folder) to your CiviCRM dedicated extension directory (available at 'System Settings / Resource URLs').
