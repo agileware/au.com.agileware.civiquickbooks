@@ -2,31 +2,12 @@ CiviCRM Extension for CiviCRM Contribution and Contact synchronization with [Qui
 
 QuickBooks Online provides different Tax APIs for US and non-US countries. This extension has been developed and tested for QuickBooks Online, Australia. With initial development and testing to support QuickBooks Online, US.
 
-About the Authors
-------
-
-This CiviCRM extension was developed by the team at [Agileware](https://agileware.com.au).
-
-[Agileware](https://agileware.com.au) provide a range of CiviCRM services including:
- - CiviCRM migration
- - CiviCRM integration
- - CiviCRM extension development
- - CiviCRM support
- - CiviCRM hosting
- - CiviCRM remote training services.
-
-Support your Australian [CiviCRM](https://civicrm.org) developers, [contact Agileware](https://agileware.com.au/contact) today!
-
-Prerequisites
--------------
-
-  * [CiviCRM](https://www.civicrm.org) 4.7 or greater  
-
 Installation and configuration
 -------------
 
 1. Ensure the CiviContribute component is enabled
-1. Download this repository(whole extension folder) to your CiviCRM dedicated extension directory (available at 'System Settings / Resource URLs').
+1. Download the [latest version of this extension](https://github.com/agileware/au.com.agileware.civiquickbooks/archive/master.zip)
+1. Unzip in the CiviCRM extension directory, as defined in 'System Settings / Directories'.
 1. Download the CiviCRM extension, **[Account Sync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync/archive/master.zip)**.
 1. In CiviCRM, go to 'System Settings / Extensions' and enable both extensions, **Account Sync** and **QuickBooks Online Integration**.
 1. 'QuickBooks' will now be available in the 'Administer' menu. 
@@ -95,3 +76,18 @@ When the extension pushes an invoice to Quickbooks, it requires every item to ha
 
 1. As line items that have no matched Quickbooks product/service name filled out or no matched Quickbooks tax account name filled out will not be pushed in the invoice, an invoice could have less items pushed. If an invoice does not have even one item in it after the filtering, the invoice will not be pushed successfully.
 1. As long as an invoice has at least one item in it after filtering, the information about those none-pushed items will be noted down as `customer memo` field. The `id` of the problematic financial type and its `acctg code` will be listed. In that case, you need to manually fix the invoice manually.
+
+About the Authors
+------
+
+This CiviCRM extension was developed by the team at [Agileware](https://agileware.com.au).
+
+[Agileware](https://agileware.com.au) provide a range of CiviCRM services including:
+ - CiviCRM migration
+ - CiviCRM integration
+ - CiviCRM extension development
+ - CiviCRM support
+ - CiviCRM hosting
+ - CiviCRM remote training services.
+
+Support your Australian [CiviCRM](https://civicrm.org) developers, [contact Agileware](https://agileware.com.au/contact) today!
