@@ -1,4 +1,4 @@
-CiviCRM Extension for CiviCRM Contribution and Contact synchronization with [QuickBooks Online](http://www.intuit.com.au/).
+CiviCRM Extension which integrates CiviCRM with [QuickBooks Online](http://www.intuit.com.au/). CiviCRM Contacts and Contributions are pushed to your QuickBooks Online account, QuickBooks Invoices are pulled into CiviCRM, updating the Contribution status. Integration of the two systems saves you time by not having to do repetitive data entry in your accounting system and CiviCRM. This extension does the work for you!
 
 QuickBooks Online provides different Tax APIs for US and non-US countries. This extension has been developed and tested for QuickBooks Online, Australia. With initial development and testing to support QuickBooks Online, US.
 
