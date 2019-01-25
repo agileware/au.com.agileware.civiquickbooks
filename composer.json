@@ -1,0 +1,5 @@
+{
+    "require": {
+        "quickbooks/v3-php-sdk": "^5.0"
+    }
+}

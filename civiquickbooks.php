@@ -14,7 +14,6 @@ function civiquickbooks_civicrm_config(&$config) {
 /**
  * Implements hook_civicrm_xmlMenu().
  *
- * @param array $files
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
  */
@@ -61,13 +60,6 @@ function civiquickbooks_civicrm_disable() {
 /**
  * Implements hook_civicrm_upgrade().
  *
- * @param $op string, the type of operation being performed; 'check' or 'enqueue'
- * @param $queue CRM_Queue_Queue, (for 'enqueue') the modifiable list of pending up upgrade tasks
- *
- * @return mixed
- *   Based on op. for 'check', returns array(boolean) (TRUE if upgrades are pending)
- *                for 'enqueue', returns void
- *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
  */
 function civiquickbooks_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
@@ -90,8 +82,6 @@ function civiquickbooks_civicrm_managed(&$entities) {
  * Implements hook_civicrm_caseTypes().
  *
  * Generate a list of case-types.
- *
- * @param array $caseTypes
  *
  * Note: This hook only runs in CiviCRM 4.4+.
  *
@@ -125,24 +115,10 @@ function civiquickbooks_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
 }
 
 /**
- * Functions below this ship commented out. Uncomment as required.
- *
- *
- * /**
- * Implements hook_civicrm_preProcess().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
- *
- * function civiquickbooks_civicrm_preProcess($formName, &$form) {
- *
- * } // */
-
-/**
  * Implements hook_civicrm_navigationMenu().
  *
  * Adds entries to the navigation menu.
  *
- * @param array $menu
  */
 function civiquickbooks_civicrm_navigationMenu(&$menu) {
   $maxID = CRM_Core_DAO::singleValueQuery("SELECT max(id) FROM civicrm_navigation");
@@ -156,7 +132,7 @@ function civiquickbooks_civicrm_navigationMenu(&$menu) {
     'attributes' => array(
       'label' => 'QuickBooks',
       'name' => 'QuickBooks',
-      'url' => null,
+      'url' => NULL,
       'permission' => 'administer CiviCRM',
       'operator' => NULL,
       'separator' => NULL,
@@ -172,26 +148,26 @@ function civiquickbooks_civicrm_navigationMenu(&$menu) {
           'url' => 'civicrm/quickbooks/settings',
           'permission' => 'administer CiviCRM',
           'operator' => NULL,
-          'separator' => null,
+          'separator' => NULL,
           'active' => 1,
           'parentID' => $navId,
           'navID' => $navId + 1,
         ),
       ),
 
-      $navId+2 => array (
+      $navId + 2 => array(
         'attributes' => array(
           'label' => 'Synchronize contacts',
           'name' => 'Contact Sync',
           'url' => 'civicrm/a/#/accounts/contact/sync/quickbooks',
           'permission' => 'administer CiviCRM',
-          'operator' => null,
-          'separator' => null,
+          'operator' => NULL,
+          'separator' => NULL,
           'active' => 1,
           'parentID'   => $navId,
           'navID' => $navId + 2,
-        ))
-
+        ),
+      ),
     ),
   );
 
@@ -281,4 +257,20 @@ function civiquickbooks_civicrm_mapAccountsData(&$accountsData, $entity, $plugin
  */
 function civiquickbooks_civicrm_accountsync_plugins(&$plugins) {
   $plugins[] = 'quickbooks';
+}
+
+/**
+ * Requires extension base Dir path
+ * @return string
+ */
+function getExtensionPath() {
+  return CRM_Core_Config::singleton()->extensionsDir . 'au.com.agileware.civiquickbooks/';
+}
+
+/**
+ * Returns composer autoload path.
+ * @return string
+ */
+function getComposerAutuLoadPath() {
+  return getExtensionPath() . 'vendor/autoload.php';
 }

@@ -13,19 +13,18 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
   private $_submittedValues = array();
   private $_settings = array();
 
-  function buildQuickForm() {
+  public function buildQuickForm() {
     $settings = $this->getFormSettings();
     $description = array();
 
-    $ckey = civicrm_api3('Setting', 'getvalue', array('group_name' => 'QuickBooks Online Settings', 'name' => 'quickbooks_consumer_key'));
-    $ssecret = civicrm_api3('Setting', 'getvalue', array('group_name' => 'QuickBooks Online Settings', 'name' => 'quickbooks_shared_secret'));
+    $QBCredentials = CRM_Quickbooks_APIHelper::getQuickBooksCredentials();
 
     foreach ($settings as $name => $setting) {
       if (isset($setting['quick_form_type'])) {
         $add = 'add' . $setting['quick_form_type'];
         CRM_Core_Error::debug_var('setting[' . $name . ']', $setting);
         if ($add == 'addElement') {
-          $this->$add($setting['html_type'], $name, $setting['title'], CRM_Utils_Array::value('html_attributes', $setting, array ()));
+          $this->$add($setting['html_type'], $name, $setting['title'], CRM_Utils_Array::value('html_attributes', $setting, array()));
         }
         elseif ($setting['html_type'] == 'Select') {
           $optionValues = array();
@@ -43,7 +42,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
     }
 
     $this->addButtons(array(
-        array (
+        array(
           'type' => 'submit',
           'name' => ts('Submit'),
           'isDefault' => TRUE,
@@ -52,7 +51,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
 
     $descriptions_to_add_link = array(
       'quickbooks_consumer_key' => 'https://developer.intuit.com/docs/0100_quickbooks_online/0100_essentials/0085_develop_quickbooks_apps/0005_use_your_app_with_production_keys',
-      'quickbooks_shared_secret' => 'https://developer.intuit.com/docs/0100_quickbooks_online/0100_essentials/0085_develop_quickbooks_apps/0001_your_first_request/0100_get_auth_tokens'
+      'quickbooks_shared_secret' => 'https://developer.intuit.com/docs/0100_quickbooks_online/0100_essentials/0085_develop_quickbooks_apps/0001_your_first_request/0100_get_auth_tokens',
     );
 
     foreach ($descriptions_to_add_link as $key => $value) {
@@ -61,13 +60,22 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
     }
 
     $exdate_element = $this->_elements[$this->_elementIndex['quickbooks_access_token_expiryDate']];
-
     $exdate_element->freeze();
 
-    if(!empty($ckey) && !empty($ssecret)) {
-      $url = str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/OAuth",null,true,null));
+    $refresh_exdate_element = $this->_elements[$this->_elementIndex['quickbooks_refresh_token_expiryDate']];
+    $refresh_exdate_element->freeze();
+
+    if (!empty($QBCredentials['clientID']) && !empty($QBCredentials['clientSecret']) && empty($QBCredentials['accessToken']) && empty($QBCredentials['refreshToken']) && empty($QBCredentials['realMId'])) {
+      $url = str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/OAuth", NULL, TRUE, NULL));
       $this->assign('redirect_url', $url);
     }
+
+    $showClientKeysMessage = TRUE;
+    if (!empty($QBCredentials['clientID']) && !empty($QBCredentials['clientSecret'])) {
+      $showClientKeysMessage = FALSE;
+    }
+
+    $this->assign('showClientKeysMessage', $showClientKeysMessage);
 
     $this->assign("description_array", $description);
 
@@ -79,12 +87,12 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
     parent::buildQuickForm();
   }
 
-  function postProcess() {
+  public function postProcess() {
     $this->_submittedValues = $this->exportValues();
 
     $settings = $this->saveSettings();
     parent::postProcess();
-    header('Location: '.$_SERVER['REQUEST_URI']);
+    header('Location: ' . $_SERVER['REQUEST_URI']);
   }
 
   /**
@@ -92,7 +100,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
    *
    * @return array (string)
    */
-  function getRenderableElementNames() {
+  public function getRenderableElementNames() {
     // The _elements list includes some items which should not be
     // auto-rendered in the loop -- such as "qfKey" and "buttons". These
     // items don't have labels. We'll identify renderable by filtering on
@@ -112,7 +120,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
    *
    * @return array
    */
-  function getFormSettings() {
+  public function getFormSettings() {
     if (empty($this->_settings)) {
       $settings = civicrm_api3('setting', 'getfields', array('filters' => $this->_settingFilter));
     }
@@ -126,20 +134,21 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
    *
    * @return array
    */
-  function saveSettings() {
+  public function saveSettings() {
     $settings = $this->getFormSettings();
     $values = array_intersect_key($this->_submittedValues, $settings);
-    $default = $this->setDefaultValues();
+    $previousValues = CRM_Quickbooks_APIHelper::getQuickBooksCredentials();
 
     civicrm_api3('setting', 'create', $values);
 
-    if($values['consumer_key'] !== $default['consumer_key'] || $values['shared_secret'] !== $default['shared_secret']) {
+    if ($previousValues['clientID'] != 'quickbooks_consumer_key' || $previousValues['clientSecret'] != 'quickbooks_shared_secret') {
       civicrm_api3(
         'setting', 'create', array(
           "quickbooks_access_token" => '',
-          "quickbooks_access_token_secret" => '',
-          "quickbooks_access_token_expiryDate" =>
-          'No access token and secret available',
+          "quickbooks_refresh_token" => '',
+          "quickbooks_realmId"  => '',
+          "quickbooks_access_token_expiryDate" => '',
+          "quickbooks_refresh_token_expiryDate" => '',
         )
       );
     }
@@ -152,7 +161,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
    *
    * @see CRM_Core_Form::setDefaultValues()
    */
-  function setDefaultValues() {
+  public function setDefaultValues() {
     $existing = civicrm_api3('setting', 'get', array('return' => array_keys($this->getFormSettings())));
     $defaults = array();
     $domainID = CRM_Core_Config::domainID();
@@ -161,4 +170,5 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
     }
     return $defaults;
   }
+
 }
