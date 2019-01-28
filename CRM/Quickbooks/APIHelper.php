@@ -17,7 +17,7 @@ class CRM_Quickbooks_APIHelper {
     $pieces = [];
     $max = mb_strlen($keyspace, '8bit') - 1;
     for ($i = 0; $i < $length; ++$i) {
-      $pieces []= $keyspace[random_int(0, $max)];
+      $pieces[] = $keyspace[random_int(0, $max)];
     }
     return implode('', $pieces);
   }
@@ -66,28 +66,38 @@ class CRM_Quickbooks_APIHelper {
    * @throws CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
-  public static function getAccountingDataServiceObject() {
+  public static function getAccountingDataServiceObject($forRefreshToken = FALSE) {
 
-    if (self::$quickBooksAccountingDataService) {
+    if (!$forRefreshToken) {
+      self::refreshAccessTokenIfRequired();
+    }
+
+    if (self::$quickBooksAccountingDataService && !$forRefreshToken) {
       return self::$quickBooksAccountingDataService;
     }
 
-    $redirectUrl = self::getRedirectUrl();
-
     $QBCredentials = self::getQuickBooksCredentials();
-
-    self::$quickBooksAccountingDataService = \QuickBooksOnline\API\DataService\DataService::Configure(array(
+    $dataServiceParams = array(
       'auth_mode' => 'oauth2',
       'ClientID' => $QBCredentials['clientID'],
       'ClientSecret' => $QBCredentials['clientSecret'],
-      'RedirectURI' => $redirectUrl,
       'accessTokenKey' => $QBCredentials['accessToken'],
       'refreshTokenKey' => $QBCredentials['refreshToken'],
       'QBORealmID' => $QBCredentials['realMId'],
-      'baseUrl' => "Development"
-    ));
+      'baseUrl' => "Development",
+    );
 
-    return self::$quickBooksAccountingDataService;
+    if ($forRefreshToken) {
+      unset($dataServiceParams['accessTokenKey']);
+    }
+
+    $dataService = \QuickBooksOnline\API\DataService\DataService::Configure($dataServiceParams);
+    if (!$forRefreshToken) {
+      self::$quickBooksAccountingDataService = $dataService;
+      return self::$quickBooksAccountingDataService;
+    }
+
+    return $dataService;
   }
 
   /**
@@ -95,7 +105,43 @@ class CRM_Quickbooks_APIHelper {
    * @return mixed
    */
   private static function getRedirectUrl() {
-    return str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/OAuth",NULL,TRUE,NULL));
+    return str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/OAuth", NULL, TRUE, NULL));
+  }
+
+  /**
+   * Refresh QuickBooks access token if required.
+   *
+   * @throws CiviCRM_API3_Exception
+   * @throws \QuickBooksOnline\API\Exception\SdkException
+   */
+  private function refreshAccessTokenIfRequired() {
+    $QBCredentials = self::getQuickBooksCredentials();
+    $now = new DateTime();
+    $now->modify("-5 minutes");
+
+    $accessTokenExpiryDate = $QBCredentials['accessTokenExpiryDate'];
+    $accessTokenExpiryDate = DateTime::createFromFormat('Y-m-d H:i:s', $accessTokenExpiryDate);
+
+    if ($now > $accessTokenExpiryDate) {
+      $dataService = self::getAccountingDataServiceObject(TRUE);
+
+      try {
+        $OAuth2LoginHelper = $dataService->getOAuth2LoginHelper();
+        $refreshedAccessTokenObj = $OAuth2LoginHelper->refreshToken();
+        $tokenExpiresIn = new DateTime();
+        $tokenExpiresIn->modify("+" . $refreshedAccessTokenObj->getAccessTokenValidationPeriodInSeconds() . "seconds");
+
+        $accessToken = $refreshedAccessTokenObj->getAccessToken();
+        civicrm_api3('Setting', 'create', array(
+          'quickbooks_access_token' => $accessToken,
+          'quickbooks_access_token_expiryDate' => $tokenExpiresIn->format("Y-m-d H:i:s"),
+        ));
+
+      }
+      catch (\QuickBooksOnline\API\Exception\IdsException $e) {
+
+      }
+    }
   }
 
   /**

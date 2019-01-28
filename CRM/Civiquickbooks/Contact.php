@@ -1,8 +1,7 @@
 <?php
 
-require_once('library/AboutQBs.php');
-require_once('library/OAuthSimple.php');
-require_once('library/CustomException.php');
+require_once 'library/CustomException.php';
+require getComposerAutuLoadPath();
 
 class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
   public function __construct() {
@@ -12,7 +11,7 @@ class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
   }
 
   public function pull($params) {
-    $_result_to_return = null;
+    $_result_to_return = NULL;
 
     $_start_date_string = (isset($params['start_date'])) ? $params['start_date'] : 'yesterday';
 
@@ -24,24 +23,27 @@ class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
       switch ($e->getCode()) {
         case 0:
           CRM_Core_Session::setStatus('Failed to pull customers from Quickbooks, as: ' . $e->getMessage());
-          return false;
-          break;
+          return FALSE;
+
+        break;
 
         case 1:
           CRM_Core_Session::setStatus('No customers are updated in Quickbooks since ' . $_start_date_string . '. Contacts pulling aborted');
-          return true;
-          break;
+          return TRUE;
+
+        break;
+
       }
     }
 
     // Now we are going to loop through all contacts in the result.
     foreach ($_contacts_from_QBs as $contact) {
       $_params_for_account_sync_api = array(
-        'accounts_display_name' => $contact['DisplayName'],
+        'accounts_display_name' => $contact->DisplayName,
         //AccountSync API can not parse this date format correctly, if we use the DAO directly, it has no problem.
         //'accounts_modified_date' => date('Y-m-d H:i:s', strtotime($contact['MetaData']['LastUpdatedTime'])),
         'plugin' => $this->_plugin,
-        'accounts_contact_id' => $contact['Id'],
+        'accounts_contact_id' => $contact->Id,
         'accounts_data' => json_encode($contact),
         'accounts_needs_update' => 0,
         'sequential' => 1,
@@ -50,7 +52,7 @@ class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
 
       try {
         $_tmp_QBs_contact = civicrm_api3('account_contact', 'getsingle', array(
-                              'accounts_contact_id' => $contact['Id'],
+                              'accounts_contact_id' => $contact->Id,
                               'plugin' => $this->_plugin,
                             ));
 
@@ -59,19 +61,20 @@ class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
       catch (CiviCRM_API3_Exception $e) {
         /*if there is no account contact found, it means that:
 
-          Either: The contact is not recorded by AccountSync
+        Either: The contact is not recorded by AccountSync
 
-          OR: The contact is recorded but not pushed, so there is no account_contact_id, but somehow (maybe manually created)we have
-          this contact info in Quickbooks and it is updated.
+        OR: The contact is recorded but not pushed, so there is no account_contact_id, but somehow (maybe manually created)we have
+        this contact info in Quickbooks and it is updated.
 
-          In the second case, the consequence could be:
-          1. Duplicated contacts will be created in quickbooks and duplicated account_contact entity will be created.
-          2. Contact push for that particular contact will fail, as quickbooks recognised that is a duplicated contact.
+        In the second case, the consequence could be:
+        1. Duplicated contacts will be created in quickbooks and duplicated account_contact entity will be created.
+        2. Contact push for that particular contact will fail, as quickbooks recognised that is a duplicated contact.
 
-          For both cases, we can not deal with here and make the decision for users.
+        For both cases, we can not deal with here and make the decision for users.
 
-          So we assume that if no contact can not be found by Quickbooks id, then there is no existing contact record captured by AccountSync
-        */
+        So we assume that if no contact can not be found by Quickbooks id, then there is no existing contact record captured by AccountSync
+         */
+        continue;
       }
 
       //create/update account contact entity.
@@ -82,7 +85,7 @@ class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
           'CRM_Accountsync_DAO_AccountContact',
           $result['values'][0]['id'],
           'accounts_modified_date',
-          date("Y-m-d H:i:s", strtotime($contact['MetaData']['LastUpdatedTime'])),
+          date("Y-m-d H:i:s", strtotime($contact->MetaData->LastUpdatedTime)),
           'id');
       }
       catch (CiviCRM_API3_Exception $e) {
@@ -131,40 +134,43 @@ class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
 
           unset($record['api.contact.get']);
 
-          $result = $this->pushCustomer($accountsContact);
+          $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
 
-          $responseErrors = null;
+          if ($accountsContact->Id) {
+            $result = $dataService->Update($accountsContact);
+          }
+          else {
+            $result = $dataService->Add($accountsContact);
+          }
 
-          $parsed_result = json_decode($result, TRUE);
-
-          if (empty($parsed_result['Customer'])) {
-            $responseErrors = $result;
+          $responseErrors = array();
+          if (!$result) {
+            $responseErrors = $dataService->getLastError();
           }
 
           if (!empty($responseErrors)) {
-            $record['error_data'] = json_encode($responseErrors);
+            $record['error_data'] = json_encode([$responseErrors->getResponseBody()]);
 
-            if( gettype($record['accounts_data']) == 'array' ){
+            if (gettype($record['accounts_data']) == 'array') {
               $record['accounts_data']  = json_encode($record['accounts_data']);
             }
           }
-          else {
-            $parsed_result = $parsed_result['Customer'];
+          elseif ($result) {
 
             $record['error_data'] = 'NULL';
 
-            $record['accounts_contact_id'] = $parsed_result['Id'];
+            $record['accounts_contact_id'] = $result->Id;
 
             CRM_Core_DAO::setFieldValue(
               'CRM_Accountsync_DAO_AccountContact',
               $record['id'],
               'accounts_modified_date',
-              date("Y-m-d H:i:s", strtotime($parsed_result['MetaData']['LastUpdatedTime'])),
+              date("Y-m-d H:i:s", strtotime($result->MetaData->LastUpdatedTime)),
               'id');
 
-            $record['accounts_data'] = json_encode($parsed_result);
+            $record['accounts_data'] = json_encode($result);
 
-            $record['accounts_display_name'] = $parsed_result['DisplayName'];
+            $record['accounts_display_name'] = $result->DisplayName;
 
             $record['accounts_needs_update'] = 0;
           }
@@ -229,119 +235,49 @@ class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
       ),
     );
 
+    $customer = \QuickBooksOnline\API\Facades\Customer::create($customer);
+
     return $customer;
-  }
-
-  protected function pushCustomer($customer) {
-    $vars_to_pass = array(
-      'action' => "POST",
-      'path' => $this->request_uri,
-      'parameters' => array(
-        'oauth_token' => FALSE,
-        'oauth_nonce' => FALSE,
-        'oauth_consumer_key' => FALSE,
-        'oauth_signature_method' => FALSE,
-        'oauth_timestamp' => FALSE,
-        'oauth_version' => FALSE,
-      ),
-      'signatures' => $this->signatures,
-    );
-
-    if (isset($customer['Id']) && isset($customer['SyncToken'])) {
-      //update the customer
-      $vars_to_pass['parameters']['operation'] = 'update';
-    }
-
-    $this->oauthObject->reset();
-
-    $result = $this->oauthObject->sign($vars_to_pass);
-
-    $ch = curl_init();
-
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($customer));
-    curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER,
-      array(
-        'Accept: application/json',
-        'Content-Type: application/json',
-      ));
-    curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
-
-    curl_setopt($ch, CURLOPT_URL, $result['signed_url']);
-
-    $result = curl_exec($ch);
-
-    curl_close($ch);
-
-    return $result;
   }
 
   /**
    *  Get all the customers from Quickbooks by providing a modification date.
    */
   protected function _get_QBs_customers($start_date_string) {
-    $_result_to_return = null;
+
+    $_result_to_return = NULL;
 
     $_date_UTC_string_for_QBs = date('c', strtotime($start_date_string));
 
-    $this->request_uri = $this->base_url . '/v3/company/' . $this->realmId . '/query';
-    $this->reset_vars_to_pass();
-
-    $this->vars_to_pass['action'] = 'GET';
-    $this->vars_to_pass['path'] = $this->request_uri;
-
     $query = "select * from customer where MetaData.LastUpdatedTime >= '" . $_date_UTC_string_for_QBs . "'";
 
-    $this->vars_to_pass['parameters']['query'] = $query;
+    $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+    $customers = $dataService->Query($query, 0, 1000);
 
-    $this->oauthObject->reset();
-
-    $result = $this->oauthObject->sign($this->vars_to_pass);
-
-    $ch = curl_init();
-
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-    curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER,
-      array(
-        'Accept: application/json',
-        'Content-Type: application/json',
-      ));
-    curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
-
-    curl_setopt($ch, CURLOPT_URL, $result['signed_url']);
-
-    $result = curl_exec($ch);
-
-    curl_close($ch);
-
-    $_result_to_return = json_decode($result, true);
+    $error = $dataService->getLastError();
+    $_result_to_return = $customers;
 
     //process and analyse the response result from Quickbooks
-    if (isset($_result_to_return['QueryResponse'])) {
-      $_result_to_return = $_result_to_return['QueryResponse'];
-
+    if ($error) {
+      // code 0 represent error received from Quickbooks. json result from Quickbooks is inserted into the message.
+      throw new ContactPullGetQBCustomersException('Got Error in customer pulling from QBs, Json: ' . $result, 0);
+    }
+    else {
       if (empty($_result_to_return)) {
         // code 1 represent no customers received from Quickbooks
         throw new ContactPullGetQBCustomersException('No customers have been updated since the date past as param', 1);
       }
-      else {
-        // if everything is all good, put just customer elements in the array.
-        $_result_to_return = $_result_to_return['Customer'];
-      }
-    }
-    else {
-      // code 0 represent error received from Quickbooks. json result from Quickbooks is inserted into the message.
-      throw new ContactPullGetQBCustomersException('Got Error in customer pulling from QBs, Json: ' . $result, 0);
     }
 
     return $_result_to_return;
   }
+
 }
 
-// it uses Class declared in library/CustomException.php
+/**
+ * it uses Class declared in library/CustomException.php
+ * Class ContactPullGetQBCustomersException
+ */
 class ContactPullGetQBCustomersException extends CustomException {
+
 }

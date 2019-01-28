@@ -31,6 +31,10 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
           if (!empty($setting['pseudoconstant']) && !empty($setting['pseudoconstant']['optionGroupName'])) {
             $optionValues = CRM_Core_OptionGroup::values($setting['pseudoconstant']['optionGroupName'], FALSE, FALSE, FALSE, NULL, 'name');
           }
+          elseif (!empty($setting['pseudoconstant']) && !empty($setting['pseudoconstant']['callback'])) {
+            $callBack = Civi\Core\Resolver::singleton()->get($setting['pseudoconstant']['callback']);
+            $optionValues = call_user_func_array($callBack, $optionValues);
+          }
           $this->add('select', $setting['name'], $setting['title'], $optionValues, FALSE, $setting['html_attributes']);
         }
         else {
