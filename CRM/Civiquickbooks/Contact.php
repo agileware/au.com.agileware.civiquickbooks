@@ -3,12 +3,9 @@
 require_once 'library/CustomException.php';
 require getComposerAutuLoadPath();
 
-class CRM_Civiquickbooks_Contact extends CRM_Civiquickbooks_OAuthBase {
-  public function __construct() {
-    parent::__construct();
+class CRM_Civiquickbooks_Contact {
 
-    $this->request_uri = $this->base_url . '/v3/company/' . $this->realmId . '/customer';
-  }
+  private $_plugin = 'quickbooks';
 
   public function pull($params) {
     $_result_to_return = NULL;
