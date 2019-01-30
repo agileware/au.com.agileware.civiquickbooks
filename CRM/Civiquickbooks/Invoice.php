@@ -44,7 +44,7 @@ class CRM_Civiquickbooks_Invoice {
       $errors = array();
 
       // US companies handles the tax in Invoice differently
-      $quickbooks_current_company_country = get_QB_setting_value('quickbooks_company_country');
+      $quickbooks_current_company_country = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_company_country", 'group' => 'QuickBooks Online Settings'));
       $this->_quickbooks_is_us_company_flag = ($quickbooks_current_company_country == 'US') ? TRUE : FALSE;
 
       foreach ($records['values'] as $i => $record) {

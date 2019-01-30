@@ -31,5 +31,5 @@ function civicrm_api3_civiquickbooks_ContactPush($params) {
 
   // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
 
-  return civicrm_api3_create_success($output, $params,'Civiquickbooks', 'Contactpush');
+  return civicrm_api3_create_success($output, $params, 'Civiquickbooks', 'Contactpush');
 }

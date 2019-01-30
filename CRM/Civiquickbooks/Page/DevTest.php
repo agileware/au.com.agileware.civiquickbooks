@@ -2,7 +2,7 @@
 
 require_once 'CRM/Core/Page.php';
 
-require_once('library/AboutQBs.php');
+require_once 'library/AboutQBs.php';
 
 class CRM_Civiquickbooks_Page_DevTest extends CRM_Core_Page {
   public function run() {
@@ -95,4 +95,5 @@ class CRM_Civiquickbooks_Page_DevTest extends CRM_Core_Page {
 
     parent::run();
   }
+
 }
