@@ -119,22 +119,36 @@ class CRM_Quickbooks_APIHelper {
     $now = new DateTime();
     $now->modify("-5 minutes");
 
-    $accessTokenExpiryDate = $QBCredentials['accessTokenExpiryDate'];
-    $accessTokenExpiryDate = DateTime::createFromFormat('Y-m-d H:i:s', $accessTokenExpiryDate);
+    $isAccessTokenExpired = self::isTokenExpired($QBCredentials);
+    $isRefreshTokenExpired = self::isTokenExpired($QBCredentials, TRUE);
 
-    if ($now > $accessTokenExpiryDate) {
+    if ($isAccessTokenExpired || $isRefreshTokenExpired) {
       $dataService = self::getAccountingDataServiceObject(TRUE);
 
       try {
         $OAuth2LoginHelper = $dataService->getOAuth2LoginHelper();
-        $refreshedAccessTokenObj = $OAuth2LoginHelper->refreshToken();
+
+        if ($isRefreshTokenExpired) {
+          $refreshedAccessTokenObj = $OAuth2LoginHelper->refreshAccessTokenWithRefreshToken($QBCredentials['refreshToken']);
+        }
+        else {
+          $refreshedAccessTokenObj = $OAuth2LoginHelper->refreshToken();
+        }
+
         $tokenExpiresIn = new DateTime();
         $tokenExpiresIn->modify("+" . $refreshedAccessTokenObj->getAccessTokenValidationPeriodInSeconds() . "seconds");
 
+        $refreshTokenExpiresIn = new DateTime();
+        $refreshTokenExpiresIn->modify("+" . $refreshedAccessTokenObj->getRefreshTokenValidationPeriodInSeconds() . "seconds");
+
         $accessToken = $refreshedAccessTokenObj->getAccessToken();
+        $refreshToken = $refreshedAccessTokenObj->getRefreshToken();
+
         civicrm_api3('Setting', 'create', array(
           'quickbooks_access_token' => $accessToken,
+          'quickbooks_refresh_token' => $refreshToken,
           'quickbooks_access_token_expiryDate' => $tokenExpiresIn->format("Y-m-d H:i:s"),
+          'quickbooks_refresh_token_expiryDate' => $refreshTokenExpiresIn->format("Y-m-d H:i:s"),
         ));
 
       }
@@ -150,7 +164,7 @@ class CRM_Quickbooks_APIHelper {
    * @return array
    * @throws CiviCRM_API3_Exception
    */
-  public function getQuickBooksCredentials() {
+  public static function getQuickBooksCredentials() {
     $quickBooksSettings = civicrm_api3('Setting', 'get', array('group' => "QuickBooks Online Settings"));
     $quickBooksSettings = $quickBooksSettings['values'][$quickBooksSettings['id']];
     $clientID = $quickBooksSettings["quickbooks_consumer_key"];
@@ -170,6 +184,32 @@ class CRM_Quickbooks_APIHelper {
       'accessTokenExpiryDate' => $tokenExpiryDate,
       'refreshTokenExpiryDate' => $refreshTokenExpiryDate,
     );
+  }
+
+  /**
+   * Check if refresh/access token expired or not.
+   *
+   * @param $QBCredentials
+   * @return bool
+   * @throws Exception
+   */
+  public static function isTokenExpired($QBCredentials, $isRefreshToken = FALSE) {
+    $tokenKey = "accessTokenExpiryDate";
+    if ($isRefreshToken) {
+      $tokenKey = "refreshTokenExpiryDate";
+    }
+    $isTokenExpired = FALSE;
+    if (isset($QBCredentials[$tokenKey]) && !empty($QBCredentials[$tokenKey]) && $QBCredentials[$tokenKey] != 1) {
+      $currentDateTime = new DateTime();
+      $currentDateTime->modify("-5 minutes");
+      $tokenExpiryDate = DateTime::createFromFormat("Y-m-d H:i:s", $QBCredentials[$tokenKey]);
+
+      if ($currentDateTime > $tokenExpiryDate) {
+        $isTokenExpired = TRUE;
+      }
+    }
+
+    return $isTokenExpired;
   }
 
 }

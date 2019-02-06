@@ -69,10 +69,14 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
     $refresh_exdate_element = $this->_elements[$this->_elementIndex['quickbooks_refresh_token_expiryDate']];
     $refresh_exdate_element->freeze();
 
-    if (!empty($QBCredentials['clientID']) && !empty($QBCredentials['clientSecret']) && empty($QBCredentials['accessToken']) && empty($QBCredentials['refreshToken']) && empty($QBCredentials['realMId'])) {
+    $isRefreshTokenExpired = CRM_Quickbooks_APIHelper::isTokenExpired($QBCredentials, TRUE);
+
+    if ((!empty($QBCredentials['clientID']) && !empty($QBCredentials['clientSecret']) && empty($QBCredentials['accessToken']) && empty($QBCredentials['refreshToken']) && empty($QBCredentials['realMId'])) || $isRefreshTokenExpired) {
       $url = str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/OAuth", NULL, TRUE, NULL));
       $this->assign('redirect_url', $url);
     }
+
+    $this->assign('isRefreshTokenExpired', $isRefreshTokenExpired);
 
     $showClientKeysMessage = TRUE;
     if (!empty($QBCredentials['clientID']) && !empty($QBCredentials['clientSecret'])) {

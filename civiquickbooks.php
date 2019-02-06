@@ -274,3 +274,24 @@ function getExtensionPath() {
 function getComposerAutuLoadPath() {
   return getExtensionPath() . 'vendor/autoload.php';
 }
+
+/**
+ * Adding a refresh token check to the status Page/System.
+ *
+ * Implements hook_civicrm_check().
+ */
+function civiquickbooks_civicrm_check(&$messages) {
+  $QBCredentials = CRM_Quickbooks_APIHelper::getQuickBooksCredentials();
+  $isRefreshTokenExpired = CRM_Quickbooks_APIHelper::isTokenExpired($QBCredentials, TRUE);
+  if ($isRefreshTokenExpired) {
+    $messages[] = (new CRM_Utils_Check_Message(
+      'quickbooks_refresh_token_expired',
+      ts('QuickBooks refresh is token is expired, <a href="%1">Reauthorize QuickBooks application</a> to continue syncing contacts and contributions updates to QuickBooks.', array(
+        1 => CRM_Utils_System::url('civicrm/quickbooks/OAuth', ''),
+      )),
+      ts('QuickBooks Token Expired'),
+      \Psr\Log\LogLevel::CRITICAL,
+      'fa-clock-o'
+    ));
+  }
+}
