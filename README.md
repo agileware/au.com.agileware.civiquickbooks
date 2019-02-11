@@ -1,11 +1,20 @@
+# IMPORTANT NOTICE 12/02/2019
+
+QBO have recently implemented mandatory OAuth 2.0 authentication for all new QBO applications integrating with QBO. So you must use the oath2.0 branch of QBO to successfully connect CiviQuickBooks to QBO. See [branch oath2.0](/agileware/au.com.agileware.civiquickbooks/tree/oauth2.0)
+CiviQuickBooks master branch uses the old authentication method which is no longer supported by QBO.
+The oath2.0 branch will become the new release once development and testing is completed.
+If you have questions or wish to co-fund development then [contact Agileware](https://agileware.com.au/contact).
+Otherwise report issues and provide a PR to the [GitHub issue queue](/agileware/au.com.agileware.civiquickbooks/issues)
+
+# README
+
 CiviCRM Extension which integrates CiviCRM with [QuickBooks Online](https://www.intuit.com.au/). CiviCRM Contacts and Contributions are pushed to your QuickBooks Online account, QuickBooks Invoices are pulled into CiviCRM, updating the Contribution status. Synchronise all things!
 
 Integration of the two systems saves you time by not having to do repetitive data entry in your accounting system and CiviCRM. This extension does the work for you!
 
 QuickBooks Online provides different Tax APIs for US and non-US countries. This extension has been developed and tested for QuickBooks Online, Australia. With initial development and testing to support QuickBooks Online, US.
 
-Installation and configuration
--------------
+## Installation and configuration
 
 1. Ensure the CiviContribute component is enabled
 1. Download the [latest version of this extension](https://github.com/agileware/au.com.agileware.civiquickbooks/archive/master.zip)
@@ -79,8 +88,7 @@ When the extension pushes an invoice to Quickbooks, it requires every item to ha
 1. As line items that have no matched Quickbooks product/service name filled out or no matched Quickbooks tax account name filled out will not be pushed in the invoice, an invoice could have less items pushed. If an invoice does not have even one item in it after the filtering, the invoice will not be pushed successfully.
 1. As long as an invoice has at least one item in it after filtering, the information about those none-pushed items will be noted down as `customer memo` field. The `id` of the problematic financial type and its `acctg code` will be listed. In that case, you need to manually fix the invoice manually.
 
-About the Authors
-------
+# About the Authors
 
 This CiviCRM extension was developed by the team at [Agileware](https://agileware.com.au).
 
