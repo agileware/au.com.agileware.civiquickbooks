@@ -1,10 +1,10 @@
 # IMPORTANT NOTICE 12/02/2019
 
-QBO have recently implemented mandatory OAuth 2.0 authentication for all new QBO applications integrating with QBO. So you must use the oath2.0 branch of QBO to successfully connect CiviQuickBooks to QBO. See [branch oath2.0](agileware/au.com.agileware.civiquickbooks/tree/oauth2.0)
+QBO have recently implemented mandatory OAuth 2.0 authentication for all new QBO applications integrating with QBO. So you must use the oath2.0 branch of QBO to successfully connect CiviQuickBooks to QBO. See [branch oath2.0](https://github.com/agileware/au.com.agileware.civiquickbooks/tree/oauth2.0)
 CiviQuickBooks master branch uses the old authentication method which is no longer supported by QBO.
 The oath2.0 branch will become the new release once development and testing is completed.
 If you have questions or wish to co-fund development then [contact Agileware](https://agileware.com.au/contact).
-Otherwise report issues and provide a PR to the [GitHub issue queue](agileware/au.com.agileware.civiquickbooks/issues)
+Otherwise report issues and provide a PR to the [GitHub issue queue](https://github.com/agileware/au.com.agileware.civiquickbooks/issues)
 
 # README
 
