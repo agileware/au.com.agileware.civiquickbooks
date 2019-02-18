@@ -37,7 +37,7 @@ QuickBooks Online provides different Tax APIs for US and non-US countries. This 
 5. Open the CiviQuickBooks settings page.
 6. To confirm QuickBooks authentication a date will be shown in the 'Access Token Expiry Date' field. If no date is shown then authentication has failed. Repeat the process.
 
-#### Map your QuickBooks product/service to CiviCRM Financial account codes
+### Map your QuickBooks product/service to CiviCRM Financial account codes
 
 Each QuickBooks Product/Service has a unique name. This is used in the CiviCRM Financial account codes to correctly code each Invoice in QuickBooks.
 
@@ -48,7 +48,7 @@ Each QuickBooks Product/Service has a unique name. This is used in the CiviCRM F
 5. During sync, the Contribution line item will be set to the corresponding QuickBooks Product/Service.
 6. When a CiviCRM 'Acctg Code' does not match any QuickBooks Product/Service name, which means that the there is no product/service in Quickbooks has the same name, that particular line item will **NOT** be pushed through the invoice.
 
-#### Map your QuickBooks tax account name to corresponding CiviCRM financial type's Sales Tax Account's `acctg code`. 
+### Map your QuickBooks tax account name to corresponding CiviCRM financial type's Sales Tax Account's `acctg code`. 
 
 When the extension pushes an invoice to Quickbooks, it requires every item to have a specified Tax account.
 
@@ -75,7 +75,7 @@ When the extension pushes an invoice to Quickbooks, it requires every item to ha
  of all `financial types` used in the contributions.
       - Make sure all used `tax accounts` have been created and have names recored in the `account type code` of the `sales tax financial account` of matched `financial type`.
 
-#### Special Notes:
+# Special Notes:
 
 1. As line items that have no matched Quickbooks product/service name filled out or no matched Quickbooks tax account name filled out will not be pushed in the invoice, an invoice could have less items pushed. If an invoice does not have even one item in it after the filtering, the invoice will not be pushed successfully.
 2. As long as an invoice has at least one item in it after filtering, the information about those none-pushed items will be noted down as `customer memo` field. The `id` of the problematic financial type and its `acctg code` will be listed. In that case, you need to manually fix the invoice manually.
