@@ -499,7 +499,7 @@ class CRM_Civiquickbooks_Invoice {
         $lineTotal = $lineItem['line_total'];
 
         $tmp = array(
-          'Id' => $i + '',
+          'Id' => $i . '',
           'LineNum' => $i,
           'Description' => $line_item_description,
           'Amount' => sprintf('%.5f', $lineTotal),
