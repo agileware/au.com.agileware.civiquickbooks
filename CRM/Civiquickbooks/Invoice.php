@@ -1,6 +1,6 @@
 <?php
 
-require getComposerAutuLoadPath();
+require getComposerAutoLoadPath();
 
 class CRM_Civiquickbooks_Invoice {
   protected $_quickbooks_is_us_company_flag;

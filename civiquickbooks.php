@@ -2,6 +2,8 @@
 
 require_once 'civiquickbooks.civix.php';
 
+use CRM_Civiquickbooks_ExtensionUtil as E;
+
 /**
  * Implements hook_civicrm_config().
  *
@@ -264,15 +266,15 @@ function civiquickbooks_civicrm_accountsync_plugins(&$plugins) {
  * @return string
  */
 function getExtensionPath() {
-  return CRM_Core_Config::singleton()->extensionsDir . 'au.com.agileware.civiquickbooks/';
+  return E::path();
 }
 
 /**
  * Returns composer autoload path.
  * @return string
  */
-function getComposerAutuLoadPath() {
-  return getExtensionPath() . 'vendor/autoload.php';
+function getComposerAutoLoadPath() {
+  return E::path('vendor/autoload.php');
 }
 
 /**

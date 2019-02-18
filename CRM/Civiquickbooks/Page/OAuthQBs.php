@@ -1,6 +1,6 @@
 <?php
 
-require getComposerAutuLoadPath();
+require getComposerAutoLoadPath();
 
 class CRM_Civiquickbooks_Page_OAuthQBs extends CRM_Core_Page {
   private $consumer_key;

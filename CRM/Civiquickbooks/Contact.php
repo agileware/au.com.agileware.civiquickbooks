@@ -1,7 +1,7 @@
 <?php
 
 require_once 'library/CustomException.php';
-require getComposerAutuLoadPath();
+require getComposerAutoLoadPath();
 
 class CRM_Civiquickbooks_Contact {
 
