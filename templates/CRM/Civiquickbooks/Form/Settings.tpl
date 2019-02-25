@@ -36,6 +36,9 @@
               All contacts and contributions updates won't get synced with QuickBooks.
           {else}
               Once a Consumer Key and Shared Secret have been configured, you will need to <a class="redirect_url" href="{$redirect_url}" title="Authorize Quickbooks Application">Authorize</a> the QuickBooks application.
+
+              <br><br>
+              You must add this Redirect URI to your application:<br> {$redirectOAuthURL}
           {/if}
         </p>
       {/if}
