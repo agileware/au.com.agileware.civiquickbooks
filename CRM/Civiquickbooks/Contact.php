@@ -15,20 +15,19 @@ class CRM_Civiquickbooks_Contact {
     // try to get customers info from quickbooks based on the date provided.
     try {
       $_contacts_from_QBs = $this->_get_QBs_customers($_start_date_string);
-    }
-    catch (ContactPullGetQBCustomersException $e) {
+    } catch (ContactPullGetQBCustomersException $e) {
       switch ($e->getCode()) {
         case 0:
           CRM_Core_Session::setStatus('Failed to pull customers from Quickbooks, as: ' . $e->getMessage());
           return FALSE;
 
-        break;
+          break;
 
         case 1:
           CRM_Core_Session::setStatus('No customers are updated in Quickbooks since ' . $_start_date_string . '. Contacts pulling aborted');
           return TRUE;
 
-        break;
+          break;
 
       }
     }
@@ -49,13 +48,12 @@ class CRM_Civiquickbooks_Contact {
 
       try {
         $_tmp_QBs_contact = civicrm_api3('account_contact', 'getsingle', array(
-                              'accounts_contact_id' => $contact->Id,
-                              'plugin' => $this->_plugin,
-                            ));
+          'accounts_contact_id' => $contact->Id,
+          'plugin' => $this->_plugin,
+        ));
 
         $_params_for_account_sync_api['id'] = $_tmp_QBs_contact['id'];
-      }
-      catch (CiviCRM_API3_Exception $e) {
+      } catch (CiviCRM_API3_Exception $e) {
         /*if there is no account contact found, it means that:
 
         Either: The contact is not recorded by AccountSync
@@ -84,8 +82,7 @@ class CRM_Civiquickbooks_Contact {
           'accounts_modified_date',
           date("Y-m-d H:i:s", strtotime($contact->MetaData->LastUpdatedTime)),
           'id');
-      }
-      catch (CiviCRM_API3_Exception $e) {
+      } catch (CiviCRM_API3_Exception $e) {
         CRM_Core_Session::setStatus(ts('Failed to store ') . $_params_for_account_sync_api['accounts_display_name']
           . ts(' with error ') . $e->getMessage(),
           ts('Contact Pull failed'));
@@ -98,15 +95,15 @@ class CRM_Civiquickbooks_Contact {
   public function push($limit = PHP_INT_MAX) {
     try {
       $records = civicrm_api3('account_contact', 'get', array(
-                   'accounts_needs_update' => 1,
-                   'api.contact.get' => 1,
-                   'plugin' => $this->_plugin,
-                   'contact_id' => array('IS NOT NULL' => 1),
-                   'connector_id' => 0,
-                   'options' => array(
-                     'limit' => $limit,
-                   ),
-                 )
+          'accounts_needs_update' => 1,
+          'api.contact.get' => 1,
+          'plugin' => $this->_plugin,
+          'contact_id' => array('IS NOT NULL' => 1),
+          'connector_id' => 0,
+          'options' => array(
+            'limit' => $limit,
+          ),
+        )
       );
 
       $errors = array();
@@ -149,7 +146,7 @@ class CRM_Civiquickbooks_Contact {
             $record['error_data'] = json_encode([$responseErrors->getResponseBody()]);
 
             if (gettype($record['accounts_data']) == 'array') {
-              $record['accounts_data']  = json_encode($record['accounts_data']);
+              $record['accounts_data'] = json_encode($record['accounts_data']);
             }
           }
           elseif ($result) {
@@ -176,11 +173,10 @@ class CRM_Civiquickbooks_Contact {
           unset($record['last_sync_date']);
 
           $result = civicrm_api3('account_contact', 'create', $record);
-        }
-        catch (CiviCRM_API3_Exception $e) {
+        } catch (CiviCRM_API3_Exception $e) {
           $errors[] = ts('Failed to push ') . $record['contact_id'] . ' (' . $record['accounts_contact_id'] . ' )'
             . ts(' with error ') . $e->getMessage() . print_r($responseErrors, TRUE)
-                                                    . ts('Contact Push failed');
+            . ts('Contact Push failed');
         }
       }
 
@@ -189,8 +185,7 @@ class CRM_Civiquickbooks_Contact {
         throw new CRM_Core_Exception(ts('Not all contacts were saved') . print_r($errors, TRUE), 'incomplete', $errors);
       }
       return TRUE;
-    }
-    catch (CiviCRM_API3_Exception $e) {
+    } catch (CiviCRM_API3_Exception $e) {
       throw new CRM_Core_Exception('Contact Push aborted due to: ' . $e->getMessage());
     }
   }
@@ -208,29 +203,29 @@ class CRM_Civiquickbooks_Contact {
     }
 
     $customer = $customer + array(
-      "BillAddr" => array(
-        "Line1" => $contact['street_address'],
-        "City" => $contact['city'],
-        "Country" => $contact['country'],
-        "CountrySubDivisionCode" => $contact['state_province'],
-        "PostalCode" => $contact['postal_code'],
-      ),
-      "Title" => $contact['individual_prefix'],
-      "GivenName" => $contact['first_name'],
-      "MiddleName" => $contact['middle_name'],
-      "FamilyName" => $contact['last_name'],
-      "Suffix" => $contact['individual_suffix'],
-      "FullyQualifiedName" => $contact['display_name'],
-      "CompanyName" => $contact['organization_name'],
-      "DisplayName" => $contact['display_name'],
-      "PrimaryPhone" => array(
-        "FreeFormNumber" => $contact['phone'],
+        "BillAddr" => array(
+          "Line1" => $contact['street_address'],
+          "City" => $contact['city'],
+          "Country" => $contact['country'],
+          "CountrySubDivisionCode" => $contact['state_province'],
+          "PostalCode" => $contact['postal_code'],
+        ),
+        "Title" => $contact['individual_prefix'],
+        "GivenName" => $contact['first_name'],
+        "MiddleName" => $contact['middle_name'],
+        "FamilyName" => $contact['last_name'],
+        "Suffix" => $contact['individual_suffix'],
+        "FullyQualifiedName" => $contact['display_name'],
+        "CompanyName" => $contact['organization_name'],
+        "DisplayName" => $contact['display_name'],
+        "PrimaryPhone" => array(
+          "FreeFormNumber" => $contact['phone'],
 
-      ),
-      "PrimaryEmailAddr" => array(
-        "Address" => $contact['email'],
-      ),
-    );
+        ),
+        "PrimaryEmailAddr" => array(
+          "Address" => $contact['email'],
+        ),
+      );
 
     $customer = \QuickBooksOnline\API\Facades\Customer::create($customer);
 

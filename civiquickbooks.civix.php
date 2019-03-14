@@ -7,8 +7,11 @@
  * extension.
  */
 class CRM_Civiquickbooks_ExtensionUtil {
+
   const SHORT_NAME = "civiquickbooks";
+
   const LONG_NAME = "au.com.agileware.civiquickbooks";
+
   const CLASS_PREFIX = "CRM_Civiquickbooks";
 
   /**
@@ -20,6 +23,7 @@ class CRM_Civiquickbooks_ExtensionUtil {
    * @param string $text
    *   Canonical message text (generally en_US).
    * @param array $params
+   *
    * @return string
    *   Translated text.
    * @see ts
@@ -37,13 +41,15 @@ class CRM_Civiquickbooks_ExtensionUtil {
    * @param string|NULL $file
    *   Ex: NULL.
    *   Ex: 'css/foo.css'.
+   *
    * @return string
    *   Ex: 'http://example.org/sites/default/ext/org.example.foo'.
    *   Ex: 'http://example.org/sites/default/ext/org.example.foo/css/foo.css'.
    */
   public static function url($file = NULL) {
     if ($file === NULL) {
-      return rtrim(CRM_Core_Resources::singleton()->getUrl(self::LONG_NAME), '/');
+      return rtrim(CRM_Core_Resources::singleton()
+        ->getUrl(self::LONG_NAME), '/');
     }
     return CRM_Core_Resources::singleton()->getUrl(self::LONG_NAME, $file);
   }
@@ -54,6 +60,7 @@ class CRM_Civiquickbooks_ExtensionUtil {
    * @param string|NULL $file
    *   Ex: NULL.
    *   Ex: 'css/foo.css'.
+   *
    * @return string
    *   Ex: '/var/www/example.org/sites/default/ext/org.example.foo'.
    *   Ex: '/var/www/example.org/sites/default/ext/org.example.foo/css/foo.css'.
@@ -68,6 +75,7 @@ class CRM_Civiquickbooks_ExtensionUtil {
    *
    * @param string $suffix
    *   Ex: 'Page_HelloWorld' or 'Page\\HelloWorld'.
+   *
    * @return string
    *   Ex: 'CRM_Foo_Page_HelloWorld'.
    */
@@ -190,11 +198,13 @@ function _civiquickbooks_civix_civicrm_disable() {
 /**
  * (Delegated) Implements hook_civicrm_upgrade().
  *
- * @param $op string, the type of operation being performed; 'check' or 'enqueue'
- * @param $queue CRM_Queue_Queue, (for 'enqueue') the modifiable list of pending up upgrade tasks
+ * @param $op string, the type of operation being performed; 'check' or
+ *   'enqueue'
+ * @param $queue CRM_Queue_Queue, (for 'enqueue') the modifiable list of
+ *   pending up upgrade tasks
  *
- * @return mixed  based on op. for 'check', returns array(boolean) (TRUE if upgrades are pending)
- *                for 'enqueue', returns void
+ * @return mixed  based on op. for 'check', returns array(boolean) (TRUE if
+ *   upgrades are pending) for 'enqueue', returns void
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
  */
@@ -224,6 +234,7 @@ function _civiquickbooks_civix_upgrader() {
  *
  * @param $dir string, base dir
  * @param $pattern string, glob pattern, eg "*.txt"
+ *
  * @return array(string)
  */
 function _civiquickbooks_civix_find_files($dir, $pattern) {
@@ -254,6 +265,7 @@ function _civiquickbooks_civix_find_files($dir, $pattern) {
   }
   return $result;
 }
+
 /**
  * (Delegated) Implements hook_civicrm_managed().
  *
@@ -340,7 +352,9 @@ function _civiquickbooks_civix_civicrm_angularModules(&$angularModules) {
  * This wrapper provides consistency.
  *
  * @link http://php.net/glob
+ *
  * @param string $pattern
+ *
  * @return array, possibly empty
  */
 function _civiquickbooks_civix_glob($pattern) {
@@ -352,16 +366,18 @@ function _civiquickbooks_civix_glob($pattern) {
  * Inserts a navigation menu item at a given place in the hierarchy.
  *
  * @param array $menu - menu hierarchy
- * @param string $path - path where insertion should happen (ie. Administer/System Settings)
- * @param array $item - menu you need to insert (parent/child attributes will be filled for you)
+ * @param string $path - path where insertion should happen (ie.
+ *   Administer/System Settings)
+ * @param array $item - menu you need to insert (parent/child attributes will
+ *   be filled for you)
  */
 function _civiquickbooks_civix_insert_navigation_menu(&$menu, $path, $item) {
   // If we are done going down the path, insert menu
   if (empty($path)) {
     $menu[] = array(
       'attributes' => array_merge(array(
-        'label'      => CRM_Utils_Array::value('name', $item),
-        'active'     => 1,
+        'label' => CRM_Utils_Array::value('name', $item),
+        'active' => 1,
       ), $item),
     );
     return TRUE;
@@ -398,7 +414,7 @@ function _civiquickbooks_civix_navigationMenu(&$nodes) {
  */
 function _civiquickbooks_civix_fixNavigationMenu(&$nodes) {
   $maxNavID = 1;
-  array_walk_recursive($nodes, function($item, $key) use (&$maxNavID) {
+  array_walk_recursive($nodes, function ($item, $key) use (&$maxNavID) {
     if ($key === 'navID') {
       $maxNavID = max($maxNavID, $item);
     }

@@ -3,8 +3,11 @@
 require getComposerAutoLoadPath();
 
 class CRM_Civiquickbooks_Page_OAuthQBs extends CRM_Core_Page {
+
   private $consumer_key;
+
   private $shared_secret;
+
   private $output;
 
   /**
@@ -35,7 +38,7 @@ class CRM_Civiquickbooks_Page_OAuthQBs extends CRM_Core_Page {
   public function run() {
     //get current value in the database
     $this->consumer_key = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_consumer_key"));
-    $this->shared_secret  = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_shared_secret"));
+    $this->shared_secret = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_shared_secret"));
 
     //the initial value of Client ID and Client Secret is empty string, need to check if they have been set
     if ($this->consumer_key === 0 || $this->consumer_key == '' || !isset($this->consumer_key)) {
@@ -82,7 +85,7 @@ class CRM_Civiquickbooks_Page_OAuthQBs extends CRM_Core_Page {
           civicrm_api3('Setting', 'create', array(
             'quickbooks_access_token' => $accessToken,
             'quickbooks_refresh_token' => $refreshToken,
-            'quickbooks_realmId'       => $realmId,
+            'quickbooks_realmId' => $realmId,
             'quickbooks_access_token_expiryDate' => $tokenExpiresIn->format("Y-m-d H:i:s"),
             'quickbooks_refresh_token_expiryDate' => $refreshTokenExpiresIn->format("Y-m-d H:i:s"),
           ));
@@ -102,8 +105,7 @@ class CRM_Civiquickbooks_Page_OAuthQBs extends CRM_Core_Page {
 
           try {
             $result = civicrm_api3('Setting', 'create', array('quickbooks_company_country' => $_company_country));
-          }
-          catch (CiviCRM_API3_Exception $e) {
+          } catch (CiviCRM_API3_Exception $e) {
             // Handle error here.
             $errorMessage = $e->getMessage();
             $errorCode = $e->getErrorCode();
@@ -121,8 +123,7 @@ class CRM_Civiquickbooks_Page_OAuthQBs extends CRM_Core_Page {
             'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page to see the new expiry date of your new access token and key</a>',
           );
 
-        }
-        catch (\QuickBooksOnline\API\Exception\IdsException $e) {
+        } catch (\QuickBooksOnline\API\Exception\IdsException $e) {
           // Exception while interacting with QuickBooks
           // Output an error with try again message.
 
@@ -141,7 +142,7 @@ class CRM_Civiquickbooks_Page_OAuthQBs extends CRM_Core_Page {
       if ($error == "access_denied") {
         // Output error if User denied the access.
         $this->output = array(
-          'message'      => 'You\'ve not authorize the request. Please authorize it to sync CiviCRM with QuickBooks',
+          'message' => 'You\'ve not authorize the request. Please authorize it to sync CiviCRM with QuickBooks',
           'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page to authorise the Quickbooks CiviCRM App</a>',
         );
       }

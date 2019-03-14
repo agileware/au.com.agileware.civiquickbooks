@@ -166,7 +166,7 @@ function civiquickbooks_civicrm_navigationMenu(&$menu) {
           'operator' => NULL,
           'separator' => NULL,
           'active' => 1,
-          'parentID'   => $navId,
+          'parentID' => $navId,
           'navID' => $navId + 2,
         ),
       ),
@@ -263,6 +263,7 @@ function civiquickbooks_civicrm_accountsync_plugins(&$plugins) {
 
 /**
  * Requires extension base Dir path
+ *
  * @return string
  */
 function getExtensionPath() {
@@ -271,6 +272,7 @@ function getExtensionPath() {
 
 /**
  * Returns composer autoload path.
+ *
  * @return string
  */
 function getComposerAutoLoadPath() {

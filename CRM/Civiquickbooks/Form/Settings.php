@@ -8,9 +8,12 @@ use CRM_Civiquickbooks_ExtensionUtil as E;
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC43/QuickForm+Reference
  */
 class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
+
   private $_settingFilter = array('group' => 'civiquickbooks');
+
   // Form re-used from CiviXero
   private $_submittedValues = array();
+
   private $_settings = array();
 
   public function buildQuickForm() {
@@ -32,7 +35,8 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
             $optionValues = CRM_Core_OptionGroup::values($setting['pseudoconstant']['optionGroupName'], FALSE, FALSE, FALSE, NULL, 'name');
           }
           elseif (!empty($setting['pseudoconstant']) && !empty($setting['pseudoconstant']['callback'])) {
-            $callBack = Civi\Core\Resolver::singleton()->get($setting['pseudoconstant']['callback']);
+            $callBack = Civi\Core\Resolver::singleton()
+              ->get($setting['pseudoconstant']['callback']);
             $optionValues = call_user_func_array($callBack, $optionValues);
           }
           $this->add('select', $setting['name'], $setting['title'], $optionValues, FALSE, $setting['html_attributes']);
@@ -46,12 +50,12 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
     }
 
     $this->addButtons(array(
-        array(
-          'type' => 'submit',
-          'name' => ts('Submit'),
-          'isDefault' => TRUE,
-        ),
-      ));
+      array(
+        'type' => 'submit',
+        'name' => ts('Submit'),
+        'isDefault' => TRUE,
+      ),
+    ));
 
     $descriptions_to_add_link = array(
       'quickbooks_consumer_key' => 'https://developer.intuit.com/docs/0100_quickbooks_online/0100_essentials/0085_develop_quickbooks_apps/0005_use_your_app_with_production_keys',
@@ -154,7 +158,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
         'setting', 'create', array(
           "quickbooks_access_token" => '',
           "quickbooks_refresh_token" => '',
-          "quickbooks_realmId"  => '',
+          "quickbooks_realmId" => '',
           "quickbooks_access_token_expiryDate" => '',
           "quickbooks_refresh_token_expiryDate" => '',
         )

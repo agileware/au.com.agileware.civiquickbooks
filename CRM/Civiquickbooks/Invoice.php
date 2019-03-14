@@ -3,10 +3,13 @@
 require getComposerAutoLoadPath();
 
 class CRM_Civiquickbooks_Invoice {
+
   protected $_quickbooks_is_us_company_flag;
 
   private $_plugin = 'quickbooks';
+
   protected $contribution_status_settings;
+
   protected $contribution_status_settings_lower_reverse;
 
   public function __construct() {
@@ -24,9 +27,11 @@ class CRM_Civiquickbooks_Invoice {
   }
 
   /**
-   * Push invoices to QuickBooks from the civicrm_account_contact with 'needs_update' = 1.
+   * Push invoices to QuickBooks from the civicrm_account_contact with
+   * 'needs_update' = 1.
    *
-   * We call the civicrm_accountPullPreSave hook so other modules can alter if required
+   * We call the civicrm_accountPullPreSave hook so other modules can alter if
+   * required
    *
    * @param array $params
    *  - start_date
@@ -44,7 +49,10 @@ class CRM_Civiquickbooks_Invoice {
       $errors = array();
 
       // US companies handles the tax in Invoice differently
-      $quickbooks_current_company_country = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_company_country", 'group' => 'QuickBooks Online Settings'));
+      $quickbooks_current_company_country = civicrm_api3('Setting', 'getvalue', array(
+        'name' => "quickbooks_company_country",
+        'group' => 'QuickBooks Online Settings',
+      ));
       $this->_quickbooks_is_us_company_flag = ($quickbooks_current_company_country == 'US') ? TRUE : FALSE;
 
       foreach ($records['values'] as $i => $record) {
@@ -63,9 +71,11 @@ class CRM_Civiquickbooks_Invoice {
           if (!empty($responseErrors)) {
             $errors[] = $responseErrors;
           }
-        }
-        catch (CiviCRM_API3_Exception $e) {
-          $this_error = $errors[] = ts('Failed to store %1 with error %2.', array(1 => $record['contribution_id'], 2 => $e->getMessage()));
+        } catch (CiviCRM_API3_Exception $e) {
+          $this_error = $errors[] = ts('Failed to store %1 with error %2.', array(
+            1 => $record['contribution_id'],
+            2 => $e->getMessage(),
+          ));
           CRM_Core_Error::debug_var($this_error, CRM_Core_Error::formatBacktrace($e->getTrace()));
         }
       }
@@ -75,8 +85,7 @@ class CRM_Civiquickbooks_Invoice {
         throw new CRM_Core_Exception(ts('Not all records were saved ') . json_encode($errors, JSON_PRETTY_PRINT), 'incomplete', $errors);
       }
       return TRUE;
-    }
-    catch (CiviCRM_API3_Exception $e) {
+    } catch (CiviCRM_API3_Exception $e) {
       throw new CRM_Core_Exception('Invoice Push aborted due to: ' . $e->getMessage());
     }
   }
@@ -101,9 +110,12 @@ class CRM_Civiquickbooks_Invoice {
           else {
             $errors[] = $invoice;
           }
-        }
-        catch (CiviCRM_API3_Exception $e) {
-          $errors[] = ts('Failed to store contribution %1 for invoice %2 with error: "%3".  Invoice pull failed.', array(1 => $record['contribution_id'], 2 => $invoice['Id'], 3 => $e->getMessage()));
+        } catch (CiviCRM_API3_Exception $e) {
+          $errors[] = ts('Failed to store contribution %1 for invoice %2 with error: "%3".  Invoice pull failed.', array(
+            1 => $record['contribution_id'],
+            2 => $invoice['Id'],
+            3 => $e->getMessage(),
+          ));
         }
       }
 
@@ -112,8 +124,7 @@ class CRM_Civiquickbooks_Invoice {
         throw new CRM_Core_Exception(ts('Not all records were saved: ') . json_encode($errors, JSON_PRETTY_PRINT), 'incomplete', $errors);
       }
       return TRUE;
-    }
-    catch (CiviCRM_API3_Exception $e) {
+    } catch (CiviCRM_API3_Exception $e) {
       throw new CRM_Core_Exception('Invoice Pull aborted due to: ' . $e->getMessage());
     }
   }
@@ -124,9 +135,9 @@ class CRM_Civiquickbooks_Invoice {
     }
 
     $db_contribution = civicrm_api3('Contribution', 'getsingle', array(
-                         'return' => array('contribution_status_id'),
-                         'id' => $contributionID,
-                       ));
+      'return' => array('contribution_status_id'),
+      'id' => $contributionID,
+    ));
 
     $db_contribution['contri_status_in_lower'] = strtolower($this->contribution_status_settings[$db_contribution['contribution_status_id']]);
 
@@ -249,19 +260,23 @@ class CRM_Civiquickbooks_Invoice {
     $contributionID = $record['contribution_id'];
 
     $db_contribution = civicrm_api3('Contribution', 'getsingle', array(
-                         'return' => array('contribution_status_id', 'receive_date', 'contribution_source'),
-                         'id' => $contributionID,
-                       ));
+      'return' => array(
+        'contribution_status_id',
+        'receive_date',
+        'contribution_source',
+      ),
+      'id' => $contributionID,
+    ));
 
     $db_contribution['status'] = $this->contribution_status_settings[$db_contribution['contribution_status_id']];
 
     $cancelledStatuses = array('failed', 'cancelled');
 
     $qb_account = civicrm_api3('account_contact', 'getsingle', array(
-                    'contact_id' => $db_contribution['contact_id'],
-                    'plugin' => $this->_plugin,
-                    'connector_id' => 0,
-                  ));
+      'contact_id' => $db_contribution['contact_id'],
+      'plugin' => $this->_plugin,
+      'connector_id' => 0,
+    ));
 
     $qb_id = $qb_account['accounts_contact_id'];
 
@@ -307,8 +322,8 @@ class CRM_Civiquickbooks_Invoice {
       $contributionID = $db_contribution['id'];
 
       $db_line_items = civicrm_api3('LineItem', 'get', array(
-                         'contribution_id' => $contributionID,
-                       ));
+        'contribution_id' => $contributionID,
+      ));
 
       if (empty($db_line_items['count'])) {
         throw new CiviCRM_API3_Exception('No line item in contribution(ID:' . $contributionID . '). Invoice push for this one aborted!', 'qbo_contribution_line_item');
@@ -382,8 +397,7 @@ class CRM_Civiquickbooks_Invoice {
             );
 
             $_tmp_civi_tax_account_code[] = $tmp;
-          }
-          catch (CiviCRM_API3_Exception $e) {
+          } catch (CiviCRM_API3_Exception $e) {
 
           }
         }
@@ -525,10 +539,10 @@ class CRM_Civiquickbooks_Invoice {
       $receive_date = $db_contribution['receive_date'];
 
       $invoice_settings = civicrm_api3('Setting', 'getvalue', array(
-                            'sequential' => 1,
-                            'name' => 'contribution_invoice_settings',
-                            'group_name' => 'Contribute Preferences',
-                          ));
+        'sequential' => 1,
+        'name' => 'contribution_invoice_settings',
+        'group_name' => 'Contribute Preferences',
+      ));
 
       if (!empty($invoice_settings['due_date']) && !empty($invoice_settings['due_date_period'])) {
         $time_adjust_str = '+' . $invoice_settings['due_date'] . ' ' . $invoice_settings['due_date_period'];
@@ -579,7 +593,7 @@ class CRM_Civiquickbooks_Invoice {
       }
     }
 
-    array_walk_recursive($new_invoice, function(&$item) {
+    array_walk_recursive($new_invoice, function (&$item) {
       $item = html_entity_decode($item, (ENT_QUOTES | ENT_HTML401), 'UTF-8');
     });
 
@@ -592,6 +606,7 @@ class CRM_Civiquickbooks_Invoice {
    * Get item id from Quickbooks, by given their names.
    *
    * @param array $tmp_acctgcode
+   *
    * @return array|bool
    * @throws CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
@@ -634,6 +649,7 @@ class CRM_Civiquickbooks_Invoice {
    * Get Tax account id from Quickbooks, by given their names.
    *
    * @param array $_tmp_civi_tax_account_code
+   *
    * @return array|bool
    * @throws CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
@@ -696,16 +712,19 @@ class CRM_Civiquickbooks_Invoice {
   }
 
   /**
-   * This function was used to calculate the tax details for the whole invoice, based on price of each line item.
-   * this function could be used for US companies to use the name stored in `account_type_code` of the first line item
-   * to get the needed state's tax code id from Quickbooks.
-   * It should returns an array with content like:
+   * This function was used to calculate the tax details for the whole invoice,
+   * based on price of each line item. this function could be used for US
+   * companies to use the name stored in `account_type_code` of the first line
+   * item to get the needed state's tax code id from Quickbooks. It should
+   * returns an array with content like:
    * "TxnTaxDetail": {
    * "TxnTaxCodeRef": {
-   * "value": "2"  <- the id here is in the response of calling Quickbooks REST API, it is the state's tax code id for this invoice.
+   * "value": "2"  <- the id here is in the response of calling Quickbooks REST
+   * API, it is the state's tax code id for this invoice.
    * }
    *
    * @param $db_line_items
+   *
    * @return array|bool
    * @throws CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
@@ -758,8 +777,9 @@ class CRM_Civiquickbooks_Invoice {
   /**
    * Get contributions marked as needing to be pushed to the accounts package.
    *
-   * We sort by error data to get the ones that have not yet been attempted first.
-   * Otherwise we can wind up endlessly retrying the same failing records.
+   * We sort by error data to get the ones that have not yet been attempted
+   * first. Otherwise we can wind up endlessly retrying the same failing
+   * records.
    *
    * @param array $params
    * @param int $limit
@@ -847,7 +867,7 @@ class CRM_Civiquickbooks_Invoice {
       $record['error_data'] = json_encode([$responseErrors->getResponseBody()]);
 
       if (gettype($record['accounts_data']) == 'array') {
-        $record['accounts_data']  = json_encode($record['accounts_data']);
+        $record['accounts_data'] = json_encode($record['accounts_data']);
       }
     }
     else {

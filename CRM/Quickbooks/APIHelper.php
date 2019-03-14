@@ -3,6 +3,7 @@
 class CRM_Quickbooks_APIHelper {
 
   private static $quickBooksDataService = NULL; //Data service object for login
+
   private static $quickBooksAccountingDataService = NULL; // Data service object for accounting and company info retrieval
 
   /**
@@ -10,6 +11,7 @@ class CRM_Quickbooks_APIHelper {
    *
    * @param $length
    * @param string $keyspace
+   *
    * @return string
    * @throws Exception
    */
@@ -53,7 +55,7 @@ class CRM_Quickbooks_APIHelper {
       'RedirectURI' => $redirectUrl,
       'scope' => "com.intuit.quickbooks.accounting",
       'response_type' => 'code',
-      'state'         => json_encode($stateToken),
+      'state' => json_encode($stateToken),
     ));
 
     return self::$quickBooksDataService;
@@ -102,6 +104,7 @@ class CRM_Quickbooks_APIHelper {
 
   /**
    * Get redirection URL for OAuth request.
+   *
    * @return mixed
    */
   private static function getRedirectUrl() {
@@ -151,8 +154,7 @@ class CRM_Quickbooks_APIHelper {
           'quickbooks_refresh_token_expiryDate' => $refreshTokenExpiresIn->format("Y-m-d H:i:s"),
         ));
 
-      }
-      catch (\QuickBooksOnline\API\Exception\IdsException $e) {
+      } catch (\QuickBooksOnline\API\Exception\IdsException $e) {
 
       }
     }
@@ -190,6 +192,7 @@ class CRM_Quickbooks_APIHelper {
    * Check if refresh/access token expired or not.
    *
    * @param $QBCredentials
+   *
    * @return bool
    * @throws Exception
    */

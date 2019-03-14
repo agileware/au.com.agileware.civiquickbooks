@@ -1,30 +1,31 @@
 <?xml version="1.0"?>
 <extension key="au.com.agileware.civiquickbooks" type="module">
-  <file>civiquickbooks</file>
-  <name>QuickBooks Online Integration</name>
-  <description>A CiviCRM extension which integrates CiviCRM with QuickBooks Online</description>
-  <license>AGPL-3.0</license>
-  <maintainer>
-    <author>Agileware</author>
-    <email>support@agileware.com.au</email>
-  </maintainer>
-  <urls>
-    <url desc="Main Extension Page">https://github.com/agileware/au.com.agileware.civiquickbooks</url>
-    <url desc="Documentation">https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/README.md</url>
-    <url desc="Support">https://agileware.com.au/contact</url>
-    <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
-  </urls>
-  <releaseDate>2019-02-18</releaseDate>
-  <version>2.0-beta1</version>
-  <develStage>beta</develStage>
-  <compatibility>
-    <ver>5.0</ver>
-  </compatibility>
-  <requires>
-    <ext>nz.co.fuzion.accountsync</ext>
-  </requires>
-  <comments>This extension requires nz.co.fuzion.accountsync</comments>
-  <civix>
-    <namespace>CRM/Civiquickbooks</namespace>
-  </civix>
+    <file>civiquickbooks</file>
+    <name>QuickBooks Online Integration</name>
+    <description>A CiviCRM extension which integrates CiviCRM with QuickBooks Online</description>
+    <license>AGPL-3.0</license>
+    <maintainer>
+        <author>Agileware</author>
+        <email>support@agileware.com.au</email>
+    </maintainer>
+    <urls>
+        <url desc="Main Extension Page">https://github.com/agileware/au.com.agileware.civiquickbooks</url>
+        <url desc="Documentation">https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/README.md
+        </url>
+        <url desc="Support">https://agileware.com.au/contact</url>
+        <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
+    </urls>
+    <releaseDate>2019-02-18</releaseDate>
+    <version>2.0-beta1</version>
+    <develStage>beta</develStage>
+    <compatibility>
+        <ver>5.0</ver>
+    </compatibility>
+    <requires>
+        <ext>nz.co.fuzion.accountsync</ext>
+    </requires>
+    <comments>This extension requires nz.co.fuzion.accountsync</comments>
+    <civix>
+        <namespace>CRM/Civiquickbooks</namespace>
+    </civix>
 </extension>
