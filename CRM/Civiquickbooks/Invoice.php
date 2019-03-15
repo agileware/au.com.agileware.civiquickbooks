@@ -464,9 +464,10 @@ class CRM_Civiquickbooks_Invoice {
           // line item that is wrong.
 
           if (empty($_error_msg_for_item_acctgcode)) {
-            //@TODO fix engrish
-            $_error_msg_for_item_acctgcode = "Line item could not be added; the Income Accounts for the Financial Type of this item have no accounting code configured.  Please correct this invoice manually:\n" .
-              'ID: ' . $lineItem['financial_type_id'] . ' Inc_acctgcode: ' . $lineItem['acctgCode'];
+            $_error_msg_for_item_acctgcode = ts('No matching Item found in Quickbooks Online for accounting code %1 (financial type %2)', array(
+              1 => $lineItem['acctgCode'],
+              2 => $lineItem['financial_type_id'],
+            ));
           }
           else {
             $_error_msg_for_item_acctgcode .= ', ID: ' . $lineItem['financial_type_id'] . ' Inc_acctgcode: ' . $lineItem['acctgCode'] . ' ';
@@ -481,18 +482,16 @@ class CRM_Civiquickbooks_Invoice {
         // For US companies, this process is not needed, as the `TaxCodeRef` for each line item is either `NON` or `TAX`.
         if (!$this->_quickbooks_is_us_company_flag) {
           if (!empty($_TaxRefs) && !isset($_TaxRefs[$lineItem['sale_tax_acctgCode']])) {
-            // if we have any line items that does not have a matched Salse Tax accounting code in Quickbooks
+            // if we have any line items that does not have a matched Sales Tax accounting code in Quickbooks
             // We are not going to include this line item in quickbooks, and include this error in Customer memo as a public not in this Invoice.
             // Customer memo can be edited by Quickbooks Users and they can use this error message to find the corresponding contribution in CiviCRM and find the
             // line item that is wrong.
 
             if (empty($_error_msg_for_tax_acctgcode)) {
-              //@TODO fix engrish
-              $_error_msg_for_tax_acctgcode = 'The sales tax financial accounts of following financial types have no/worng acctgcode filled out in CiviCRM. Can not find matched tax code names in Quickbooks. Corresponding line items are not synced to quickbooks, please correct this invoice manually:
-	            ID: ' . $lineItem['financial_type_id'] . ' Sale_tax_acctgcode: ' . $lineItem['sale_tax_acctgCode'];
+              $_error_msg_for_tax_acctgcode = ts('No matching Tax type found in Quickbooks online for %1', array(1 => $lineItem['sale_tax_acctgCode']));
             }
             else {
-              $_error_msg_for_tax_acctgcode = $_error_msg_for_tax_acctgcode . ', ID: ' . $lineItem['financial_type_id'] . ' Sale_tax_acctgcode: ' . $lineItem['sale_tax_acctgCode'] . ' ';
+              $_error_msg_for_tax_acctgcode .= ', ID: ' . $lineItem['financial_type_id'] . ' Tax type: ' . $lineItem['sale_tax_acctgCode'] . ' ';
             }
 
             continue;
