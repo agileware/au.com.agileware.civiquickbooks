@@ -604,35 +604,21 @@ class CRM_Civiquickbooks_Invoice {
   /**
    * Get item id from Quickbooks, by given their names.
    *
-   * @param array $tmp_acctgcode
+   * @param array $item_codes
    *
    * @return array|bool
    * @throws CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
-  protected function getItemRefs($tmp_acctgcode = array()) {
-    if (empty($tmp_acctgcode)) {
+  protected function getItemRefs($item_codes = array()) {
+    if (empty($item_codes)) {
       return FALSE;
     }
+    
+    $tklist = "('" . implode("','", $item_codes) . "')";
 
-    $query = 'SELECT Name,Id FROM Item WHERE name in (';
-
-    $i = 1;
-    $max = (int) count($tmp_acctgcode);
-
-    //assembling the name options in query.
-    foreach ($tmp_acctgcode as $value) {
-      $query = $query . "'" . $value . "'";
-
-      if ($i !== $max) {
-        $query = $query . ',';
-      }
-      else {
-        $query = $query . ')';
-      }
-      $i = $i + 1;
-    }
-
+    $query = 'SELECT Name,Id FROM Item WHERE Name IN' . $tklist;
+    
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $result = $dataService->Query($query, 0, 10);
     $errors = $dataService->getLastError();
@@ -647,34 +633,20 @@ class CRM_Civiquickbooks_Invoice {
   /**
    * Get Tax account id from Quickbooks, by given their names.
    *
-   * @param array $_tmp_civi_tax_account_code
+   * @param array $tax_codes
    *
    * @return array|bool
    * @throws CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
-  protected function getTaxRefs($_tmp_civi_tax_account_code = array()) {
-    if (empty($_tmp_civi_tax_account_code)) {
+  protected function getTaxRefs($tax_codes = array()) {
+    if (empty($tax_codes)) {
       return FALSE;
     }
+    
+    $tklist = "('" . implode("','", $tax_codes) . "')";
 
-    $query = 'SELECT Name,Id FROM TaxCode WHERE name in (';
-
-    $i = 1;
-    $max = (int) count($_tmp_civi_tax_account_code);
-
-    //assembling the name options in query.
-    foreach ($_tmp_civi_tax_account_code as $value) {
-      $query = $query . "'" . $value . "'";
-
-      if ($i !== $max) {
-        $query = $query . ',';
-      }
-      else {
-        $query = $query . ')';
-      }
-      $i = $i + 1;
-    }
+    $query = 'SELECT Name,Id FROM TaxCode WHERE Name IN' . $tklist;
 
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $result = $dataService->Query($query, 0, 10);
