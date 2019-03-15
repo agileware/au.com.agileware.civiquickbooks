@@ -123,17 +123,24 @@ class CRM_Civiquickbooks_Contact {
           // And when we get it out using api, it will deserialize automatically for us.
           $accounts_data = isset($account_contact['accounts_contact_id']) ? $account_contact['accounts_data'] : NULL;
 
-          $accountsContact = $this->mapToCustomer($account_contact['api.contact.get']['values'][0], $id, $accounts_data);
+          $QBOContact = $this->mapToCustomer($account_contact['api.contact.get']['values'][0], $id, $accounts_data);
+
+          $proceed = TRUE;
+          CRM_Accountsync_Hook::accountPushAlterMapped('contact', $account_contact, $proceed, $QBOContact);
+
+          if(!$proceed) {
+            continue;
+          }
 
           unset($account_contact['api.contact.get']);
 
           $data_service = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
 
-          if ($accountsContact->Id) {
-            $result = $data_service->Update($accountsContact);
+          if ($QBOContact->Id) {
+            $result = $data_service->Update($QBOContact);
           }
           else {
-            $result = $data_service->Add($accountsContact);
+            $result = $data_service->Add($QBOContact);
           }
 
           if (!$result) {

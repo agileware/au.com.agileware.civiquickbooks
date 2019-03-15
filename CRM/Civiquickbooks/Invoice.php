@@ -59,6 +59,14 @@ class CRM_Civiquickbooks_Invoice {
       foreach ($records['values'] as $i => $record) {
         try {
           $accountsInvoice = $this->getAccountsInvoice($record);
+
+          $proceed = TRUE;
+          CRM_Accountsync_Hook::accountPushAlterMapped('invoice', $record, $proceed, $accountsInvoice);
+
+          if(!$proceed) {
+            continue;
+          }
+
           $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
 
           if ($accountsInvoice->Id) {
