@@ -104,7 +104,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
           $_company_country = (isset($_company_country['CompanyInfo'])) ? $_company_country['CompanyInfo']['Country'] : 'AU';
 
           try {
-            $result = civicrm_api3('Setting', 'create', array('quickbooks_company_country' => $_company_country));
+            civicrm_api3('Setting', 'create', array('quickbooks_company_country' => $_company_country));
           } catch (CiviCRM_API3_Exception $e) {
             // Handle error here.
             $errorMessage = $e->getMessage();

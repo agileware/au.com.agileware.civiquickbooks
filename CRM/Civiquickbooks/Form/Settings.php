@@ -57,16 +57,6 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
       ),
     ));
 
-    $descriptions_to_add_link = array(
-      'quickbooks_consumer_key' => 'https://developer.intuit.com/docs/0100_quickbooks_online/0100_essentials/0085_develop_quickbooks_apps/0005_use_your_app_with_production_keys',
-      'quickbooks_shared_secret' => 'https://developer.intuit.com/docs/0100_quickbooks_online/0100_essentials/0085_develop_quickbooks_apps/0001_your_first_request/0100_get_auth_tokens',
-    );
-
-    foreach ($descriptions_to_add_link as $key => $value) {
-      $index = $this->_elementIndex[$key];
-      $element = $this->_elements[$index];
-    }
-
     $exdate_element = $this->_elements[$this->_elementIndex['quickbooks_access_token_expiryDate']];
     $exdate_element->freeze();
 
@@ -102,7 +92,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
   public function postProcess() {
     $this->_submittedValues = $this->exportValues();
 
-    $settings = $this->saveSettings();
+    $this->saveSettings();
     parent::postProcess();
     header('Location: ' . $_SERVER['REQUEST_URI']);
   }

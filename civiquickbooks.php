@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection HtmlUnknownTarget */
+/** @noinspection HtmlUnknownTarget */
 
 require_once 'civiquickbooks.civix.php';
 

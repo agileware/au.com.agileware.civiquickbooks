@@ -4,25 +4,26 @@ require getComposerAutoLoadPath();
 
 class CRM_Civiquickbooks_Invoice {
 
-  protected $_quickbooks_is_us_company_flag;
+  // Flag if account is US
+  protected $us_company;
 
-  private $_plugin = 'quickbooks';
+  private $plugin = 'quickbooks';
 
-  protected $contribution_status_settings;
+  protected $contribution_status;
 
-  protected $contribution_status_settings_lower_reverse;
+  protected $contribution_status_by_value;
 
   public function __construct() {
-    $this->contribution_status_settings = civicrm_api3('Contribution', 'getoptions', array('field' => 'contribution_status_id'));
+    $this->contribution_status = civicrm_api3('Contribution', 'getoptions', array('field' => 'contribution_status_id'));
 
-    $this->contribution_status_settings = $this->contribution_status_settings['values'];
+    $this->contribution_status = $this->contribution_status['values'];
 
-    $this->contribution_status_settings_lower_reverse = array();
+    $this->contribution_status_by_value = array();
 
-    foreach ($this->contribution_status_settings as $key => $value) {
-      $this->contribution_status_settings[$key] = strtolower($value);
+    foreach ($this->contribution_status as $key => $value) {
+      $this->contribution_status[$key] = strtolower($value);
 
-      $this->contribution_status_settings_lower_reverse[strtolower($value)] = $key;
+      $this->contribution_status_by_value[strtolower($value)] = $key;
     }
   }
 
@@ -40,20 +41,20 @@ class CRM_Civiquickbooks_Invoice {
    *   Number of invoices to process
    *
    * @return bool
+   *
    * @throws \CRM_Core_Exception
-   * @throws \CiviCRM_API3_Exception
    */
   public function push($params = array(), $limit = PHP_INT_MAX) {
     try {
-      $records = $this->getContributionsRequiringPushUpdate($params, $limit);
+      $records = $this->findPushContributions($params, $limit);
       $errors = array();
 
       // US companies handles the tax in Invoice differently
-      $quickbooks_current_company_country = civicrm_api3('Setting', 'getvalue', array(
+      $company_country = civicrm_api3('Setting', 'getvalue', array(
         'name' => "quickbooks_company_country",
         'group' => 'QuickBooks Online Settings',
       ));
-      $this->_quickbooks_is_us_company_flag = ($quickbooks_current_company_country == 'US') ? TRUE : FALSE;
+      $this->us_company = ($company_country == 'US');
 
       foreach ($records['values'] as $i => $record) {
         try {
@@ -76,7 +77,8 @@ class CRM_Civiquickbooks_Invoice {
             1 => $record['contribution_id'],
             2 => $e->getMessage(),
           ));
-          CRM_Core_Error::debug_var($this_error, CRM_Core_Error::formatBacktrace($e->getTrace()));
+          CRM_Core_Error::debug_log_message($this_error);
+          CRM_Core_Error::debug_log_message(CRM_Core_Error::formatBacktrace($e->getTrace()));
         }
       }
 
@@ -92,7 +94,7 @@ class CRM_Civiquickbooks_Invoice {
 
   public function pull($params = array(), $limit = PHP_INT_MAX) {
     try {
-      $records = $this->getContributionsRequiringPullUpdate($params, $limit);
+      $records = $this->findPullContributions($params, $limit);
 
       $errors = array();
 
@@ -103,9 +105,9 @@ class CRM_Civiquickbooks_Invoice {
             continue;
           }
 
-          $invoice = $this->getInvoiceFromQBs($record);
+          $invoice = $this->getInvoiceFromQBO($record);
           if ($invoice instanceof \QuickBooksOnline\API\Data\IPPInvoice) {
-            $result = $this->saveToCiviCRM($invoice, $record);
+           $this->saveToCiviCRM($invoice, $record);
           }
           else {
             $errors[] = $invoice;
@@ -139,12 +141,12 @@ class CRM_Civiquickbooks_Invoice {
       'id' => $contributionID,
     ));
 
-    $db_contribution['contri_status_in_lower'] = strtolower($this->contribution_status_settings[$db_contribution['contribution_status_id']]);
+    $db_contribution['contri_status_in_lower'] = strtolower($this->contribution_status[$db_contribution['contribution_status_id']]);
 
     return $db_contribution;
   }
 
-  protected function getInvoiceFromQBs($record) {
+  protected function getInvoiceFromQBO($record) {
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $invoice = $dataService->FindById('invoice', $record['accounts_invoice_id']);
     $error = $dataService->getLastError();
@@ -189,7 +191,7 @@ class CRM_Civiquickbooks_Invoice {
     }
     elseif ($invoice_status == 'voided') {
       if ($contribution['contri_status_in_lower'] != 'cancelled') {
-        $result = CRM_Core_DAO::setFieldValue('CRM_Contribute_DAO_Contribution', $record['contribution_id'], 'contribution_status_id', $this->contribution_status_settings_lower_reverse['cancelled'], 'id');
+        $result = CRM_Core_DAO::setFieldValue('CRM_Contribute_DAO_Contribution', $record['contribution_id'], 'contribution_status_id', $this->contribution_status_by_value['cancelled'], 'id');
 
         if ($result == FALSE) {
           throw new CiviCRM_API3_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status');
@@ -211,10 +213,10 @@ class CRM_Civiquickbooks_Invoice {
 
     unset($record['accounts_modified_date']);
 
-    // Must update synctoken as any modification in QBs end will change the origional token
+    // Must update synctoken as any modification in QBs end will change the original token
     $record['accounts_data'] = $invoice->SyncToken;
 
-    $result = civicrm_api3('AccountInvoice', 'create', $record);
+    civicrm_api3('AccountInvoice', 'create', $record);
 
     return TRUE;
   }
@@ -268,13 +270,13 @@ class CRM_Civiquickbooks_Invoice {
       'id' => $contributionID,
     ));
 
-    $db_contribution['status'] = $this->contribution_status_settings[$db_contribution['contribution_status_id']];
+    $db_contribution['status'] = $this->contribution_status[$db_contribution['contribution_status_id']];
 
     $cancelledStatuses = array('failed', 'cancelled');
 
     $qb_account = civicrm_api3('account_contact', 'getsingle', array(
       'contact_id' => $db_contribution['contact_id'],
-      'plugin' => $this->_plugin,
+      'plugin' => $this->plugin,
       'connector_id' => 0,
     ));
 
@@ -309,6 +311,8 @@ class CRM_Civiquickbooks_Invoice {
    *
    * @return array|bool
    *   Contact Object/ array as expected by accounts package
+   *
+   * @throws \CiviCRM_API3_Exception
    */
   protected function mapToAccounts($db_contribution, $accountsID, $SyncToken, $qb_id) {
     static $tmp = NULL;
@@ -326,110 +330,107 @@ class CRM_Civiquickbooks_Invoice {
       ));
 
       if (empty($db_line_items['count'])) {
-        throw new CiviCRM_API3_Exception('No line item in contribution(ID:' . $contributionID . '). Invoice push for this one aborted!', 'qbo_contribution_line_item');
-        return FALSE;
+        throw new CiviCRM_API3_Exception('No line item in contribution id ' . $contributionID . '; push aborted.', 'qbo_contribution_line_item');
       }
 
-      $lineItems = array();
+      $line_items = array();
 
       /* static array for storing financial type and its Inc account's accounting code.
        * key: financial type id.
        * value: the accounting code of the Inc financial account of this financial type.*/
-      static $acctgcode_for_itemref = array();
+      static $item_ref_codes = array();
 
       /* static array for mapping item name from Quickbooks and its item refer id.
        * key: account code (item name in Quickbooks).
        * value:  Quickbooks' Item id */
-      static $ItemRefs = array();
+      static $items = array();
 
       /* static array for storing financial type and its Inc account's accounting code.
        * key: financial type id.
        * value: the accounting code of the sales tax account of this financial type.*/
-      static $_acctgcode_for_taxref = array();
+      static $tax_types = array();
 
       /* static array for mapping item name from Quickbooks and its item refer id.
        * key: Tax account code (Tax account name in Quickbooks).
        * value:  Quickbooks' Tax account id */
-      static $_TaxRefs = array();
+      static $tax_refs = array();
 
-      $_tmp_result = NULL;
+      $result = NULL;
 
-      $tmp_acctgcode = array();
-      $tmp_ItemRefs = array();
+      $item_codes = array();
 
-      $_tmp_civi_tax_account_code = array();
-      $_tmp_TaxRefs = array();
+      $tax_codes = array();
 
       //Collect all accounting codes for all line items
-      foreach ($db_line_items['values'] as $id => $lineItem) {
+      foreach ($db_line_items['values'] as $id => $line_item) {
         //get Inc Account accounting code if it is not collected previously
-        if (!isset($acctgcode_for_itemref[$lineItem['financial_type_id']])) {
-          $tmp = htmlspecialchars_decode(CRM_Financial_BAO_FinancialAccount::getAccountingCode($lineItem['financial_type_id']));
+        if (!isset($item_ref_codes[$line_item['financial_type_id']])) {
+          $tmp = htmlspecialchars_decode(CRM_Financial_BAO_FinancialAccount::getAccountingCode($line_item['financial_type_id']));
 
-          $acctgcode_for_itemref[$lineItem['financial_type_id']] = $tmp;
-          $tmp_acctgcode[] = $tmp;
+          $item_ref_codes[$line_item['financial_type_id']] = $tmp;
+          $item_codes[] = $tmp;
         }
 
-        $db_line_items['values'][$id]['acctgCode'] = $acctgcode_for_itemref[$lineItem['financial_type_id']];
+        $db_line_items['values'][$id]['acctgCode'] = $item_ref_codes[$line_item['financial_type_id']];
 
         //get Sales Tax Account accounting code if it is not collected previously
-        if (!isset($_acctgcode_for_taxref[$lineItem['financial_type_id']])) {
+        if (!isset($tax_types[$line_item['financial_type_id']])) {
           try {
-            $_tmp_result = civicrm_api3('EntityFinancialAccount', 'getsingle', array(
+            $result = civicrm_api3('EntityFinancialAccount', 'getsingle', array(
               'sequential' => 1,
               'return' => array("financial_account_id"),
-              'entity_id' => $lineItem['financial_type_id'],
+              'entity_id' => $line_item['financial_type_id'],
               'entity_table' => "civicrm_financial_type",
               'account_relationship' => "Sales Tax Account is",
             ));
 
-            $_tmp_result = civicrm_api3('FinancialAccount', 'getsingle', array(
+            $result = civicrm_api3('FinancialAccount', 'getsingle', array(
               'sequential' => 1,
-              'id' => $_tmp_result['financial_account_id'],
+              'id' => $result['financial_account_id'],
             ));
 
-            $tmp = htmlspecialchars_decode($_tmp_result['accounting_code']);
+            $tmp = htmlspecialchars_decode($result['accounting_code']);
 
             // We will use account type code to get state tax code id for US companies
-            $_acctgcode_for_taxref[$lineItem['financial_type_id']] = array(
+            $tax_types[$line_item['financial_type_id']] = array(
               'sale_tax_acctgCode' => $tmp,
-              'sale_tax_account_type_code' => htmlspecialchars_decode($_tmp_result['account_type_code']),
+              'sale_tax_account_type_code' => htmlspecialchars_decode($result['account_type_code']),
             );
 
-            $_tmp_civi_tax_account_code[] = $tmp;
+            $tax_codes[] = $tmp;
           } catch (CiviCRM_API3_Exception $e) {
 
           }
         }
 
-        $db_line_items['values'][$id]['sale_tax_acctgCode'] = $_acctgcode_for_taxref[$lineItem['financial_type_id']]['sale_tax_acctgCode'];
+        $db_line_items['values'][$id]['sale_tax_acctgCode'] = $tax_types[$line_item['financial_type_id']]['sale_tax_acctgCode'];
 
         // We will use account type code to get state tax code id for US companies
-        $db_line_items['values'][$id]['sale_tax_account_type_code'] = $_acctgcode_for_taxref[$lineItem['financial_type_id']]['sale_tax_account_type_code'];
+        $db_line_items['values'][$id]['sale_tax_account_type_code'] = $tax_types[$line_item['financial_type_id']]['sale_tax_account_type_code'];
       }
 
       //If we have collected any Sales Tax accounting code, request their information from Quickbooks.
       //For US companies, this process is not needed, as the `TaxCodeRef` for each line item is either `NON` or `TAX`.
-      if (!empty($_tmp_civi_tax_account_code) && !$this->_quickbooks_is_us_company_flag) {
-        $_tmp_TaxRefs = $this->getTaxRefs($_tmp_civi_tax_account_code);
+      if (!empty($tax_codes) && !$this->us_company) {
+        $tmp_TaxRefs = $this->getTaxRefs($tax_codes);
 
-        if ($_tmp_TaxRefs) {
+        if ($tmp_TaxRefs) {
 
           $tmp = array();
 
           //putting the name, id we got from Quickbooks into a temp array, with name as the key
-          foreach ($_tmp_TaxRefs as $value) {
+          foreach ($tmp_TaxRefs as $value) {
             $tmp[$value->Name] = $value->Id;
           }
 
           //add our temp array on static array
-          $_TaxRefs = $_TaxRefs + $tmp;
+          $tax_refs = $tax_refs + $tmp;
         }
       }
 
       //If we have collected any item Income accounting code, request their information from Quickbooks.
-      if (!empty($tmp_acctgcode)) {
-        $tmp_ItemRefs = $this->getItemRefs($tmp_acctgcode);
+      if (!empty($item_codes)) {
+        $tmp_ItemRefs = $this->getItemRefs($item_codes);
 
         if ($tmp_ItemRefs) {
           $tmp = array();
@@ -440,76 +441,71 @@ class CRM_Civiquickbooks_Invoice {
           }
 
           //add our temp array on static array
-          $ItemRefs = $ItemRefs + $tmp;
+          $items = $items + $tmp;
         }
       }
 
-      $tmp = array();
       $i = 1;
 
-      $_error_msg_to_QBs = NULL;
+      $QBO_errormsg = NULL;
 
-      $_error_msg_for_item_acctgcode = NULL;
+      $item_errormsg = NULL;
 
-      $_error_msg_for_tax_acctgcode = NULL;
+      $tax_errormsg = NULL;
 
       //looping through all line items and create an array that contains all necessary info for each line item.
-      foreach ($db_line_items['values'] as $id => $lineItem) {
-        $line_item_description = str_replace(array('&nbsp;'), ' ', $lineItem['label']);
+      foreach ($db_line_items['values'] as $id => $line_item) {
+        $line_item_description = str_replace(array('&nbsp;'), ' ', $line_item['label']);
 
-        if (!isset($ItemRefs[$lineItem['acctgCode']])) {
+        if (!isset($items[$line_item['acctgCode']])) {
           // If we have any line items that does not have a matched accounting code in Quickbooks.
           // We are not going to include this line item in quickbooks, and include this error in Customer memo as a public not in this Invoice.
           // Customer memo can be edited by Quickbooks Users and they can use this error message to find the corresponding contribution in CiviCRM and find the
           // line item that is wrong.
 
-          if (empty($_error_msg_for_item_acctgcode)) {
-            $_error_msg_for_item_acctgcode = ts('No matching Item found in Quickbooks Online for accounting code %1 (financial type %2)', array(
-              1 => $lineItem['acctgCode'],
-              2 => $lineItem['financial_type_id'],
+          if (empty($item_errormsg)) {
+            $item_errormsg = ts('No matching Item found in Quickbooks Online for accounting code %1 (financial type %2)', array(
+              1 => $line_item['acctgCode'],
+              2 => $line_item['financial_type_id'],
             ));
           }
           else {
-            $_error_msg_for_item_acctgcode .= ', ID: ' . $lineItem['financial_type_id'] . ' Inc_acctgcode: ' . $lineItem['acctgCode'] . ' ';
+            $item_errormsg .= ', ID: ' . $line_item['financial_type_id'] . ' Inc_acctgcode: ' . $line_item['acctgCode'] . ' ';
           }
 
           continue;
         }
         else {
-          $line_item_ref = $ItemRefs[$lineItem['acctgCode']];
+          $line_item_ref = $items[$line_item['acctgCode']];
         }
 
         // For US companies, this process is not needed, as the `TaxCodeRef` for each line item is either `NON` or `TAX`.
-        if (!$this->_quickbooks_is_us_company_flag) {
-          if (!empty($_TaxRefs) && !isset($_TaxRefs[$lineItem['sale_tax_acctgCode']])) {
+        if (!$this->us_company) {
+          if (!empty($tax_refs) && !isset($tax_refs[$line_item['sale_tax_acctgCode']])) {
             // if we have any line items that does not have a matched Sales Tax accounting code in Quickbooks
             // We are not going to include this line item in quickbooks, and include this error in Customer memo as a public not in this Invoice.
             // Customer memo can be edited by Quickbooks Users and they can use this error message to find the corresponding contribution in CiviCRM and find the
             // line item that is wrong.
 
-            if (empty($_error_msg_for_tax_acctgcode)) {
-              $_error_msg_for_tax_acctgcode = ts('No matching Tax type found in Quickbooks online for %1', array(1 => $lineItem['sale_tax_acctgCode']));
+            if (empty($tax_errormsg)) {
+              $tax_errormsg = ts('No matching Tax type found in Quickbooks online for %1', array(1 => $line_item['sale_tax_acctgCode']));
             }
             else {
-              $_error_msg_for_tax_acctgcode .= ', ID: ' . $lineItem['financial_type_id'] . ' Tax type: ' . $lineItem['sale_tax_acctgCode'] . ' ';
+              $tax_errormsg .= ', ID: ' . $line_item['financial_type_id'] . ' Tax type: ' . $line_item['sale_tax_acctgCode'] . ' ';
             }
 
             continue;
           }
           else {
-            $line_item_tax_ref = $_TaxRefs[$lineItem['sale_tax_acctgCode']];
+            $line_item_tax_ref = $tax_refs[$line_item['sale_tax_acctgCode']];
           }
         }
         else {
           // 'NON' or 'TAX' recorded in CiviCRM for US Companies
-          $usTaxCode = "NON";
-          if (isset($lineItem['sale_tax_acctgCode'])) {
-            $usTaxCode = "TAX";
-          }
-          $line_item_tax_ref = $usTaxCode;
+          $line_item_tax_ref = isset($line_item['sale_tax_acctgCode']) ? 'TAX' : 'NON';
         }
 
-        $lineTotal = $lineItem['line_total'];
+        $lineTotal = $line_item['line_total'];
 
         $tmp = array(
           'Id' => $i . '',
@@ -521,19 +517,19 @@ class CRM_Civiquickbooks_Invoice {
             'ItemRef' => array(
               'value' => $line_item_ref,
             ),
-            'UnitPrice' => $lineTotal / $lineItem['qty'] * 1.00,
-            'Qty' => $lineItem['qty'] * 1,
+            'UnitPrice' => $lineTotal / $line_item['qty'] * 1.00,
+            'Qty' => $line_item['qty'] * 1,
             'TaxCodeRef' => array(
               'value' => $line_item_tax_ref,
             ),
           ),
         );
 
-        $lineItems[] = $tmp;
+        $line_items[] = $tmp;
         $i += 1;
       }
 
-      $_error_msg_to_QBs = $_error_msg_for_item_acctgcode . $_error_msg_for_tax_acctgcode;
+      $QBO_errormsg = $item_errormsg . $tax_errormsg;
 
       $receive_date = $db_contribution['receive_date'];
 
@@ -561,8 +557,8 @@ class CRM_Civiquickbooks_Invoice {
         );
       }
 
-      if (empty($lineItems)) {
-        throw new CiviCRM_API3_Exception('No valid line items in the Invoice to push. ' . $_error_msg_to_QBs, 'qbo_invoice_line_items');
+      if (empty($line_items)) {
+        throw new CiviCRM_API3_Exception('No valid line items in the Invoice to push. ' . $QBO_errormsg, 'qbo_invoice_line_items');
       }
 
       $new_invoice += array(
@@ -570,9 +566,9 @@ class CRM_Civiquickbooks_Invoice {
         'DueDate' => $due_date,
         'DocNumber' => 'Civi-' . $db_contribution['id'],
         'CustomerMemo' => array(
-          'value' => empty($_error_msg_to_QBs) ? $db_contribution['contribution_source'] : $_error_msg_to_QBs,
+          'value' => empty($QBO_errormsg) ? $db_contribution['contribution_source'] : $QBO_errormsg,
         ),
-        'Line' => $lineItems,
+        'Line' => $line_items,
         'CustomerRef' => array(
           'value' => $qb_id,
         ),
@@ -581,10 +577,10 @@ class CRM_Civiquickbooks_Invoice {
 
       // For US company, add the array generated by $this->generateTxnTaxDetail on the top of the new invoice array.
       // to specify the tax rate for the entire invoice.
-      if ($this->_quickbooks_is_us_company_flag) {
+      if ($this->us_company) {
         //this function is used for US companies to use the name stored in `account_type_code` of the first line item
         //to get the needed state's tax code id from Quickbooks
-        $result = $this->generateTxnTaxDetail($db_line_items);
+        $result = $this->generateTaxDetails($db_line_items);
 
         if (is_array($result)) {
           $new_invoice['TxnTaxDetail'] = $result;
@@ -592,6 +588,7 @@ class CRM_Civiquickbooks_Invoice {
       }
     }
 
+    // Ensure HTML entities are not double encoded in Invoice create
     array_walk_recursive($new_invoice, function (&$item) {
       $item = html_entity_decode($item, (ENT_QUOTES | ENT_HTML401), 'UTF-8');
     });
@@ -615,9 +612,9 @@ class CRM_Civiquickbooks_Invoice {
       return FALSE;
     }
     
-    $tklist = "('" . implode("','", $item_codes) . "')";
+    $tk_list = "('" . implode("','", $item_codes) . "')";
 
-    $query = 'SELECT Name,Id FROM Item WHERE Name IN' . $tklist;
+    $query = 'SELECT Name,Id FROM Item WHERE Name IN' . $tk_list;
     
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $result = $dataService->Query($query, 0, 10);
@@ -644,9 +641,9 @@ class CRM_Civiquickbooks_Invoice {
       return FALSE;
     }
     
-    $tklist = "('" . implode("','", $tax_codes) . "')";
+    $tk_list = "('" . implode("','", $tax_codes) . "')";
 
-    $query = 'SELECT Name,Id FROM TaxCode WHERE Name IN' . $tklist;
+    $query = 'SELECT Name,Id FROM TaxCode WHERE Name IN' . $tk_list;
 
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $result = $dataService->Query($query, 0, 10);
@@ -694,20 +691,20 @@ class CRM_Civiquickbooks_Invoice {
    * API, it is the state's tax code id for this invoice.
    * }
    *
-   * @param $db_line_items
+   * @param $line_items
    *
    * @return array|bool
    * @throws CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
-  protected function generateTxnTaxDetail($db_line_items) {
+  protected function generateTaxDetails($line_items) {
     //We only take the first line item's sales tax account's `account type code`.
     //As we assume that all lint items have assigned with correct Tax financial account with correct
     //state tax name filled in to `account type code`.
 
-    foreach ($db_line_items['values'] as $id => $line_item) {
+    foreach ($line_items['values'] as $id => $line_item) {
       if ($line_item['sale_tax_acctgCode'] == 'TAX') {
-        $_first_line_item_account_type_code = $line_item['sale_tax_account_type_code'];
+        $tax_code = $line_item['sale_tax_account_type_code'];
         break;
       }
       else {
@@ -715,34 +712,27 @@ class CRM_Civiquickbooks_Invoice {
       }
     }
 
-    if (!isset($_first_line_item_account_type_code)) {
+    if (!isset($tax_code)) {
       return FALSE;
     }
 
-    $query = "SELECT Id FROM TaxCode WHERE name='" . $_first_line_item_account_type_code . "'";
+    $query = "SELECT Id FROM TaxCode WHERE name='" . $tax_code . "'";
 
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $result = $dataService->Query($query, 0, 10);
     $errors = $dataService->getLastError();
 
-    if ($errors || !$result) {
+    if ($errors || !$result || count($result) < 1) {
       return FALSE;
     }
 
-    if (count($result) > 0) {
-      $_tax_code_id = $result[0]->Id;
-    }
-    else {
-      return FALSE;
-    }
-
-    $_to_return = array(
+    $tax_detail = array(
       'TxnTaxCodeRef' => array(
-        'value' => $_tax_code_id,
+        'value' => $result[0]->Id,
       ),
     );
 
-    return $_to_return;
+    return $tax_detail;
   }
 
   /**
@@ -758,10 +748,10 @@ class CRM_Civiquickbooks_Invoice {
    * @return array
    * @throws \CiviCRM_API3_Exception
    */
-  protected function getContributionsRequiringPushUpdate($params, $limit) {
+  protected function findPushContributions($params, $limit) {
     $criteria = array(
       'accounts_needs_update' => 1,
-      'plugin' => $this->_plugin,
+      'plugin' => $this->plugin,
       'connector_id' => 0,
       'accounts_status_id' => array('NOT IN', 3),
       'options' => array(
@@ -786,9 +776,9 @@ class CRM_Civiquickbooks_Invoice {
     return $records;
   }
 
-  protected function getContributionsRequiringPullUpdate($params, $limit) {
+  protected function findPullContributions($params, $limit) {
     $criteria = array(
-      'plugin' => $this->_plugin,
+      'plugin' => $this->plugin,
       'connector_id' => 0,
       'accounts_status_id' => array('NOT IN', array(1, 3)),
       'accounts_invoice_id' => array('IS NOT NULL' => 1),

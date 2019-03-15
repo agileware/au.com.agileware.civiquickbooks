@@ -117,7 +117,7 @@ class CRM_Quickbooks_APIHelper {
    * @throws CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
-  private function refreshAccessTokenIfRequired() {
+  private static function refreshAccessTokenIfRequired() {
     $QBCredentials = self::getQuickBooksCredentials();
     $now = new DateTime();
     $now->modify("-5 minutes");

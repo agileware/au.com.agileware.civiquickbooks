@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection ALL */
 
 // AUTO-GENERATED FILE -- Civix may overwrite any changes made to this file
 
