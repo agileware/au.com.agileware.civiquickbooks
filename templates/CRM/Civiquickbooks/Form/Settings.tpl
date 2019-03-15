@@ -53,7 +53,6 @@
                     {/if}
                 </p>
             {/if}
-            </dl>
         {/if}
         <div class="clear"></div>
     </div>
