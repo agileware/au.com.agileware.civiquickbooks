@@ -43,6 +43,8 @@ class CRM_Civiquickbooks_Invoice {
    * @return bool
    *
    * @throws \CRM_Core_Exception
+   * @throws \QuickBooksOnline\API\Exception\IdsException
+   * @throws \QuickBooksOnline\API\Exception\SdkException
    */
   public function push($params = array(), $limit = PHP_INT_MAX) {
     try {
@@ -348,20 +350,10 @@ class CRM_Civiquickbooks_Invoice {
        * value: the accounting code of the Inc financial account of this financial type.*/
       static $item_ref_codes = array();
 
-      /* static array for mapping item name from Quickbooks and its item refer id.
-       * key: account code (item name in Quickbooks).
-       * value:  Quickbooks' Item id */
-      static $items = array();
-
       /* static array for storing financial type and its Inc account's accounting code.
        * key: financial type id.
        * value: the accounting code of the sales tax account of this financial type.*/
       static $tax_types = array();
-
-      /* static array for mapping item name from Quickbooks and its item refer id.
-       * key: Tax account code (Tax account name in Quickbooks).
-       * value:  Quickbooks' Tax account id */
-      static $tax_refs = array();
 
       $result = NULL;
 
@@ -417,42 +409,6 @@ class CRM_Civiquickbooks_Invoice {
         $db_line_items['values'][$id]['sale_tax_account_type_code'] = $tax_types[$line_item['financial_type_id']]['sale_tax_account_type_code'];
       }
 
-      //If we have collected any Sales Tax accounting code, request their information from Quickbooks.
-      //For US companies, this process is not needed, as the `TaxCodeRef` for each line item is either `NON` or `TAX`.
-      if (!empty($tax_codes) && !$this->us_company) {
-        $tmp_TaxRefs = $this->getTaxRefs($tax_codes);
-
-        if ($tmp_TaxRefs) {
-
-          $tmp = array();
-
-          //putting the name, id we got from Quickbooks into a temp array, with name as the key
-          foreach ($tmp_TaxRefs as $value) {
-            $tmp[$value->Name] = $value->Id;
-          }
-
-          //add our temp array on static array
-          $tax_refs = $tax_refs + $tmp;
-        }
-      }
-
-      //If we have collected any item Income accounting code, request their information from Quickbooks.
-      if (!empty($item_codes)) {
-        $tmp_ItemRefs = $this->getItemRefs($item_codes);
-
-        if ($tmp_ItemRefs) {
-          $tmp = array();
-
-          //putting the name, id we got from Quickbooks into a temp array, with name as the key
-          foreach ($tmp_ItemRefs as $value) {
-            $tmp[$value->Name] = $value->Id;
-          }
-
-          //add our temp array on static array
-          $items = $items + $tmp;
-        }
-      }
-
       $i = 1;
 
       $QBO_errormsg = NULL;
@@ -465,7 +421,9 @@ class CRM_Civiquickbooks_Invoice {
       foreach ($db_line_items['values'] as $id => $line_item) {
         $line_item_description = str_replace(array('&nbsp;'), ' ', $line_item['label']);
 
-        if (!isset($items[$line_item['acctgCode']])) {
+        $item_code = self::getItem($line_item['acctgCode']);
+
+        if (!$item_code) {
           // If we have any line items that does not have a matched accounting code in Quickbooks.
           // We are not going to include this line item in quickbooks, and include this error in Customer memo as a public not in this Invoice.
           // Customer memo can be edited by Quickbooks Users and they can use this error message to find the corresponding contribution in CiviCRM and find the
@@ -484,12 +442,14 @@ class CRM_Civiquickbooks_Invoice {
           continue;
         }
         else {
-          $line_item_ref = $items[$line_item['acctgCode']];
+          $line_item_ref = $item_code;
         }
 
         // For US companies, this process is not needed, as the `TaxCodeRef` for each line item is either `NON` or `TAX`.
         if (!$this->us_company) {
-          if (!empty($tax_refs) && !isset($tax_refs[$line_item['sale_tax_acctgCode']])) {
+          $tax_ref = self::getTaxCode($line_item['sale_tax_acctgCode']);
+
+          if (!$tax_ref) {
             // if we have any line items that does not have a matched Sales Tax accounting code in Quickbooks
             // We are not going to include this line item in quickbooks, and include this error in Customer memo as a public not in this Invoice.
             // Customer memo can be edited by Quickbooks Users and they can use this error message to find the corresponding contribution in CiviCRM and find the
@@ -505,7 +465,7 @@ class CRM_Civiquickbooks_Invoice {
             continue;
           }
           else {
-            $line_item_tax_ref = $tax_refs[$line_item['sale_tax_acctgCode']];
+            $line_item_tax_ref = $tax_ref;
           }
         }
         else {
@@ -607,61 +567,71 @@ class CRM_Civiquickbooks_Invoice {
   }
 
   /**
-   * Get item id from Quickbooks, by given their names.
+   * Get item id from QBO by Name or FullyQualifiedName
    *
-   * @param array $item_codes
+   * @param $name - Name or FullyQualifiedName of Item.
+   *                Assumes FullyQualifiedName if containing a colon (:)
    *
-   * @return array|bool
-   * @throws CiviCRM_API3_Exception
+   * @return int|FALSE
+   * @throws \CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
-  protected function getItemRefs($item_codes = array()) {
-    if (empty($item_codes)) {
-      return FALSE;
+  public static function getItem($name) {
+    $items =& \Civi::$statics[__CLASS__][__FUNCTION__];
+
+    if(!isset($items[$name])) {
+      $field = (strpos($name, ':') === FALSE) ? 'Name' : 'FullyQualifiedName';
+      $query = sprintf('SELECT %1$s,Id From Item WHERE %1$s = "%1$s"', $field, $name);
+
+      $dataService= CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+      $result = $dataService->Query($query,0,1);
+
+      if(empty($result)) {
+        $items[$name] = FALSE;
+
+        if($error = $dataService->getLastError()) {
+          CRM_Core_Error::debug_log_message(ts('Error getting Item "%1" from QBO: %2', [1 => $name, 2 => $error->getResponseBody()]));
+        }
+      }
+      else {
+        $items[$name] = $result[0]->Id;
+      }
     }
-    
-    $tk_list = "('" . implode("','", $item_codes) . "')";
 
-    $query = 'SELECT Name,Id FROM Item WHERE Name IN' . $tk_list;
-    
-    $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
-    $result = $dataService->Query($query, 0, 10);
-    $errors = $dataService->getLastError();
-
-    if ($errors || !$result) {
-      return FALSE;
-    }
-
-    return $result;
+    return $items[$name];
   }
 
   /**
-   * Get Tax account id from Quickbooks, by given their names.
+   * Get TaxCode id from QBO by Namde
    *
-   * @param array $tax_codes
+   * @param $name - Name of Tax Code.
    *
-   * @return array|bool
-   * @throws CiviCRM_API3_Exception
+   * @return int|FALSE
+   * @throws \CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
-  protected function getTaxRefs($tax_codes = array()) {
-    if (empty($tax_codes)) {
-      return FALSE;
+  public static function getTaxCode($name) {
+    $codes =& \Civi::$statics[__CLASS__][__FUNCTION__];
+
+    if(!isset($codes[$name])) {
+      $query = sprintf('SELECT Name,Id From TaxCode WHERE Name = "%1"', $name);
+
+      $dataService= CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+      $result = $dataService->Query($query,0,1);
+
+      if(empty($result)) {
+        $codes[$name] = FALSE;
+
+        if($error = $dataService->getLastError()) {
+          CRM_Core_Error::debug_log_message(ts('Error getting TaxCode "%1" from QBO: %2', [1 => $name, 2 => $error->getResponseBody()]));
+        }
+      }
+      else {
+        $codes[$name] = $result[0]->Id;
+      }
     }
-    
-    $tk_list = "('" . implode("','", $tax_codes) . "')";
 
-    $query = 'SELECT Name,Id FROM TaxCode WHERE Name IN' . $tk_list;
-
-    $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
-    $result = $dataService->Query($query, 0, 10);
-    $errors = $dataService->getLastError();
-
-    if ($errors || !$result) {
-      return FALSE;
-    }
-
-    return $result;
+    return $codes[$name];
   }
 
   /**
