@@ -581,7 +581,7 @@ class CRM_Civiquickbooks_Invoice {
 
     if(!isset($items[$name])) {
       $field = (strpos($name, ':') === FALSE) ? 'Name' : 'FullyQualifiedName';
-      $query = sprintf('SELECT %1$s,Id From Item WHERE %1$s = "%1$s"', $field, $name);
+      $query = sprintf('SELECT %1$s,Id From Item WHERE %1$s = \'%1$s\'', $field, $name);
 
       $dataService= CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
       $result = $dataService->Query($query,0,1);
@@ -614,7 +614,7 @@ class CRM_Civiquickbooks_Invoice {
     $codes =& \Civi::$statics[__CLASS__][__FUNCTION__];
 
     if(!isset($codes[$name])) {
-      $query = sprintf('SELECT Name,Id From TaxCode WHERE Name = "%1"', $name);
+      $query = sprintf('SELECT Name,Id From TaxCode WHERE Name = \'%1\'', $name);
 
       $dataService= CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
       $result = $dataService->Query($query,0,1);
