@@ -581,7 +581,7 @@ class CRM_Civiquickbooks_Invoice {
 
     if(!isset($items[$name])) {
       $field = (strpos($name, ':') === FALSE) ? 'Name' : 'FullyQualifiedName';
-      $query = sprintf('SELECT %1$s,Id From Item WHERE %1$s = \'%1$s\'', $field, $name);
+      $query = sprintf('SELECT %1$s,Id From Item WHERE %1$s = \'%2$s\'', $field, $name);
 
       $dataService= CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
       $result = $dataService->Query($query,0,1);
@@ -591,6 +591,7 @@ class CRM_Civiquickbooks_Invoice {
 
         if($error = $dataService->getLastError()) {
           CRM_Core_Error::debug_log_message(ts('Error getting Item "%1" from QBO: %2', [1 => $name, 2 => $error->getResponseBody()]));
+          CRM_Core_Error::debug_var('query', $query);
         }
       }
       else {
@@ -613,8 +614,12 @@ class CRM_Civiquickbooks_Invoice {
   public static function getTaxCode($name) {
     $codes =& \Civi::$statics[__CLASS__][__FUNCTION__];
 
+    if(empty($name)) {
+      return FALSE;
+    }
+
     if(!isset($codes[$name])) {
-      $query = sprintf('SELECT Name,Id From TaxCode WHERE Name = \'%1\'', $name);
+      $query = sprintf('SELECT Name,Id From TaxCode WHERE Name = \'%1s\'', $name);
 
       $dataService= CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
       $result = $dataService->Query($query,0,1);
@@ -624,6 +629,7 @@ class CRM_Civiquickbooks_Invoice {
 
         if($error = $dataService->getLastError()) {
           CRM_Core_Error::debug_log_message(ts('Error getting TaxCode "%1" from QBO: %2', [1 => $name, 2 => $error->getResponseBody()]));
+          CRM_Core_Error::debug_var('query', $query);
         }
       }
       else {
