@@ -76,6 +76,10 @@ class CRM_Civiquickbooks_Invoice {
           }
           else {
             $result = $dataService->Add($accountsInvoice);
+
+            if ($result->Id) {
+              $result_payments = self::pushPayments($record['contribution_id'], $result);
+            }
           }
 
           $responseErrors = $this->savePushResponse($result, $record, $dataService);
@@ -139,6 +143,49 @@ class CRM_Civiquickbooks_Invoice {
     } catch (CiviCRM_API3_Exception $e) {
       throw new CRM_Core_Exception('Invoice Pull aborted due to: ' . $e->getMessage());
     }
+  }
+
+  /**
+   * Find Payment entities for given contribution ID and record against
+   * AccountInvoice
+   *
+   * @param $contribution_id
+   * @param $account_invoice
+   *
+   * @throws \CiviCRM_API3_Exception
+   * @throws \QuickBooksOnline\API\Exception\SdkException
+   * @throws \QuickBooksOnline\API\Exception\IdsException
+   */
+  public static function pushPayments($contribution_id, $account_invoice) {
+    $payments = civicrm_api3('Payment', 'get', ['contribution_id' => $contribution_id, 'status_id' => 'Completed', 'sequential' => 1]);
+
+    if (!$payments['count']) {
+      return;
+    }
+
+    $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+    $result = [];
+
+    foreach($payments['values'] as $payment) {
+      $total = sprintf('%.5f', $payment['total_amount']);
+      $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create(
+        [
+          'TotalAmt' => $total,
+          'CustomerRef' => $account_invoice->CustomerRef,
+          'CurrencyRef' => $account_invoice->CurrencyRef,
+          'Line' => [
+            'Amount' => $total,
+            'LinkedTxn' => [[
+              'TxnType' => 'Invoice',
+              'TxnId' => $account_invoice->Id,
+            ]],
+          ],
+        ]
+      );
+      $result[] = $dataService->Add($QBOPayment);
+    }
+
+    return $result;
   }
 
   protected function getContributionInfo($contributionID) {
