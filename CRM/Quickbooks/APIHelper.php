@@ -86,7 +86,7 @@ class CRM_Quickbooks_APIHelper {
       'accessTokenKey' => $QBCredentials['accessToken'],
       'refreshTokenKey' => $QBCredentials['refreshToken'],
       'QBORealmID' => $QBCredentials['realMId'],
-      'baseUrl' => "Development",
+      'baseUrl' => "Production",
     );
 
     if ($forRefreshToken) {
