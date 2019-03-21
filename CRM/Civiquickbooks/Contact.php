@@ -251,7 +251,7 @@ class CRM_Civiquickbooks_Contact {
     //process and analyse the response result from Quickbooks
     if ($error) {
       // code 0 represent error received from Quickbooks. json result from Quickbooks is inserted into the message.
-      throw new CRM_Civiquickbooks_Contact_Exception('Got Error in customer pulling from QBs, Json: ' . $error, 0);
+      throw new CRM_Civiquickbooks_Contact_Exception('Got Error in customer pulling from QBs, Json: ' . $error->getResponseBody(), 0);
     }
     else {
       if (empty($customers)) {
