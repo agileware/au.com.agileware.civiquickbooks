@@ -49,7 +49,7 @@
                         <br>
                         You must add this Redirect URI to your application:
                         <br>
-                        {$redirectOAuthURL}
+                        {$redirect_url}
                     {/if}
                 </p>
             {/if}
