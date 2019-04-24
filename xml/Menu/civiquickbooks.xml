@@ -14,4 +14,14 @@
         <title>QuickBooks Online Settings</title>
         <access_arguments>access CiviCRM</access_arguments>
     </item>
+    <item>
+        <path>civicrm/ajax/civiquickbooks/sync/contact/errors</path>
+        <page_callback>CRM_Civiquickbooks_Page_AJAX::contactSyncErrors</page_callback>
+        <access_arguments>access CiviCRM</access_arguments>
+    </item>
+    <item>
+        <path>civicrm/ajax/civiquickbooks/sync/invoice/errors</path>
+        <page_callback>CRM_Civiquickbooks_Page_AJAX::invoiceSyncErrors</page_callback>
+        <access_arguments>access CiviCRM</access_arguments>
+    </item>
 </menu>

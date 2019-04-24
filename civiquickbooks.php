@@ -300,3 +300,99 @@ function civiquickbooks_civicrm_check(&$messages) {
     ));
   }
 }
+
+/**
+ * Get plugin name.
+ *
+ * @return string
+ */
+function _civiquickbooks_account_plugin_name() {
+  return 'quickbooks';
+}
+
+/**
+ * Gettings contributions of sinlge contact
+ *
+ * @param $contactid
+ */
+function _civiquickbooks_getContactContributions($contactid) {
+  $contributions = civicrm_api3("Contribution", "get", array(
+    "contact_id" => $contactid,
+    "return"     => array("contribution_id"),
+    "sequential" => TRUE,
+  ));
+  $contributions = array_column($contributions["values"], "id");
+  return $contributions;
+}
+
+/**
+ * Gettings errored invoices of given contributions
+ *
+ * @param $contributions
+ */
+function _civiquickbooks_getErroredInvoicesOfContributions($contributions) {
+  $invoices = civicrm_api3("AccountInvoice", "get", array(
+    "plugin"          => _civiquickbooks_account_plugin_name(),
+    "sequential"      => TRUE,
+    "contribution_id" => array("IN" => $contributions),
+    "error_data"      => array("<>" => ""),
+  ));
+  return $invoices;
+}
+
+/**
+ * Implements hook_civicrm_contactSummaryBlocks().
+ *
+ * @link https://github.com/civicrm/org.civicrm.contactlayout
+ */
+function civiquickbooks_civicrm_contactSummaryBlocks(&$blocks) {
+  $blocks += [
+    'civiquickbooksblock' => [
+      'title' => ts('Civi QuickBooks'),
+      'blocks' => [],
+    ]
+  ];
+  $blocks['civiquickbooksblock']['blocks']['contactsyncstatus'] = [
+    'title' => ts('Contact Sync Status'),
+    'tpl_file' => 'CRM/Civiquickbooks/Page/Inline/ContactSyncStatus.tpl',
+    'edit' => FALSE,
+  ];
+  $blocks['civiquickbooksblock']['blocks']['contactsyncerrors'] = [
+    'title' => ts('Contact Sync Errors'),
+    'tpl_file' => 'CRM/Civiquickbooks/Page/Inline/ContactSyncErrors.tpl',
+    'edit' => FALSE,
+  ];
+  $blocks['civiquickbooksblock']['blocks']['invoicesyncerrors'] = [
+    'title' => ts('Invoice Sync Errors'),
+    'tpl_file' => 'CRM/Civiquickbooks/Page/Inline/InvoiceSyncErrors.tpl',
+    'edit' => FALSE,
+  ];
+
+}
+
+/**
+ * Implements hook pageRun().
+ *
+ * Add QuickBooks links to contact summary
+ *
+ * @param $page
+ */
+function civiquickbooks_civicrm_pageRun(&$page) {
+  $pageName = get_class($page);
+  if ($pageName != 'CRM_Contact_Page_View_Summary' || !CRM_Core_Permission::check('view all contacts')) {
+    return;
+  }
+
+  if (($contactID = $page->getVar('_contactId')) != FALSE) {
+
+    CRM_Core_Resources::singleton()->addScriptFile('au.com.agileware.civiquickbooks', 'js/civiquickbooks_errors.js');
+
+    CRM_Civiquickbooks_Page_Inline_ContactSyncStatus::addContactSyncStatusBlock($page, $contactID);
+    CRM_Civiquickbooks_Page_Inline_ContactSyncErrors::addContactSyncErrorsBlock($page, $contactID);
+    CRM_Civiquickbooks_Page_Inline_InvoiceSyncErrors::addInvoiceSyncErrorsBlock($page, $contactID);
+
+    CRM_Core_Region::instance('contact-basic-info-right')->add(array(
+      'template' => "CRM/Civiquickbooks/ContactSyncBlock.tpl",
+    ));
+  }
+}
