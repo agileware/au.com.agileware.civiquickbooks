@@ -509,7 +509,6 @@ class CRM_Civiquickbooks_Invoice {
               $tax_errormsg .= ', ID: ' . $line_item['financial_type_id'] . ' Tax type: ' . $line_item['sale_tax_acctgCode'] . ' ';
             }
 
-            continue;
           }
           else {
             $line_item_tax_ref = $tax_ref;
