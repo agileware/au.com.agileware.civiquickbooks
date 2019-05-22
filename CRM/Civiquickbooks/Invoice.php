@@ -62,6 +62,11 @@ class CRM_Civiquickbooks_Invoice {
         try {
           $accountsInvoice = $this->getAccountsInvoice($record);
 
+          if(empty($accountsInvoice)) {
+              civicrm_api3('AccountInvoice', 'create', ['id' => $record['id'], 'accounts_needs_update' => 0]);
+              throw new CiviCRM_API3_Exception(E::ts('AccountInvoice object for %1 is empty', [1 => $record['id']]), 'empty_invoice');
+          }
+
           $proceed = TRUE;
           CRM_Accountsync_Hook::accountPushAlterMapped('invoice', $record, $proceed, $accountsInvoice);
 
@@ -83,6 +88,7 @@ class CRM_Civiquickbooks_Invoice {
           }
 
           $responseErrors = $this->savePushResponse($result, $record, $dataService);
+
           if (!empty($responseErrors)) {
             $errors[] = $responseErrors;
           }
@@ -91,8 +97,12 @@ class CRM_Civiquickbooks_Invoice {
             1 => $record['contribution_id'],
             2 => $e->getMessage(),
           ));
+
+          civicrm_api3('AccountInvoice', 'create', [ 'id' => $record['id'], 'error_data' => json_encode (
+              [ date('c'), [ 'message' => 'CiviCRM: ' . $e->getMessage ] ]
+          )]);
+
           CRM_Core_Error::debug_log_message($this_error);
-          CRM_Core_Error::debug_log_message(CRM_Core_Error::formatBacktrace($e->getTrace()));
         }
       }
 
@@ -785,7 +795,7 @@ class CRM_Civiquickbooks_Invoice {
       'connector_id' => 0,
       'accounts_status_id' => array('NOT IN', 3),
       'options' => array(
-        'sort' => 'error_data',
+        'sort' => 'error_data ASC',
         'limit' => $limit,
       ),
     );
