@@ -504,21 +504,18 @@ class CRM_Civiquickbooks_Invoice {
 
         // For US companies, this process is not needed, as the `TaxCodeRef` for each line item is either `NON` or `TAX`.
         if (!$this->us_company) {
-          $tax_ref = self::getTaxCode($line_item['sale_tax_acctgCode']);
+          if(!empty($line_item['sale_tax_acctgCode'])){
+            $tax_ref = self::getTaxCode($line_item['sale_tax_acctgCode']);
 
-          if (!$tax_ref) {
-            // if we have any line items that does not have a matched Sales Tax accounting code in Quickbooks
-            // We are not going to include this line item in quickbooks, and include this error in Customer memo as a public not in this Invoice.
-            // Customer memo can be edited by Quickbooks Users and they can use this error message to find the corresponding contribution in CiviCRM and find the
-            // line item that is wrong.
-
-            if (empty($tax_errormsg)) {
-              $tax_errormsg = ts('No matching Tax type found in Quickbooks online for %1', array(1 => $line_item['sale_tax_acctgCode']));
+            if (!$tax_ref) {
+              // Don't include any line items wih a non-matching TaxCode in Quickbooks.
+              if (empty($tax_errormsg)) {
+                $tax_errormsg = ts('No matching Tax type found in Quickbooks online for %1', array(1 => $line_item['sale_tax_acctgCode']));
+              }
+              else {
+                $tax_errormsg .= ', ID: ' . $line_item['financial_type_id'] . ' Tax type: ' . $line_item['sale_tax_acctgCode'] . ' ';
+              }
             }
-            else {
-              $tax_errormsg .= ', ID: ' . $line_item['financial_type_id'] . ' Tax type: ' . $line_item['sale_tax_acctgCode'] . ' ';
-            }
-
           }
           else {
             $line_item_tax_ref = $tax_ref;
@@ -590,7 +587,7 @@ class CRM_Civiquickbooks_Invoice {
         'DueDate' => $due_date,
         'DocNumber' => 'Civi-' . $db_contribution['id'],
         'CustomerMemo' => array(
-          'value' => empty($QBO_errormsg) ? $db_contribution['contribution_source'] : $QBO_errormsg,
+          'value' => $db_contribution['contribution_source'],
         ),
         'Line' => $line_items,
         'CustomerRef' => array(
