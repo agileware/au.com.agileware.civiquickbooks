@@ -389,9 +389,9 @@ class CRM_Civiquickbooks_Invoice {
     //those contributions we care
     $status_array = array('pending', 'completed', 'partially paid');
 
-    if (in_array($contri_status_in_lower, $status_array)) {
-      $contributionID = $db_contribution['id'];
+    $contributionID = $db_contribution['id'];
 
+    if (in_array($contri_status_in_lower, $status_array)) {
       $db_line_items = civicrm_api3('LineItem', 'get', array(
         'contribution_id' => $contributionID,
       ));
@@ -607,16 +607,22 @@ class CRM_Civiquickbooks_Invoice {
           $new_invoice['TxnTaxDetail'] = $result;
         }
       }
+
+      // Ensure HTML entities are not double encoded in Invoice create
+      array_walk_recursive($new_invoice, function (&$item) {
+          $item = html_entity_decode($item, (ENT_QUOTES | ENT_HTML401), 'UTF-8');
+      });
+
+      try {
+        return \QuickBooksOnline\API\Facades\Invoice::create($new_invoice);
+      }
+      catch(Exception $e) {
+        throw new CiviCRM_API3_Exception(
+          E::ts('Error creating Invoice for %1: %2', [1 => $contributionID, 2 => $e->getMessage()]),
+          'qbo_invoice_creation'
+        );
+      }
     }
-
-    // Ensure HTML entities are not double encoded in Invoice create
-    array_walk_recursive($new_invoice, function (&$item) {
-      $item = html_entity_decode($item, (ENT_QUOTES | ENT_HTML401), 'UTF-8');
-    });
-
-    $new_invoice = \QuickBooksOnline\API\Facades\Invoice::create($new_invoice);
-
-    return $new_invoice;
   }
 
   /**
