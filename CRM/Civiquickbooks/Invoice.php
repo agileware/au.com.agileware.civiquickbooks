@@ -487,7 +487,7 @@ class CRM_Civiquickbooks_Invoice {
           // line item that is wrong.
 
           if (empty($item_errormsg)) {
-            $item_errormsg = ts('No matching Item found in Quickbooks Online for accounting code %1 (financial type %2)', array(
+            $item_errormsg = ts('No matching Item found in Quickbooks Online for accounting code "%1" (financial type %2)', array(
               1 => $line_item['acctgCode'],
               2 => $line_item['financial_type_id'],
             ));
@@ -516,9 +516,9 @@ class CRM_Civiquickbooks_Invoice {
                 $tax_errormsg .= ', ID: ' . $line_item['financial_type_id'] . ' Tax type: ' . $line_item['sale_tax_acctgCode'] . ' ';
               }
             }
-          }
-          else {
-            $line_item_tax_ref = $tax_ref;
+            else {
+              $line_item_tax_ref = $tax_ref;
+            }
           }
         }
         else {
@@ -651,6 +651,9 @@ class CRM_Civiquickbooks_Invoice {
         if($error = $dataService->getLastError()) {
           CRM_Core_Error::debug_log_message(ts('Error getting Item "%1" from QBO: %2', [1 => $name, 2 => $error->getResponseBody()]));
           CRM_Core_Error::debug_var('query', $query);
+        } else {
+          CRM_Core_Error::debug_log_message(ts('No result getting Item "%1" from QBO', [1 => $name]));
+          CRM_Core_Error::debug_var('query', $query);
         }
       }
       else {
@@ -688,6 +691,10 @@ class CRM_Civiquickbooks_Invoice {
 
         if($error = $dataService->getLastError()) {
           CRM_Core_Error::debug_log_message(ts('Error getting TaxCode "%1" from QBO: %2', [1 => $name, 2 => $error->getResponseBody()]));
+          CRM_Core_Error::debug_var('query', $query);
+        }
+        else {
+          CRM_Core_Error::debug_log_message(ts('No result getting TaxCode "%1" from QBO', [1 => $name]));
           CRM_Core_Error::debug_var('query', $query);
         }
       }
