@@ -177,12 +177,14 @@ class CRM_Civiquickbooks_Invoice {
     $result = [];
 
     foreach($payments['values'] as $payment) {
+      $txnDate = $payment['trxn_date'];
       $total = sprintf('%.5f', $payment['total_amount']);
       $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create(
         [
           'TotalAmt' => $total,
           'CustomerRef' => $account_invoice->CustomerRef,
           'CurrencyRef' => $account_invoice->CurrencyRef,
+          'TxnDate' => $txnDate,
           'Line' => [
             'Amount' => $total,
             'LinkedTxn' => [[
