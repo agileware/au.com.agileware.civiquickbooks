@@ -25,7 +25,7 @@ new keys.  See the [Configuration](#configuration) section below.
 
 1. Ensure the CiviContribute component is enabled
 2. Download the [latest version of this
-   extension](https://github.com/agileware/au.com.agileware.civiquickbooks/archive/2.0.tar.gz)
+   extension](https://github.com/agileware/au.com.agileware.civiquickbooks/releases)
 3. Unzip in the CiviCRM extension directory, as defined in 'System Settings /
    Directories'.
 4. Download the CiviCRM extension, **[Account
