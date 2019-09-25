@@ -1,17 +1,17 @@
 [
     {
         "name": "quickbooks/v3-php-sdk",
-        "version": "5.0.4",
-        "version_normalized": "5.0.4.0",
+        "version": "v5.2.1",
+        "version_normalized": "5.2.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/intuit/QuickBooks-V3-PHP-SDK.git",
-            "reference": "f9d1e768adaba9bda7a1fd374adca04fc119b85c"
+            "reference": "ef3ddde325de97411e0052d3012d929f8d2d8b39"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/intuit/QuickBooks-V3-PHP-SDK/zipball/f9d1e768adaba9bda7a1fd374adca04fc119b85c",
-            "reference": "f9d1e768adaba9bda7a1fd374adca04fc119b85c",
+            "url": "https://api.github.com/repos/intuit/QuickBooks-V3-PHP-SDK/zipball/ef3ddde325de97411e0052d3012d929f8d2d8b39",
+            "reference": "ef3ddde325de97411e0052d3012d929f8d2d8b39",
             "shasum": ""
         },
         "require": {
@@ -26,7 +26,7 @@
             "ext-curl": "Uses Curl to make HTTP Requests",
             "guzzlehttp/guzzle": "Uses Guzzle to make HTTP Requests"
         },
-        "time": "2019-03-26T08:42:18+00:00",
+        "time": "2019-09-05T10:47:45+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
