@@ -221,10 +221,20 @@ class CRM_Civiquickbooks_Invoice {
     switch($send) {
       case 'unpaid':
       case 'always':
-        $invoice = $dataService->FindById('invoice', $record['accounts_invoice_id']);
+        $invoice = $dataService->FindById('invoice', $invoice_id);
 
-        if ($invoice && (('always' == $send) || $invoice->Balance)) {
-          $dataService->sendEmail($invoice);
+        CRM_Core_Error::debug_var('invoice', $invoice);
+
+        if ($invoice && (('always' == $send) || $invoice->Balance) &&
+          ($customer = $dataService->FindById('customer', $invoice->CustomerRef))) {
+          CRM_Core_Error::debug_var('customer', $customer);
+
+          if (@$email = $customer->PrimaryEmailAddr->Address) {
+
+            CRM_Core_Error::debug_var('email', $email);
+
+            $dataService->sendEmail($invoice, $email);
+          }
         }
 
         break;
