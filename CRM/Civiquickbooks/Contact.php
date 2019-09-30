@@ -134,51 +134,51 @@ class CRM_Civiquickbooks_Contact {
 
           unset($account_contact['api.contact.get']);
 
-          $data_service = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+          try {
+            $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
 
-          if ($QBOContact->Id) {
-            $result = $data_service->Update($QBOContact);
+            if ($QBOContact->Id) {
+              $result = $dataService->Update($QBOContact);
+            }
+            else {
+              $result = $dataService->Add($QBOContact);
+            }
+
+            if($result) {
+              $account_contact['error_data'] = 'NULL';
+
+              $account_contact['accounts_contact_id'] = $result->Id;
+
+              CRM_Core_DAO::setFieldValue(
+                'CRM_Accountsync_DAO_AccountContact',
+                $account_contact['id'],
+                'accounts_modified_date',
+                date("Y-m-d H:i:s", strtotime($result->MetaData->LastUpdatedTime)),
+                'id');
+
+              $account_contact['accounts_data'] = json_encode($result);
+
+              $account_contact['accounts_display_name'] = $result->DisplayName;
+
+              $account_contact['accounts_needs_update'] = 0;
+            }
           }
-          else {
-            $result = $data_service->Add($QBOContact);
+          catch (\QuickbooksOnline\API\Exception\IdsException $e) {
+            $account_contact['error_data'] = json_encode([{$e->getCode() => $e->getMessage()}]);
+
+            throw $e;
           }
-
-          if (!$result) {
-            $response_errors = $data_service->getLastError();
-          }
-
-          if (!empty($response_errors)) {
-            $account_contact['error_data'] = json_encode([$response_errors->getResponseBody()]);
-
+          finally {
             if (gettype($account_contact['accounts_data']) == 'array') {
               $account_contact['accounts_data'] = json_encode($account_contact['accounts_data']);
             }
+
+            // This will update the last sync date.
+            unset($account_contact['last_sync_date']);
+
+            civicrm_api3('account_contact', 'create', $account_contact);
           }
-          elseif ($result) {
-
-            $account_contact['error_data'] = 'NULL';
-
-            $account_contact['accounts_contact_id'] = $result->Id;
-
-            CRM_Core_DAO::setFieldValue(
-              'CRM_Accountsync_DAO_AccountContact',
-              $account_contact['id'],
-              'accounts_modified_date',
-              date("Y-m-d H:i:s", strtotime($result->MetaData->LastUpdatedTime)),
-              'id');
-
-            $account_contact['accounts_data'] = json_encode($result);
-
-            $account_contact['accounts_display_name'] = $result->DisplayName;
-
-            $account_contact['accounts_needs_update'] = 0;
-          }
-
-          // This will update the last sync date.
-          unset($account_contact['last_sync_date']);
-
-          civicrm_api3('account_contact', 'create', $account_contact);
-        } catch (CiviCRM_API3_Exception $e) {
+        } catch (Exception $e) {
           $errors[] = ts('Failed to push ') . $account_contact['contact_id'] . ' (' . $account_contact['accounts_contact_id'] . ' )'
             . ts(' with error ') . $e->getMessage() . print_r($response_errors, TRUE)
             . ts('Contact Push failed');
@@ -242,22 +242,20 @@ class CRM_Civiquickbooks_Contact {
 
     $query = "SELECT * FROM customer WHERE MetaData.LastUpdatedTime >= '" . $date . "'";
 
-    $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+    try {
+      $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
 
-    $customers = $dataService->Query($query, 0, 1000);
+      $customers = $dataService->Query($query, 0, 1000);
 
-    $error = $dataService->getLastError();
-
-    //process and analyse the response result from Quickbooks
-    if ($error) {
-      // code 0 represent error received from Quickbooks. json result from Quickbooks is inserted into the message.
-      throw new CRM_Civiquickbooks_Contact_Exception('Got Error in customer pulling from QBs, Json: ' . $error->getResponseBody(), 0);
     }
-    else {
-      if (empty($customers)) {
-        // code 1 represent no customers received from Quickbooks
-        throw new CRM_Civiquickbooks_Contact_Exception('No customers have been updated since the date past as param', 1);
-      }
+    //process and analyse the response result from Quickbooks
+    catch(\QuickbooksOnline\API\Exception\IdsException $e) {
+      throw new CRM_Civiquickbooks_Contact_Exception('Error in customer pulling from QBs: ' . $e->getMessage(), 0);
+    }
+
+    if (empty($customers)) {
+      // code 1 represent no customers received from Quickbooks
+      throw new CRM_Civiquickbooks_Contact_Exception('No customers have been updated since the date passed as a parameter', 1);
     }
 
     return $customers;
