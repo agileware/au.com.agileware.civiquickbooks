@@ -76,40 +76,31 @@ class CRM_Civiquickbooks_Invoice {
 
           $responseError='';
 
-          try {
-            $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+          $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
 
-            if ($accountsInvoice->Id) {
-              $result = $dataService->Update($accountsInvoice);
-            }
-            else {
-              $result = $dataService->Add($accountsInvoice);
-
-              if ($result->Id) {
-                $result_payments = self::pushPayments($record['contribution_id'], $result);
-                self::sendEmail($result->Id);
-              }
-            }
+          if ($accountsInvoice->Id) {
+            $result = $dataService->Update($accountsInvoice);
 
             $this->savePushResponse($result, $record);
           }
-          catch(\QuickbooksOnline\API\Exception\IdsException $e) {
-            $responseError = $e->getMessage();
+          else {
+            $result = $dataService->Add($accountsInvoice);
 
-            $this->savePushResponse($result, $record, $responseError);
-
-            $errors[] = $responseError;
-
-            throw $e;
+            if ($result->Id) {
+              $this->savePushResponse($result, $record);
+              $result_payments = self::pushPayments($record['contribution_id'], $result);
+              self::sendEmail($result->Id);
+            }
           }
-        } catch (CiviCRM_API3_Exception $e) {
+
+        } catch (Exception $e) {
           $this_error = $errors[] = ts('Failed to store %1 with error %2.', array(
             1 => $record['contribution_id'],
             2 => $e->getMessage(),
           ));
 
           civicrm_api3('AccountInvoice', 'create', [ 'id' => $record['id'], 'error_data' => json_encode (
-              [ date('c'), [ 'message' => 'CiviCRM: ' . $e->getMessage ] ]
+              [ date('c'), [ 'message' => 'CiviCRM: ' . $e->getMessage() ] ]
           )]);
 
           CRM_Core_Error::debug_log_message($this_error);
@@ -118,7 +109,7 @@ class CRM_Civiquickbooks_Invoice {
 
       if ($errors) {
         // since we expect this to wind up in the job log we'll print the errors
-        throw new CRM_Core_Exception(ts('Not all records were saved ') . json_encode($errors, JSON_PRETTY_PRINT), 'incomplete', $errors);
+        throw new CRM_Core_Exception(ts('Not all records were saved: ') . json_encode($errors, JSON_PRETTY_PRINT), 'incomplete', $errors);
       }
       return TRUE;
     } catch (CiviCRM_API3_Exception $e) {
@@ -231,8 +222,6 @@ class CRM_Civiquickbooks_Invoice {
       case 'unpaid':
       case 'always':
         $invoice = $dataService->FindById('invoice', $invoice_id);
-
-        CRM_Core_Error::debug_var('invoice', $invoice);
 
         if ($invoice && (('always' == $send) || $invoice->Balance) &&
           ($customer = $dataService->FindById('customer', $invoice->CustomerRef))) {
@@ -513,11 +502,11 @@ class CRM_Civiquickbooks_Invoice {
 
       $i = 1;
 
-      $QBO_errormsg = NULL;
+      $QBO_errormsg = [];
 
-      $item_errormsg = NULL;
+      $item_errormsg = [];
 
-      $tax_errormsg = NULL;
+      $tax_errormsg = [];
 
       //looping through all line items and create an array that contains all necessary info for each line item.
       foreach ($db_line_items['values'] as $id => $line_item) {
@@ -526,11 +515,12 @@ class CRM_Civiquickbooks_Invoice {
         try {
           $line_item_ref = self::getItem($line_item['acctgCode']);
         } catch (Exception $e) {
-          $item_errormsg []= ts(
-            'No matching Item found in Quickbooks Online for accounting code "%1" (financial type %2)',
+          $item_errormsg[] = ts(
+            'No matching Item for accounting code "%1" (financial type %2) - %3',
             array(
               1 => $line_item['acctgCode'],
               2 => $line_item['financial_type_id'],
+              3 => $e->getMessage()
             )
           );
 
@@ -577,7 +567,7 @@ class CRM_Civiquickbooks_Invoice {
         $i += 1;
       }
 
-      $QBO_errormsg = implode(', ', array_merge($item_errormsg, $tax_errormsg));
+      $QBO_errormsg = implode("\n", array_merge($item_errormsg, $tax_errormsg));
 
       $receive_date = $db_contribution['receive_date'];
 
@@ -606,7 +596,7 @@ class CRM_Civiquickbooks_Invoice {
       }
 
       if (empty($line_items)) {
-        throw new CiviCRM_API3_Exception('No valid line items in the Invoice to push. ' . $QBO_errormsg, 'qbo_invoice_line_items');
+        throw new CiviCRM_API3_Exception("No valid line items in the Invoice to push:\n" . $QBO_errormsg, 'qbo_invoice_line_items');
       }
 
       $new_invoice += array(
@@ -678,7 +668,7 @@ class CRM_Civiquickbooks_Invoice {
       $result = $dataService->Query($query,0,1);
 
       if(empty($result)) {
-        throw new Exception('No Items found matching $name');
+        throw new Exception("No Product found matching $name");
       }
 
       $items[$name] = $result[0]->Id;
@@ -708,6 +698,10 @@ class CRM_Civiquickbooks_Invoice {
 
       $dataService= CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
       $result = $dataService->Query($query,0,1);
+
+      if(empty($result)) {
+        throw new Exception("No Tax Code found matching $name");
+      }
 
       $codes[$name] = $result[0]->Id;
     }

@@ -18,17 +18,15 @@ class CRM_Civiquickbooks_Contact {
     } catch (CRM_Civiquickbooks_Contact_Exception $e) {
       switch ($e->getCode()) {
         case 0:
-          CRM_Core_Session::setStatus('Failed to pull customers from Quickbooks, as: ' . $e->getMessage());
-          return FALSE;
+          throw new CRM_Core_Exception('Failed to pull customers from Quickbooks: ' . $e->getMessage());
 
           break;
-
         case 1:
-          CRM_Core_Session::setStatus('No customers are updated in Quickbooks since ' . $start_date . '. Contacts pulling aborted');
-          return TRUE;
+          return ['No customers are updated in Quickbooks since ' . $start_date . '; Contact pull aborted'];
 
           break;
-
+        default:
+          break;
       }
     }
 
@@ -114,8 +112,6 @@ class CRM_Civiquickbooks_Contact {
           continue;
         }
 
-        $response_errors = array();
-
         try {
           $id = isset($account_contact['accounts_contact_id']) ? $account_contact['accounts_contact_id'] : NULL;
 
@@ -179,15 +175,19 @@ class CRM_Civiquickbooks_Contact {
             civicrm_api3('account_contact', 'create', $account_contact);
           }
         } catch (Exception $e) {
-          $errors[] = ts('Failed to push ') . $account_contact['contact_id'] . ' (' . $account_contact['accounts_contact_id'] . ' )'
-            . ts(' with error ') . $e->getMessage() . print_r($response_errors, TRUE)
-            . ts('Contact Push failed');
+          $errors[] = ts(
+            'Failed to push %1 (%2) with error %3',
+            [
+              1 => $account_contact['contact_id'],
+              2 => $account_contact['accounts_contact_id'],
+              3 => $e->getMessage()
+            ]);
         }
       }
 
       if ($errors) {
         // since we expect this to wind up in the job log we'll print the errors
-        throw new CRM_Core_Exception(ts('Not all contacts were saved') . print_r($errors, TRUE), 'incomplete', $errors);
+        throw new CRM_Core_Exception(ts("Not all contacts were saved: \n ") . implode("\n  ", $errors), 'incomplete', $errors);
       }
       return TRUE;
     } catch (CiviCRM_API3_Exception $e) {

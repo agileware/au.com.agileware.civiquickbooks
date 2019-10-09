@@ -25,7 +25,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
     foreach ($settings as $name => $setting) {
       if (isset($setting['quick_form_type'])) {
         $add = 'add' . $setting['quick_form_type'];
-        CRM_Core_Error::debug_var('setting[' . $name . ']', $setting);
+
         if ($add == 'addElement') {
           $this->$add($setting['html_type'], $name, $setting['title'], CRM_Utils_Array::value('html_attributes', $setting, array()));
         }
