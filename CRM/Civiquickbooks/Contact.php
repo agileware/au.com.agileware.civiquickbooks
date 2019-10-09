@@ -164,7 +164,7 @@ class CRM_Civiquickbooks_Contact {
             }
           }
           catch (\QuickbooksOnline\API\Exception\IdsException $e) {
-            $account_contact['error_data'] = json_encode([{$e->getCode() => $e->getMessage()}]);
+            $account_contact['error_data'] = json_encode([[$e->getCode() => $e->getMessage()]]);
 
             throw $e;
           }
