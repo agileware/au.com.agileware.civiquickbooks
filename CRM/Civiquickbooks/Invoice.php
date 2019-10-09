@@ -84,6 +84,7 @@ class CRM_Civiquickbooks_Invoice {
 
             if ($result->Id) {
               $result_payments = self::pushPayments($record['contribution_id'], $result);
+              self::sendEmail($result->Id);
             }
           }
 
@@ -198,6 +199,38 @@ class CRM_Civiquickbooks_Invoice {
     }
 
     return $result;
+  }
+
+  /**
+   * Calls QuickBooks Online to send an invoice email for a given invoice ID.
+   *
+   * @param $invoice_id
+   * @param $dataService
+   *
+   * @throws \CiviCRM_API3_Exception
+   * @throws \QuickBooksOnline\API\Exception\SdkException
+   * @throws \QuickBooksOnline\API\Exception\IdsException
+   */
+  public static function sendEmail($invoice_id, $dataService = NULL) {
+    if($dataService == NULL) {
+      $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+    }
+
+    $send = civicrm_api3('Setting', 'getvalue', [ 'name' => 'quickbooks_email_invoice' ]);
+
+    switch($send) {
+      case 'unpaid':
+      case 'always':
+        $invoice = $dataService->FindById('invoice', $record['accounts_invoice_id']);
+
+        if ($invoice && (('always' == $send) || $invoice->Balance)) {
+          $dataService->sendEmail($invoice);
+        }
+
+        break;
+      default:
+        break;
+    }
   }
 
   protected function getContributionInfo($contributionID) {
