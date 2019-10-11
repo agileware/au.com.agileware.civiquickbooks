@@ -94,6 +94,9 @@ class CRM_Quickbooks_APIHelper {
     }
 
     $dataService = \QuickBooksOnline\API\DataService\DataService::Configure($dataServiceParams);
+
+    $dataService->throwExceptionOnError(true);
+
     if (!$forRefreshToken) {
       self::$quickBooksAccountingDataService = $dataService;
       return self::$quickBooksAccountingDataService;
