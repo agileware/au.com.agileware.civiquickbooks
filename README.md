@@ -78,7 +78,8 @@ Financial account codes to correctly code each Invoice in QuickBooks Online.
 3. Open the CiviCRM Financial Account setting page
    (civicrm/admin/financial/financialAccount) and update the 'Acctg Code' of
    corresponding Financial account to be the same as each QuickBooks
-   product/service name.
+   Product/Service name:
+   ![Product Name -> Acctg Code](doc/product_name-to-acctg_code.png)
 4. When setting up Contributions in CiviCRM, ensure that the Financial Type for
    the Contribution is set to use the correct Financial Account as the Income
    Account.
