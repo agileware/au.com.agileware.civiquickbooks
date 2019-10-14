@@ -195,6 +195,39 @@ class CRM_Civiquickbooks_Contact {
     }
   }
 
+  public static function getBillingEmail($contact) {
+    if (is_array($contact)) {
+      $contact = $contact['id'];
+    }
+
+    if($contact) {
+      $criteria_set = [
+        [ 'location_type_id' => 'Billing' ], // Start with location type
+        [ 'is_billing'       => 1         ], // Then check is_billing flag
+        [ 'is_primary'       => 1         ], // Then check is_primary flag
+        [                                 ], // Finally, fall back
+      ];
+
+      foreach ( $criteria_set as $criteria ) {
+        $emails = civicrm_api3(
+          'Email',
+          'get',
+          $criteria + [
+            'contact_id' => $contact,
+            'options' => [ 'sort' => 'is_billing DESC, is_primary DESC, on_hold ASC, id DESC' ],
+            'sequential' => 1
+          ]
+        );
+
+        if ( $emails['count'] ) {
+          return $emails['values'][0]['email'];
+        }
+      }
+    }
+    // The contact HAS no email, apparently.
+    return '';
+  }
+
   protected function mapToCustomer($contact, $accountsID, $customer_data) {
     $customer = array(
       "BillAddr" => array(
@@ -214,10 +247,9 @@ class CRM_Civiquickbooks_Contact {
       "DisplayName" => $contact['display_name'],
       "PrimaryPhone" => array(
         "FreeFormNumber" => $contact['phone'],
-
       ),
       "PrimaryEmailAddr" => array(
-        "Address" => $contact['email'],
+        "Address" => self::getBillingEmail($contact),
       ),
     );
 
