@@ -92,7 +92,6 @@ class CRM_Civiquickbooks_Contact {
     try {
       $records = civicrm_api3('account_contact', 'get', array(
           'accounts_needs_update' => 1,
-          'api.contact.get' => 1,
           'plugin' => $this->plugin,
           'contact_id' => array('IS NOT NULL' => 1),
           'connector_id' => 0,
@@ -119,7 +118,11 @@ class CRM_Civiquickbooks_Contact {
           // And when we get it out using api, it will deserialize automatically for us.
           $accounts_data = isset($account_contact['accounts_contact_id']) ? $account_contact['accounts_data'] : NULL;
 
-          $QBOContact = $this->mapToCustomer($account_contact['api.contact.get']['values'][0], $id, $accounts_data);
+          $QBOContact = $this->mapToCustomer(
+              civicrm_api3('contact', 'getsingle', [ 'id' => $account_contact['contact_id'] ]),
+              $id,
+              $accounts_data
+          );
 
           $proceed = TRUE;
           CRM_Accountsync_Hook::accountPushAlterMapped('contact', $account_contact, $proceed, $QBOContact);
@@ -195,29 +198,146 @@ class CRM_Civiquickbooks_Contact {
     }
   }
 
+  public static function getBillingEmail($contact) {
+    if (is_array($contact)) {
+      $contact = $contact['id'];
+    }
+
+    if($contact) {
+      $criteria_set = [
+        [ 'location_type_id' => 'Billing' ], // Start with location type
+        [ 'is_billing'       => 1         ], // Then check is_billing flag
+        [ 'is_primary'       => 1         ], // Then check is_primary flag
+        [                                 ], // Finally, fall back
+      ];
+
+      foreach ( $criteria_set as $criteria ) {
+        $emails = civicrm_api3(
+          'Email',
+          'get',
+          $criteria + [
+            'contact_id' => $contact,
+            'options' => [ 'sort' => 'is_billing DESC, is_primary DESC, on_hold ASC, id DESC' ],
+            'sequential' => 1
+          ]
+        );
+
+        if ( $emails['count'] ) {
+          return $emails['values'][0]['email'];
+        }
+      }
+    }
+    // The contact HAS no email, apparently.
+    return '';
+  }
+
+  public static function getBillingAddr($contact) {
+    if (is_array($contact)) {
+      $contact = $contact['id'];
+    }
+
+    if($contact) {
+      $criteria_set = [
+        [ 'location_type_id' => 'Billing' ], // Start with location type
+        [ 'is_billing'       => 1         ], // Then check is_billing flag
+        [ 'is_primary'       => 1         ], // Then check is_primary flag
+        [                                 ], // Finally, fall back
+      ];
+
+      foreach ( $criteria_set as $criteria ) {
+        $addrs = civicrm_api3(
+          'Address',
+          'get',
+          $criteria + [
+            'contact_id' => $contact,
+            'options'    => [ 'sort' => 'is_billing DESC, is_primary DESC, id DESC' ],
+            'sequential' => 1,
+            'return'     => [
+              'street_address',
+              'supplemental_address_1',
+              'supplemental_address_2',
+              'supplemental_address_3',
+              'city',
+              'state_province_id.country_id.name',
+              'state_province_id.abbreviation',
+              'postal_code',
+            ]
+          ]
+        );
+
+        if ( $addrs['count'] ) {
+          $addr = $addrs['values'][0];
+
+          return @array_filter([
+              'Line1'                  => $addr['street_address'],
+              'Line2'                  => $addr['supplemental_address_1'],
+              'Line3'                  => $addr['supplemental_address_2'],
+              'Line4'                  => $addr['supplemental_address_3'],
+              'City'                   => $addr['city'],
+              'Country'                => $addr['state_province_id.country_id.name'],
+              'CountrySubDivisionCode' => $addr['state_province_id.abbreviation'],
+              'PostalCode'             => $addr['postal_code'],
+            ]);
+        }
+      }
+    }
+
+    return [];
+  }
+
+  public static function getBillingPhone($contact) {
+    if (is_array($contact)) {
+      $contact = $contact['id'];
+    }
+
+    if($contact) {
+      $criteria_set = [
+        [ 'location_type_id' => 'Billing' ], // Start with location type
+        [ 'is_billing'       => 1         ], // Then check is_billing flag
+        [ 'is_primary'       => 1         ], // Then check is_primary flag
+        [                                 ], // Finally, fall back
+      ];
+
+      foreach ( $criteria_set as $criteria ) {
+        $phones = civicrm_api3(
+          'Phone',
+          'get',
+          $criteria + [
+            'contact_id' => $contact,
+            'options' => [ 'sort' => 'is_billing DESC, is_primary DESC, phone_type_id ASC, id DESC' ],
+            // We can only make limited assertions about what phone types are
+            // available, so exclude the default types we're sure are incorrect.
+            'phone_type_id' => [ 'NOT IN' => ['Fax','Pager','Voicemail'] ],
+            'sequential' => 1
+          ]
+        );
+
+        if ( $phones['count'] ) {
+          return $phones['values'][0]['phone'];
+        }
+      }
+    }
+    // The contact HAS no phone, apparently.
+    return '';
+  }
+
+
   protected function mapToCustomer($contact, $accountsID, $customer_data) {
     $customer = array(
-      "BillAddr" => array(
-        "Line1" => $contact['street_address'],
-        "City" => $contact['city'],
-        "Country" => $contact['country'],
-        "CountrySubDivisionCode" => $contact['state_province'],
-        "PostalCode" => $contact['postal_code'],
-      ),
-      "Title" => $contact['individual_prefix'],
-      "GivenName" => $contact['first_name'],
-      "MiddleName" => $contact['middle_name'],
-      "FamilyName" => $contact['last_name'],
-      "Suffix" => $contact['individual_suffix'],
+      "BillAddr"           => self::getBillingAddr($contact),
+      "Title"              => $contact['individual_prefix'],
+      "GivenName"          => $contact['first_name'],
+      "MiddleName"         => $contact['middle_name'],
+      "FamilyName"         => $contact['last_name'],
+      "Suffix"             => $contact['individual_suffix'],
       "FullyQualifiedName" => $contact['display_name'],
-      "CompanyName" => $contact['organization_name'],
-      "DisplayName" => $contact['display_name'],
-      "PrimaryPhone" => array(
-        "FreeFormNumber" => $contact['phone'],
-
+      "CompanyName"        => $contact['organization_name'],
+      "DisplayName"        => $contact['display_name'],
+      "PrimaryPhone"       => array(
+        "FreeFormNumber" => self::getBillingPhone($contact),
       ),
-      "PrimaryEmailAddr" => array(
-        "Address" => $contact['email'],
+      "PrimaryEmailAddr"   => array(
+        "Address"        => self::getBillingEmail($contact),
       ),
     );
 
