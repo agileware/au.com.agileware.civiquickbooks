@@ -10,8 +10,11 @@ data entry in your accounting system and CiviCRM. This extension does the work
 for you!
 
 QuickBooks Online provides different Tax APIs for US and non-US countries. This
-extension has been developed and tested for QuickBooks Online, Australia. With
-initial development and testing to support QuickBooks Online, US.
+extension has been developed and tested with:
+
+1. QuickBooks Online, Australia (AU)
+2. QuickBooks Online, United States (USA)
+3. QuickBooks Online, United Kingdom (UK)
 
 CiviQuickBooks will only synchronise contacts to Quickbooks Online from your
 CiviCRM when a Contribution is added to them, either through online payments or
