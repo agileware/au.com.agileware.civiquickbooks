@@ -175,4 +175,23 @@ return array(
       'readonly' => 'true',
     ),
   ),
+  'quickbooks_autogenerate_invoice_number' => array(
+    'group_name' => E::ts('QuickBooks Online Settings'),
+    'group' => 'civiquickbooks',
+    'name' => 'quickbooks_autogenerate_invoice_number',
+    'type' => 'String',
+    'add' => '4.7',
+    'default' => 'civi',
+    'title' => E::ts('Where should Invoice Numbers be generated?'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => E::ts('Whether the invoice numbers should be generated in CiviCRM or QuickBooks.'),
+    'help_text' => E::ts('Whether the invoice numbers should be generated in CiviCRM or QuickBooks.'),
+    'html_type' => 'Select',
+    'html_attributes' => array(
+      'civi' => E::ts('CiviCRM'),
+      'qb' => E::ts('QuickBooks'),
+    ),
+    'quick_form_type' => 'Element',
+  ),
 );
