@@ -232,4 +232,22 @@ return array(
     ),
     'quick_form_type' => 'Element',
   ),
+  'quickbooks_customer_memo' => array(
+    'group_name' => E::ts('QuickBooks Online Settings'),
+    'group' => 'civiquickbooks',
+    'name' => 'quickbooks_customer_memo',
+    'type' => 'String',
+    'add' => '4.7',
+    'default' => '',
+    'title' => E::ts('Customer Memo Override'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => E::ts('Custom Memo text (instead of the contribution source)'),
+    'help_text' => E::ts('if you enter text into this field it will be displayed on the invoice as the Memo instead of the source'),
+    'html_type' => 'Textarea',
+    'html_attributes' => array(
+      'size' => 200,
+    ),
+    'quick_form_type' => 'Element',
+  ),
 );
