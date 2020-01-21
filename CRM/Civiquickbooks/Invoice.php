@@ -614,7 +614,7 @@ class CRM_Civiquickbooks_Invoice {
 
       // check the setting 'Where should Invoice Numbers be generated?' and
       // populate the new invoice accordingly
-      $whereToGetInvoiceNumber = getSetting('quickbooks_autogenerate_invoice_number');
+      $whereToGetInvoiceNumber = $this->getSetting('quickbooks_autogenerate_invoice_number');
 
       if ($whereToGetInvoiceNumber == 'civi') {
         $new_invoice['DocNumber'] = 'Civi-' . $db_contribution['id'];
@@ -629,13 +629,13 @@ class CRM_Civiquickbooks_Invoice {
         'quickbooks_allow_ach' => 'AllowOnlineACHPayment',
       ];
       foreach ($onlinePaymentOptions as $settingNameInCivi => $qbParam) {
-        $allowCC = getSetting($settingNameInCivi);
+        $allowCC = $this->getSetting($settingNameInCivi);
         if ($allowCC == 1) {
           $new_invoice[$qbParam] = 1;
         }
       }
 
-      $customMemo = getSetting('quickbooks_customer_memo');
+      $customMemo = $this->getSetting('quickbooks_customer_memo');
       if ($customMemo != '') {
         $new_invoice['CustomerMemo'] = ['value' => $customMemo];
       }
