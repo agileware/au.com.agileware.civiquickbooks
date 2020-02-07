@@ -6,7 +6,7 @@ CRM.$(function($) {
             {quickbookserrorid: $(this).data('quickbookserrorid')})
         ).done(function (result) {
             if((typeof result) == "object") {
-                result = getArrayFromObject(result);
+                result = Object.values(result);
             }
             if(result.length > 0) {
                 CRM.alert(getErrorsText(result),"Contact sync","error");
@@ -21,30 +21,29 @@ CRM.$(function($) {
             {quickbookserrorid: $(this).data('quickbookserrorid')})
         ).done(function (result) {
             if((typeof result) == "object") {
-                result = getArrayFromObject(result);
+                result = Object.values(result);
             }
             if(result.length > 0) {
-                CRM.alert(getErrorsText(result),"Contributions sync","error");
+                CRM.alert(getErrorsText(result),"Invoice sync","error");
             }
         });
     });
 
-    function getArrayFromObject(object) {
-        var array = $.map(object, function(value, index) {
-            return [value];
-        });
-        return array;
-    }
-
     function getErrorsText(result) {
-        var text ="";
-        for(var i=0; i<result.length; i++) {
-            text += "<br>";
-            text += result[i];
-            if(i != (result.length-1)) {
-                text += "<br>";
+        let text = result.map(function(v) {
+            if("object" == typeof v) {
+                let error = Object.keys(v)[0];
+                let string = v[error];
+                if (response = string.match(/<IntuitResponse(?:.*|\n)*<\/IntuitResponse>/)) {
+                    let responsedoc = $(response[0]);
+                    string = responsedoc.find('Detail').text();
+                }
+                return string;
+            } else {
+                return v;
             }
-        }
+        }).join("<br />");
+        
         return text;
     }
 });
