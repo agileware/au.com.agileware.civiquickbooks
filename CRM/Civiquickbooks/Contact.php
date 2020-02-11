@@ -3,6 +3,8 @@
 require_once 'library/CustomException.php';
 require getComposerAutoLoadPath();
 
+use CRM_Civiquickbooks_ExtensionUtil as E;
+
 class CRM_Civiquickbooks_Contact {
 
   private $plugin = 'quickbooks';
@@ -136,11 +138,20 @@ class CRM_Civiquickbooks_Contact {
           try {
             $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
 
+            $dataService->throwExceptionOnError(FALSE);
+
             if ($QBOContact->Id) {
               $result = $dataService->Update($QBOContact);
             }
             else {
               $result = $dataService->Add($QBOContact);
+            }
+
+            if ($last_error = $dataService->getLastError()) {
+              $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
+
+              $account_contact['error_data'] = json_encode($error_message);
+              throw new Exception('"' . implode("\n", $error_message) . '"');
             }
 
             if($result) {
@@ -365,11 +376,18 @@ class CRM_Civiquickbooks_Contact {
     try {
       $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
 
+      $dataService->throwExceptionOnError(FALSE);
+
       $customers = $dataService->Query($query, 0, 1000);
+      if ($last_error = $dataService->getLastError()) {
+        $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
+
+        throw new Exception('"' . implode("\n", $error_message) . '"');
+      }
 
     }
     //process and analyse the response result from Quickbooks
-    catch(\QuickbooksOnline\API\Exception\IdsException $e) {
+    catch(Exception $e) {
       throw new CRM_Civiquickbooks_Contact_Exception('Error in customer pulling from QBs: ' . $e->getMessage(), 0);
     }
 

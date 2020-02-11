@@ -2,6 +2,8 @@
 
 require getComposerAutoLoadPath();
 
+use CRM_Civiquickbooks_ExtensionUtil as E;
+
 class CRM_Civiquickbooks_Invoice {
 
   // Flag if account is US
@@ -78,8 +80,16 @@ class CRM_Civiquickbooks_Invoice {
 
           $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
 
+          $dataService->throwExceptionOnError(FALSE);
+
           if ($accountsInvoice->Id) {
             $result = $dataService->Update($accountsInvoice);
+
+            if ($last_error = $dataService->getLastError()) {
+              $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
+
+              throw new Exception(json_encode($error_message));
+            }
 
             $this->savePushResponse($result, $record);
           }
@@ -94,14 +104,21 @@ class CRM_Civiquickbooks_Invoice {
           }
 
         } catch (Exception $e) {
-          $this_error = $errors[] = ts('Failed to store %1 with error %2.', array(
-            1 => $record['contribution_id'],
-            2 => $e->getMessage(),
-          ));
+          $messages = json_decode($e->getMessage());
 
-          civicrm_api3('AccountInvoice', 'create', [ 'id' => $record['id'], 'error_data' => json_encode (
-              [ date('c'), [ 'message' => 'CiviCRM: ' . $e->getMessage() ] ]
-          )]);
+          if (is_null($messages)) {
+            $messages = $e->getMessage();
+          }
+
+          $errors[] =$this_error = ts('Failed to store %1 with error %2.', [
+                       1 => $record['contribution_id'],
+                       2 => $messages,
+                     ]);
+
+          civicrm_api3('AccountInvoice', 'create', [
+              'id' => $record['id'],
+              'error_data' => json_encode([ date('c'), [ 'message' => $messages ] ]),
+            ]);
 
           CRM_Core_Error::debug_log_message($this_error);
         }
@@ -254,7 +271,15 @@ class CRM_Civiquickbooks_Invoice {
 
   protected function getInvoiceFromQBO($record) {
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+    $dataService->throwExceptionOnError(FALSE);
+
     $invoice = $dataService->FindById('invoice', $record['accounts_invoice_id']);
+
+    if ($last_error = $dataService->getLastError()) {
+        $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
+
+        throw new Exception('"' . implode("\n", $error_message) . '"');
+    }
 
     return $invoice;
   }
