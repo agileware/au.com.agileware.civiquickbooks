@@ -95,8 +95,6 @@ class CRM_Quickbooks_APIHelper {
 
     $dataService = \QuickBooksOnline\API\DataService\DataService::Configure($dataServiceParams);
 
-    $dataService->throwExceptionOnError(true);
-
     if (!$forRefreshToken) {
       self::$quickBooksAccountingDataService = $dataService;
       return self::$quickBooksAccountingDataService;
@@ -218,4 +216,49 @@ class CRM_Quickbooks_APIHelper {
     return $isTokenExpired;
   }
 
+  /* Helper Function to convert faults errors saved by the SDK into something
+     we can store in an Account* error_data */
+  public static function parseErrorResponse($error_response) {
+    // Start with a blank set of error messages.
+    $error_message = [];
+
+    // Quickbooks Online API seems to always send XML error messages, even when
+    // you query with JSON.  Parse into a document tree.
+    $response_doc = new DOMDocument();
+    if($response_doc->loadXML($error_response->getResponseBody())) {
+
+      // Error responses wrap (at least one) Error element.
+      $error_els = $response_doc->getElementsByTagName('Error');
+      foreach($error_els as $error) {
+
+        // Nice errors have a Detail element, which tends to render the possibly
+        // also present Message redundant.
+        if (($details = $error->getElementsByTagName('Detail'))->length > 0) {
+          for ($n = 0; $n < $details->length; $n++) {
+            $detail = $details->item($n);
+            $error_message[] = $detail->textContent;
+          }
+        }
+        // If there's no Detail, just use the Message
+        elseif(($messages = $error->getElementsByTagName('Message'))->length > 0) {
+          for ($n = 0; $n < $messages->length; $n++) {
+            $message = $messages->item($n);
+            $error_message[] = $message->textContent;
+          }
+        }
+        // Finally, the error might just have text in it.
+        else {
+          $error_message[] =& $error->textContent;
+        }
+      }
+    }
+
+    // If either the response was not XML, or was not in an XML format we
+    // expected, just put the code and response in as it has been.
+    if(!count($error_message)){
+      $error_message = [ $error_response->getHttpStatusCode() . ': [' . $error_response->getResponseBody() . ']' ];
+    }
+
+    return $error_message;
+  }
 }
