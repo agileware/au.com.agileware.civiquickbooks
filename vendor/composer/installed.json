@@ -1,17 +1,63 @@
 [
     {
-        "name": "quickbooks/v3-php-sdk",
-        "version": "v5.2.1",
-        "version_normalized": "5.2.1.0",
+        "name": "cweagans/composer-patches",
+        "version": "1.6.7",
+        "version_normalized": "1.6.7.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/intuit/QuickBooks-V3-PHP-SDK.git",
-            "reference": "ef3ddde325de97411e0052d3012d929f8d2d8b39"
+            "url": "https://github.com/cweagans/composer-patches.git",
+            "reference": "2e6f72a2ad8d59cd7e2b729f218bf42adb14f590"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/intuit/QuickBooks-V3-PHP-SDK/zipball/ef3ddde325de97411e0052d3012d929f8d2d8b39",
-            "reference": "ef3ddde325de97411e0052d3012d929f8d2d8b39",
+            "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/2e6f72a2ad8d59cd7e2b729f218bf42adb14f590",
+            "reference": "2e6f72a2ad8d59cd7e2b729f218bf42adb14f590",
+            "shasum": ""
+        },
+        "require": {
+            "composer-plugin-api": "^1.0",
+            "php": ">=5.3.0"
+        },
+        "require-dev": {
+            "composer/composer": "~1.0",
+            "phpunit/phpunit": "~4.6"
+        },
+        "time": "2019-08-29T20:11:49+00:00",
+        "type": "composer-plugin",
+        "extra": {
+            "class": "cweagans\\Composer\\Patches"
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "cweagans\\Composer\\": "src"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "BSD-3-Clause"
+        ],
+        "authors": [
+            {
+                "name": "Cameron Eagans",
+                "email": "me@cweagans.net"
+            }
+        ],
+        "description": "Provides a way to patch Composer packages."
+    },
+    {
+        "name": "quickbooks/v3-php-sdk",
+        "version": "v5.3.3",
+        "version_normalized": "5.3.3.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/intuit/QuickBooks-V3-PHP-SDK.git",
+            "reference": "63ab5ce9a6ae0f16ea137f89416d1537e6536f26"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/intuit/QuickBooks-V3-PHP-SDK/zipball/63ab5ce9a6ae0f16ea137f89416d1537e6536f26",
+            "reference": "63ab5ce9a6ae0f16ea137f89416d1537e6536f26",
             "shasum": ""
         },
         "require": {
@@ -26,8 +72,15 @@
             "ext-curl": "Uses Curl to make HTTP Requests",
             "guzzlehttp/guzzle": "Uses Guzzle to make HTTP Requests"
         },
-        "time": "2019-09-05T10:47:45+00:00",
+        "time": "2020-01-10T01:16:20+00:00",
         "type": "library",
+        "extra": {
+            "patches_applied": {
+                "Revert change “Set default use SSL to false”": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/280.patch",
+                "Rename bootrape.php to bootstrap.php": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/213.patch",
+                "adding missing use statement, removing invalid if condition check": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/270.patch"
+            }
+        },
         "installation-source": "dist",
         "autoload": {
             "psr-4": {
