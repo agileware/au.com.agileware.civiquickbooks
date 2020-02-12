@@ -7,6 +7,10 @@ namespace Composer\Autoload;
 class ComposerStaticInit903dbff61e82dffd8f13e8f8eee503f0
 {
     public static $prefixLengthsPsr4 = array (
+        'c' => 
+        array (
+            'cweagans\\Composer\\' => 18,
+        ),
         'Q' => 
         array (
             'QuickBooksOnline\\API\\' => 21,
@@ -14,6 +18,10 @@ class ComposerStaticInit903dbff61e82dffd8f13e8f8eee503f0
     );
 
     public static $prefixDirsPsr4 = array (
+        'cweagans\\Composer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cweagans/composer-patches/src',
+        ),
         'QuickBooksOnline\\API\\' => 
         array (
             0 => __DIR__ . '/..' . '/quickbooks/v3-php-sdk/src',

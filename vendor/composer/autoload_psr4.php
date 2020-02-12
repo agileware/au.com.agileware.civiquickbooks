@@ -6,5 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'cweagans\\Composer\\' => array($vendorDir . '/cweagans/composer-patches/src'),
     'QuickBooksOnline\\API\\' => array($vendorDir . '/quickbooks/v3-php-sdk/src'),
 );
