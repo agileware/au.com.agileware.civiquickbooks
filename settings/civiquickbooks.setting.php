@@ -139,6 +139,24 @@ return array(
     ),
     'quick_form_type' => 'Element',
   ),
+  'quickbooks_invoice_prefix' => array(
+    'group_name' => E::ts('QuickBooks Online Settings'),
+    'group' => 'civiquickbooks',
+    'name' => 'quickbooks_invoice_prefix',
+    'type' => 'String',
+    'add' => '2.7', // this is the civiquickboks version number where this was added
+    'default' => 'Civi-',
+    'title' => E::ts('Invoice Prefix'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => E::ts('Will be prefixed to Transaction ID when creating an invoices in QBO.'),
+    'help_text' => E::ts('Will be prefixed to Transaction ID when creating an invoice in QBO.'),
+    'html_type' => 'Text',
+    'html_attributes' => array(
+      'size' => 10,
+    ),
+    'quick_form_type' => 'Element',
+  ),
   'quickbooks_realmId' => array(
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',
