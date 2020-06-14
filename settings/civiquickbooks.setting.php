@@ -163,7 +163,7 @@ return array(
     'name' => 'quickbooks_use_deposit_accounts',
     'type' => 'Boolean',
     'add' => '2.7', // this is the civiquickboks version number where this was added
-    'default' => '0',
+    'default' => 0,
     'title' => E::ts('Use Deposit Accounts?'),
     'is_domain' => 1,
     'is_contact' => 0,
@@ -178,7 +178,7 @@ return array(
     'name' => 'quickbooks_add_fee_lines',
     'type' => 'Boolean',
     'add' => '2.7', // this is the civiquickboks version number where this was added
-    'default' => '0',
+    'default' => 0,
     'title' => E::ts('Add Fee Lines?'),
     'is_domain' => 1,
     'is_contact' => 0,

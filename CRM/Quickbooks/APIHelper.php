@@ -60,7 +60,7 @@ class CRM_Quickbooks_APIHelper {
       'state' => json_encode($stateToken),
   ));
 
-    self::$quickBooksDataService.setLogLocation($logLocation);
+    self::$quickBooksDataService->setLogLocation($logLocation);
 
     return self::$quickBooksDataService;
   }
