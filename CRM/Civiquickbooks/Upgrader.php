@@ -138,4 +138,14 @@ class CRM_Civiquickbooks_Upgrader extends CRM_Civiquickbooks_Upgrader_Base {
 
     return true;
   }
+  public function upgrade_20204() {
+    $this->ctx->log->info('Setting defaults on new settings for compatibility.');
+
+    civicrm_api3('Setting', 'create', [ 'quickbooks_invoice_preference' => 'Civi-' ]);
+    civicrm_api3('Setting', 'create', [ 'quickbooks_log_dir' => '/tmp/IdsLogs' ]);
+    civicrm_api3('Setting', 'create', [ 'quickbooks_use_deposit_accounts' => '0' ]);
+    civicrm_api3('Setting', 'create', [ 'quickbooks_add_fee_lines' => '0' ]);
+
+    return true;
+  }
 }

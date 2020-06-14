@@ -169,7 +169,7 @@ return array(
     'is_contact' => 0,
     'description' => E::ts('If selected, payments will be recorded against Financial Account specified for Payment Processor instead of Undeposited Funds.'),
     'help_text' => E::ts('If selected, payments will be recorded against Financial Account specified for Payment Processor instead of Undeposited Funds.'),
-    'html_type' => 'Checkbox',
+    'html_type' => 'checkbox',
     'quick_form_type' => 'Element',
   ),
   'quickbooks_add_fee_lines' => array(
@@ -183,7 +183,7 @@ return array(
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => E::ts('If selected, line items will be created for payment processor fees.'),
-    'help_text' => Null,
+    'help_text' => E::ts('If selected, line items will be created for payment processor fees.'),
     'html_type' => 'checkbox',
     'quick_form_type' => 'Element',
   ),
@@ -201,7 +201,7 @@ return array(
     'help_text' => E::ts('Absolute path to writable file system directory for QBO logs.'),
     'html_type' => 'Text',
     'html_attributes' => array(
-      'size' => 10,
+      'size' => 30,
     ),
     'quick_form_type' => 'Element',
   ),
