@@ -195,6 +195,7 @@ class CRM_Civiquickbooks_Invoice {
     $result = [];
 
     foreach($payments['values'] as $payment) {
+      $financial_account_for_payment = civicrm_api3("Account", "getsingle", ['id' => $payment['to_financial_account_id']]);
       $txnDate = $payment['trxn_date'];
       $total = sprintf('%.5f', $payment['total_amount']);
       $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create(
@@ -202,6 +203,7 @@ class CRM_Civiquickbooks_Invoice {
           'TotalAmt' => $total,
           'CustomerRef' => $account_invoice->CustomerRef,
           'CurrencyRef' => $account_invoice->CurrencyRef,
+          'DepositToAccountRef' => ['name' => $financial_account_for_payment['name']],
           'TxnDate' => $txnDate,
           'Line' => [
             'Amount' => $total,
