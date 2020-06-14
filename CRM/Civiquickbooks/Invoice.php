@@ -612,9 +612,19 @@ class CRM_Civiquickbooks_Invoice {
       //looping through all line items and create an array that contains all necessary info for each line item.
       foreach ($db_line_items['values'] as $id => $line_item) {
         $line_item_description = str_replace(array('&nbsp;'), ' ', $line_item['label']);
+        $acctg_code = $line_item['acctgCode'];
+        $class_code = Null;
+        $class_ref = Null;
+
+        if (strlen($class_delimiter) > 0 && strpos($acctg_code, $class_delimiter) !== false) {
+            [$acctg_code, $class_code] = split($class_delimiter, $acctg_code);
+        }
 
         try {
-          $line_item_ref = self::getItem($line_item['acctgCode']);
+          $line_item_ref = self::getItem($acctg_code);
+          if ($class_code != Null) {
+              $class_ref = self.getQBOClass($class_code);
+          }
         } catch (Exception $e) {
           $item_errormsg[] = ts(
             'No matching Item for accounting code "%1" (financial type %2) - %3',
@@ -662,7 +672,11 @@ class CRM_Civiquickbooks_Invoice {
               'value' => $line_item_tax_ref,
             ),
           ),
-        );
+      );
+
+        if ($class_ref != Null) {
+            $tmp['SalesItemLineDetail']['ClassRef'] = ["value" => $class_ref];
+        }
 
         $line_items[] = $tmp;
         $i += 1;
@@ -680,6 +694,11 @@ class CRM_Civiquickbooks_Invoice {
 
       $invoice_prefix = civicrm_api3('Setting', 'getvalue', array(
         'name' => "quickbooks_invoice_prefix",
+        'group' => 'QuickBooks Online Settings',
+    ));
+
+      $class_delimiter = civicrm_api3('Setting', 'getvalue', array(
+        'name' => "quickbooks_class_delimiter",
         'group' => 'QuickBooks Online Settings',
       ));
 
@@ -775,6 +794,36 @@ class CRM_Civiquickbooks_Invoice {
 
       if(empty($result)) {
         throw new Exception("No Product found matching $name");
+      }
+
+      $items[$name] = $result[0]->Id;
+    }
+
+    return $items[$name];
+  }
+
+  /**
+   * Get class id from QBO by Name or FullyQualifiedName
+   *
+   * @param $name - Name or FullyQualifiedName of Class.
+   *                Assumes FullyQualifiedName if containing a colon (:)
+   *
+   * @return int|FALSE
+   * @throws \CiviCRM_API3_Exception
+   * @throws \QuickBooksOnline\API\Exception\SdkException
+   */
+  public static function getQBOClass($name) {
+    $items =& \Civi::$statics[__CLASS__][__FUNCTION__];
+
+    if(!isset($items[$name])) {
+      $field = (strpos($name, ':') === FALSE) ? 'Name' : 'FullyQualifiedName';
+      $query = sprintf('SELECT %1$s,Id From Class WHERE %1$s = \'%2$s\'', $field, $name);
+
+      $dataService= CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+      $result = $dataService->Query($query,0,1);
+
+      if(empty($result)) {
+        throw new Exception("No Class found matching $name");
       }
 
       $items[$name] = $result[0]->Id;
