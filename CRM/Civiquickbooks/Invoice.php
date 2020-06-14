@@ -600,6 +600,11 @@ class CRM_Civiquickbooks_Invoice {
         'sequential' => 1,
         'name' => 'contribution_invoice_settings',
         'group_name' => 'Contribute Preferences',
+    ));
+
+      $invoice_prefix = civicrm_api3('Setting', 'getvalue', array(
+        'name' => "quickbooks_invoice_prefix",
+        'group' => 'QuickBooks Online Settings',
       ));
 
       if (!empty($invoice_settings['due_date']) && !empty($invoice_settings['due_date_period'])) {
@@ -627,7 +632,7 @@ class CRM_Civiquickbooks_Invoice {
       $new_invoice += array(
         'TxnDate' => $receive_date,
         'DueDate' => $due_date,
-        'DocNumber' => 'Civi-' . $db_contribution['id'],
+        'DocNumber' => $invoice_prefix . $db_contribution['id'],
         'CustomerMemo' => array(
           'value' => $db_contribution['contribution_source'],
         ),
