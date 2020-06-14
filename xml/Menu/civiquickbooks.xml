@@ -24,11 +24,4 @@
         <page_callback>CRM_Civiquickbooks_Page_AJAX::invoiceSyncErrors</page_callback>
         <access_arguments>access CiviCRM</access_arguments>
     </item>
-    <item>
-        <path>civicrm/admin/setting/preferences/multisite</path>
-        <title>Multi Site Settings</title>
-        <page_callback>CRM_Admin_Form_Generic</page_callback>
-        <adminGroup>System Settings</adminGroup>
-        <weight>130</weight>
-    </item>
 </menu>
