@@ -4,16 +4,15 @@
         <path>civicrm/quickbooks/OAuth</path>
         <page_callback>CRM_Civiquickbooks_Page_OAuthQBO</page_callback>
         <title>QuickBooks Online Authentication</title>
-        <!-- The access permission type should be for just administrators, as they need to login first to access to the form page.
-         On that page they could have redirect button to the OAuth page, so they have already loggedin. So we do not need the public accessing token anymore. -->
+            <!-- The access permission type should be for just administrators, as they need to login first to access to the form page.
+            On that page they could have redirect button to the OAuth page, so they have already loggedin. So we do not need the public accessing token anymore. -->
         <access_arguments>access CiviCRM</access_arguments>
     </item>
     <item>
-        <path>civicrm/admin/setting/preferences/multisite</path>
-        <title>Multi Site Settings</title>
-        <page_callback>CRM_Admin_Form_Generic</page_callback>
-        <adminGroup>System Settings</adminGroup>
-        <weight>130</weight>
+        <path>civicrm/quickbooks/settings</path>
+        <page_callback>CRM_Civiquickbooks_Form_Settings</page_callback>
+        <title>QuickBooks Online Settings</title>
+        <access_arguments>access CiviCRM</access_arguments>
     </item>
     <item>
         <path>civicrm/ajax/civiquickbooks/sync/contact/errors</path>
@@ -24,5 +23,12 @@
         <path>civicrm/ajax/civiquickbooks/sync/invoice/errors</path>
         <page_callback>CRM_Civiquickbooks_Page_AJAX::invoiceSyncErrors</page_callback>
         <access_arguments>access CiviCRM</access_arguments>
+    </item>
+    <item>
+        <path>civicrm/admin/setting/preferences/multisite</path>
+        <title>Multi Site Settings</title>
+        <page_callback>CRM_Admin_Form_Generic</page_callback>
+        <adminGroup>System Settings</adminGroup>
+        <weight>130</weight>
     </item>
 </menu>

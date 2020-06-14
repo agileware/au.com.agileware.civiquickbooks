@@ -62,7 +62,9 @@ class CRM_Quickbooks_APIHelper {
   ));
 
     self::$quickBooksDataService->setLogLocation($logLocation);
-    self::$quickBooksDataService->setLogStatus($logActivated);
+    if (!$logActivated) {
+        self::$quickBooksDataService->disableLog();
+    }
 
     return self::$quickBooksDataService;
   }
