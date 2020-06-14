@@ -163,16 +163,13 @@ return array(
     'name' => 'quickbooks_use_deposit_accounts',
     'type' => 'String',
     'add' => '2.7', // this is the civiquickboks version number where this was added
-    'default' => 'Civi-',
+    'default' => false,
     'title' => E::ts('Use Deposit Accounts?'),
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => E::ts('If selected, payments will be recorded against Financial Account specified for Payment Processor instead of Undeposited Funds.'),
     'help_text' => E::ts('If selected, payments will be recorded against Financial Account specified for Payment Processor instead of Undeposited Funds.'),
     'html_type' => 'Checkbox',
-    'html_attributes' => array(
-      'size' => 10,
-    ),
     'quick_form_type' => 'Element',
   ),
   'quickbooks_log_dir' => array(
