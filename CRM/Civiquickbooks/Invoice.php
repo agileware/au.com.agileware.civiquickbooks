@@ -590,12 +590,12 @@ class CRM_Civiquickbooks_Invoice {
       } // end of loop collecting accounting codes for each line item
 
       // Add another line item to invoice to reflect payment processing fees, if option selected
-      if ($do_add_fee_lines) {
-          $value = (-1) * $db_contribution['fee_amount'];
+      $fee_value = $db_contribution['fee_amount'];
+      if ($do_add_fee_lines and $fee_value != 0) {
           $db_line_items['values'][$next_id]  = [
-              "qty" => $value,
+              "qty" => (-1) * $fee_value,
               "unit_price" => 1,
-              "line_total" => $value,
+              "line_total" => (-1) * $fee_value,
               "acctgCode" => $fee_acctg_code,
               "financial_type_id" => $first_financial_type_id
           ];

@@ -157,6 +157,24 @@ return array(
     ),
     'quick_form_type' => 'Element',
   ),
+  'quickbooks_class_delimiter' => array(
+    'group_name' => E::ts('QuickBooks Online Settings'),
+    'group' => 'civiquickbooks',
+    'name' => 'quickbooks_class_delimiter',
+    'type' => 'String',
+    'add' => '2.7', // this is the civiquickboks version number where this was added
+    'default' => Null,
+    'title' => E::ts('Class Code Delimiter'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => E::ts('If set, and if present in AcctgCode field, delimiter will be used to split AcctgCode entry into Product Name and QBO Class Name.'),
+    'help_text' => E::ts('If set, and if present in AcctgCode field, delimiter will be used to split AcctgCode entry into Product Name and QBO Class Name.'),
+    'html_type' => 'Text',
+    'html_attributes' => array(
+      'size' => 10,
+    ),
+    'quick_form_type' => 'Element',
+  ),
   'quickbooks_use_deposit_accounts' => array(
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',

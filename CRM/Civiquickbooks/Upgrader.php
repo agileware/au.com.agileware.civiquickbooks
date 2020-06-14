@@ -155,4 +155,11 @@ class CRM_Civiquickbooks_Upgrader extends CRM_Civiquickbooks_Upgrader_Base {
 
     return true;
   }
+  public function upgrade_20206() {
+    $this->ctx->log->info('Setting defaults on class code delimiter for compatibility.');
+
+    civicrm_api3('Setting', 'create', [ 'quickbooks_class_delimiter' => Null ]);
+
+    return true;
+  }
 }
