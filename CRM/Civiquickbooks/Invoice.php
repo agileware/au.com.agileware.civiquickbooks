@@ -194,12 +194,29 @@ class CRM_Civiquickbooks_Invoice {
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $result = [];
 
+    $use_deposit_accounts = civicrm_api3('Setting', 'getvalue', array(
+        'name' => "quickbooks_use_deposit_accounts",
+        'group' => 'QuickBooks Online Settings',
+    ));
+
+    $do_add_fee_lines = civicrm_api3('Setting', 'getvalue', array(
+        'name' => "quickbooks_add_fee_lines",
+        'group' => 'QuickBooks Online Settings',
+    ));
+
     foreach($payments['values'] as $payment) {
-      $financial_account_for_payment = civicrm_api3("FinancialAccount", "getsingle", ['id' => $payment['to_financial_account_id']]);
-      $txnDate = $payment['trxn_date'];
-      $total = sprintf('%.5f', $payment['total_amount']);
-      $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create(
-        [
+        $txnDate = $payment['trxn_date'];
+
+      // This might need to be a separate setting, but, if we deduct fees
+      // from our invoice, we probably also want to only record the net
+      // amount as payment.
+      if ($do_add_fee_lines) {
+          $total = sprintf('%.5f', $payment['net_amount']);
+      } else {
+          $total = sprintf('%.5f', $payment['total_amount']);
+      }
+
+      $QBOPaymentInfo = [
           'TotalAmt' => $total,
           'CustomerRef' => $account_invoice->CustomerRef,
           'CurrencyRef' => $account_invoice->CurrencyRef,
@@ -211,20 +228,16 @@ class CRM_Civiquickbooks_Invoice {
               'TxnId' => $account_invoice->Id,
             ]],
           ],
-        ]
-    );
-
-      $use_deposit_accounts = civicrm_api3('Setting', 'getvalue', array(
-          'name' => "quickbooks_use_deposit_accounts",
-          'group' => 'QuickBooks Online Settings',
-      ));
+        ];
 
       if ($use_deposit_accounts) {
-          $QBOPayment['DepositToAccountRef'] = [
+          $financial_account_for_payment = civicrm_api3("FinancialAccount", "getsingle", ['id' => $payment['to_financial_account_id']]);
+          $QBOPaymentInfo['DepositToAccountRef'] = [
               'name' => $financial_account_for_payment['name'],
-              'value' => $financial_account_for_payment['acctg_code']
+              'value' => $financial_account_for_payment['accounting_code']
           ];
       }
+      $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create($QBOPaymentInfo);
       $result[] = $dataService->Add($QBOPayment);
     }
 
@@ -405,6 +418,9 @@ class CRM_Civiquickbooks_Invoice {
         'contribution_status_id',
         'receive_date',
         'contribution_source',
+        'total_amount',
+        'fee_amount',
+        'net_amount'
       ),
       'id' => $contributionID,
     ));
@@ -458,12 +474,19 @@ class CRM_Civiquickbooks_Invoice {
     $new_invoice = array();
     $contri_status_in_lower = strtolower($db_contribution['status']);
 
+    // FIXME if this is costly, move into push function and pass as param to mapToAccounts
+    $do_add_fee_lines = civicrm_api3('Setting', 'getvalue', array(
+        'name' => "quickbooks_add_fee_lines",
+        'group' => 'QuickBooks Online Settings',
+    ));
+
     //those contributions we care
     $status_array = array('pending', 'completed', 'partially paid');
 
     $contributionID = $db_contribution['id'];
 
     if (in_array($contri_status_in_lower, $status_array)) {
+        // Assemble line items for contribution
       $db_line_items = civicrm_api3('LineItem', 'get', array(
         'contribution_id' => $contributionID,
       ));
@@ -490,8 +513,17 @@ class CRM_Civiquickbooks_Invoice {
 
       $tax_codes = array();
 
+
+      // For now, assuming the first line item's fee account applies to total balacnce.
+      // If anyone wants to use different fee accounts per financial type,
+      // then this can be changed and the fee prorated by total.
+      $first_financial_type_id = Null;
+      $fee_acctg_code = NULL;
+
+      $next_id = Null;
       //Collect all accounting codes for all line items
       foreach ($db_line_items['values'] as $id => $line_item) {
+        $next_id = $id + 1;
         //get Inc Account accounting code if it is not collected previously
         if (!isset($item_ref_codes[$line_item['financial_type_id']])) {
           $tmp = htmlspecialchars_decode(CRM_Financial_BAO_FinancialAccount::getAccountingCode($line_item['financial_type_id']));
@@ -532,10 +564,40 @@ class CRM_Civiquickbooks_Invoice {
           }
         }
 
-        $db_line_items['values'][$id]['sale_tax_acctgCode'] = $tax_types[$line_item['financial_type_id']]['sale_tax_acctgCode'];
+        //get Fee Account accounting code if it is not collected previously
+        if (is_null($fee_acctg_code)) {
+            $first_financial_type_id = $line_item['financial_type_id'];
+          try {
+            $result = civicrm_api3('EntityFinancialAccount', 'getsingle', array(
+              'sequential' => 1,
+              'return' => array("financial_account_id"),
+              'entity_id' => $line_item['financial_type_id'],
+              'entity_table' => "civicrm_financial_type",
+              'account_relationship' => "Expense Account is",
+            ));
 
-        // We will use account type code to get state tax code id for US companies
-        $db_line_items['values'][$id]['sale_tax_account_type_code'] = $tax_types[$line_item['financial_type_id']]['sale_tax_account_type_code'];
+            $result = civicrm_api3('FinancialAccount', 'getsingle', array(
+              'sequential' => 1,
+              'id' => $result['financial_account_id'],
+          ));
+
+            $fee_acctg_code = htmlspecialchars_decode($result['accounting_code']);
+          } catch (CiviCRM_API3_Exception $e) {
+
+          }
+        }
+      } // end of loop collecting accounting codes for each line item
+
+      // Add another line item to invoice to reflect payment processing fees, if option selected
+      if ($do_add_fee_lines) {
+          $value = (-1) * $db_contribution['fee_amount'];
+          $db_line_items['values'][$next_id]  = [
+              "qty" => $value,
+              "unit_price" => 1,
+              "line_total" => $value,
+              "acctgCode" => $fee_acctg_code,
+              "financial_type_id" => $first_financial_type_id
+          ];
       }
 
       $i = 1;
