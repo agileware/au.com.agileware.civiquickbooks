@@ -183,8 +183,8 @@ return array(
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => E::ts('If selected, line items will be created for payment processor fees.'),
-    'help_text' => E::ts('If selected, line items will be created for payment processor fees.'),
-    'html_type' => 'Checkbox',
+    'help_text' => Null,
+    'html_type' => 'checkbox',
     'quick_form_type' => 'Element',
   ),
   'quickbooks_log_dir' => array(
