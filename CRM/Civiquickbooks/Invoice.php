@@ -632,7 +632,7 @@ class CRM_Civiquickbooks_Invoice {
       $new_invoice += array(
         'TxnDate' => $receive_date,
         'DueDate' => $due_date,
-        'DocNumber' => $invoice_prefix . $db_contribution['id'],
+        'DocNumber' => $invoice_prefix . sprintf("%06d", $db_contribution['id']),
         'CustomerMemo' => array(
           'value' => $db_contribution['contribution_source'],
         ),
