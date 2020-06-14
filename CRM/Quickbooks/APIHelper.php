@@ -42,6 +42,8 @@ class CRM_Quickbooks_APIHelper {
 
     $clientID = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_consumer_key"));
     $clientSecret = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_shared_secret"));
+    $logLocation = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_log_dir"));
+
 
     $stateToken = array(
       'state_token' => $stateTokenValue,
@@ -56,7 +58,9 @@ class CRM_Quickbooks_APIHelper {
       'scope' => "com.intuit.quickbooks.accounting",
       'response_type' => 'code',
       'state' => json_encode($stateToken),
-    ));
+  ));
+
+    self::$quickBooksDataService.setLogLocation($logLocation);
 
     return self::$quickBooksDataService;
   }

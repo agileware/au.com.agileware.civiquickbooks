@@ -157,6 +157,42 @@ return array(
     ),
     'quick_form_type' => 'Element',
   ),
+  'quickbooks_use_deposit_accounts' => array(
+    'group_name' => E::ts('QuickBooks Online Settings'),
+    'group' => 'civiquickbooks',
+    'name' => 'quickbooks_use_deposit_accounts',
+    'type' => 'String',
+    'add' => '2.7', // this is the civiquickboks version number where this was added
+    'default' => 'Civi-',
+    'title' => E::ts('Use Deposit Accounts?'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => E::ts('If selected, payments will be recorded against Financial Account specified for Payment Processor instead of Undeposited Funds.'),
+    'help_text' => E::ts('If selected, payments will be recorded against Financial Account specified for Payment Processor instead of Undeposited Funds.'),
+    'html_type' => 'Checkbox',
+    'html_attributes' => array(
+      'size' => 10,
+    ),
+    'quick_form_type' => 'Element',
+  ),
+  'quickbooks_log_dir' => array(
+    'group_name' => E::ts('QuickBooks Online Settings'),
+    'group' => 'civiquickbooks',
+    'name' => 'quickbooks_log_dir',
+    'type' => 'String',
+    'add' => '2.7', // this is the civiquickboks version number where this was added
+    'default' => '/tmp/IdsLogs',
+    'title' => E::ts('QBO Log Directory'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => E::ts('Absolute path to writable file system directory for QBO logs.'),
+    'help_text' => E::ts('Absolute path to writable file system directory for QBO logs.'),
+    'html_type' => 'Text',
+    'html_attributes' => array(
+      'size' => 10,
+    ),
+    'quick_form_type' => 'Element',
+  ),
   'quickbooks_realmId' => array(
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',

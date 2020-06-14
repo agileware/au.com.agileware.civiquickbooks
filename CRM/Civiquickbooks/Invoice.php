@@ -195,7 +195,7 @@ class CRM_Civiquickbooks_Invoice {
     $result = [];
 
     foreach($payments['values'] as $payment) {
-      $financial_account_for_payment = civicrm_api3("Account", "getsingle", ['id' => $payment['to_financial_account_id']]);
+      $financial_account_for_payment = civicrm_api3("FinancialAccount", "getsingle", ['id' => $payment['to_financial_account_id']]);
       $txnDate = $payment['trxn_date'];
       $total = sprintf('%.5f', $payment['total_amount']);
       $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create(
@@ -203,7 +203,6 @@ class CRM_Civiquickbooks_Invoice {
           'TotalAmt' => $total,
           'CustomerRef' => $account_invoice->CustomerRef,
           'CurrencyRef' => $account_invoice->CurrencyRef,
-          'DepositToAccountRef' => ['value' => 1432],
           'TxnDate' => $txnDate,
           'Line' => [
             'Amount' => $total,
@@ -213,7 +212,19 @@ class CRM_Civiquickbooks_Invoice {
             ]],
           ],
         ]
-      );
+    );
+
+      $use_deposit_accounts = civicrm_api3('Setting', 'getvalue', array(
+          'name' => "quickbooks_use_deposit_accounts",
+          'group' => 'QuickBooks Online Settings',
+      ));
+
+      if ($use_deposit_accounts) {
+          $QBOPayment['DepositToAccountRef'] = [
+              'name' => $financial_account_for_payment['name'],
+              'value' => $financial_account_for_payment['acctg_code']
+          ];
+      }
       $result[] = $dataService->Add($QBOPayment);
     }
 
