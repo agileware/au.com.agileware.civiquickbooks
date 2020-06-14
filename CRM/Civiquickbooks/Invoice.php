@@ -203,7 +203,7 @@ class CRM_Civiquickbooks_Invoice {
           'TotalAmt' => $total,
           'CustomerRef' => $account_invoice->CustomerRef,
           'CurrencyRef' => $account_invoice->CurrencyRef,
-          'DepositToAccountRef' => ['name' => $financial_account_for_payment['name']],
+          'DepositToAccountRef' => ['value' => 1432],
           'TxnDate' => $txnDate,
           'Line' => [
             'Amount' => $total,
