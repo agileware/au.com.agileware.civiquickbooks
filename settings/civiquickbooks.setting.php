@@ -205,6 +205,21 @@ return array(
     ),
     'quick_form_type' => 'Element',
   ),
+  'quickbooks_activate_qbo_logging' => array(
+    'group_name' => E::ts('QuickBooks Online Settings'),
+    'group' => 'civiquickbooks',
+    'name' => 'quickbooks_activate_qbo_logging',
+    'type' => 'Boolean',
+    'add' => '2.7', // this is the civiquickboks version number where this was added
+    'default' => 0,
+    'title' => E::ts('Activate QBO logging?'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => E::ts('If selected, QBO will log potentially sensitive data to the QBO Log Directory.'),
+    'help_text' => E::ts('If selected, QBO will log potentially sensitive data to the QBO Log Directory.'),
+    'html_type' => 'checkbox',
+    'quick_form_type' => 'Element',
+  ),
   'quickbooks_realmId' => array(
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',

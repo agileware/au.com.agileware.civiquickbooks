@@ -139,10 +139,22 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
   public function saveSettings() {
     $settings = $this->getFormSettings();
     $values = array_intersect_key($this->_submittedValues, $settings);
+
+    // Fix for unsetting a checkbox. When setting a checkbox,
+    // quickbooks_bool_value => 1 is returned. But when unsetting a checkbox,
+    // quickbooks_bool_value => 0 is NOT returned. Absence of a checkbox
+    // attribute should be interpreted as setting its value to 0.
+    foreach ($settings as $setting_name => $setting_info) {
+        if ($setting_info['type'] == "Boolean" && !array_key_exists($setting_name, $values)) {
+            $values[$setting_name] = 0;
+        }
+    }
+
     $previousValues = CRM_Quickbooks_APIHelper::getQuickBooksCredentials();
 
     civicrm_api3('setting', 'create', $values);
 
+    // FIXME this erases valid access tokens any time settings are saved
     if ($previousValues['clientID'] != 'quickbooks_consumer_key' || $previousValues['clientSecret'] != 'quickbooks_shared_secret') {
       civicrm_api3(
         'setting', 'create', array(

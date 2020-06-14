@@ -43,6 +43,7 @@ class CRM_Quickbooks_APIHelper {
     $clientID = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_consumer_key"));
     $clientSecret = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_shared_secret"));
     $logLocation = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_log_dir"));
+    $logActivated = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_activate_qbo_logging"));
 
 
     $stateToken = array(
@@ -61,6 +62,7 @@ class CRM_Quickbooks_APIHelper {
   ));
 
     self::$quickBooksDataService->setLogLocation($logLocation);
+    self::$quickBooksDataService->setLogStatus($logActivated);
 
     return self::$quickBooksDataService;
   }
