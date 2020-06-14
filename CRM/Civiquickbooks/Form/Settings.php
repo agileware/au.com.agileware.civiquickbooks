@@ -150,12 +150,14 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
         }
     }
 
-    $previousValues = CRM_Quickbooks_APIHelper::getQuickBooksCredentials();
-
     civicrm_api3('setting', 'create', $values);
 
-    // FIXME this erases valid access tokens any time settings are saved
-    if ($previousValues['clientID'] != 'quickbooks_consumer_key' || $previousValues['clientSecret'] != 'quickbooks_shared_secret') {
+    $currentCredentials = CRM_Quickbooks_APIHelper::getQuickBooksCredentials();
+    $clientIDChanged = $currentCredentials['clientID'] != $settings['quickbooks_consumer_key'];
+    $clientSecretChanged = $currentCredentials['clientSecret'] != $settings['quickbooks_shared_secret'];
+
+    if ($clientIDChanged || $clientSecretChanged) {
+      // invalidate anything that depended on the old Client ID or Shared Secret
       civicrm_api3(
         'setting', 'create', array(
           "quickbooks_access_token" => '',
