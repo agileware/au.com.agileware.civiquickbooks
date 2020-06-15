@@ -475,10 +475,14 @@ class CRM_Civiquickbooks_Invoice {
     $new_invoice = array();
     $contri_status_in_lower = strtolower($db_contribution['status']);
 
-    // FIXME if this is costly, move into push function and pass as param to mapToAccounts
     $do_add_fee_lines = civicrm_api3('Setting', 'getvalue', array(
         'name' => "quickbooks_add_fee_lines",
         'group' => 'QuickBooks Online Settings',
+    ));
+
+    $class_delimiter = civicrm_api3('Setting', 'getvalue', array(
+      'name' => "quickbooks_class_delimiter",
+      'group' => 'QuickBooks Online Settings',
     ));
 
     //those contributions we care
@@ -609,6 +613,7 @@ class CRM_Civiquickbooks_Invoice {
 
       $tax_errormsg = [];
 
+      $first_row_class_ref = Null;
       //looping through all line items and create an array that contains all necessary info for each line item.
       foreach ($db_line_items['values'] as $id => $line_item) {
         $line_item_description = str_replace(array('&nbsp;'), ' ', $line_item['label']);
@@ -616,14 +621,20 @@ class CRM_Civiquickbooks_Invoice {
         $class_code = Null;
         $class_ref = Null;
 
+
         if (strlen($class_delimiter) > 0 && strpos($acctg_code, $class_delimiter) !== false) {
-            [$acctg_code, $class_code] = split($class_delimiter, $acctg_code);
+            list($acctg_code, $class_code) = explode($class_delimiter, $acctg_code);
         }
 
         try {
           $line_item_ref = self::getItem($acctg_code);
           if ($class_code != Null) {
-              $class_ref = self.getQBOClass($class_code);
+              $class_ref = self::getQBOClass($class_code);
+              if ($first_row_class_ref == Null) {
+                  $first_row_class_ref = $class_ref;
+              }
+          } elseif ($line_item['acctgCode'] == $fee_acctg_code) {
+              $class_ref = $first_row_class_ref;
           }
         } catch (Exception $e) {
           $item_errormsg[] = ts(
@@ -696,11 +707,6 @@ class CRM_Civiquickbooks_Invoice {
         'name' => "quickbooks_invoice_prefix",
         'group' => 'QuickBooks Online Settings',
     ));
-
-      $class_delimiter = civicrm_api3('Setting', 'getvalue', array(
-        'name' => "quickbooks_class_delimiter",
-        'group' => 'QuickBooks Online Settings',
-      ));
 
       if (!empty($invoice_settings['due_date']) && !empty($invoice_settings['due_date_period'])) {
         $time_adjust_str = '+' . $invoice_settings['due_date'] . ' ' . $invoice_settings['due_date_period'];
