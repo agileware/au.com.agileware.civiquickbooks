@@ -352,6 +352,14 @@ class CRM_Civiquickbooks_Contact {
       ),
     );
 
+    // This sets the company name field for Individuals to be their current
+    // employer (if the contact has a current employer). Presumbably contacts of
+    // the type "Individual" will never have an "organization_name" as that
+    // field is for contacts of the type "Organization"
+    if ($contact['contact_type'] == 'Individual' && !empty($contact['current_employer']) && empty($contact['organization_name'])) {
+      $customer["CompanyName"] = $contact['current_employer'];
+    }
+
     if (isset($accountsID)) {
       if (isset($customer_data)) {
         //NOTE here the customer_data is deserialized as an array.
