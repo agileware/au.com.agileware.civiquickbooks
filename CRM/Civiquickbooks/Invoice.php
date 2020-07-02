@@ -614,7 +614,18 @@ class CRM_Civiquickbooks_Invoice {
 
       // check the setting 'Where should Invoice Numbers be generated?' and
       // populate the new invoice accordingly
-      $whereToGetInvoiceNumber = $this->getSetting('quickbooks_autogenerate_invoice_number');
+      try {
+        $whereToGetInvoiceNumber = civicrm_api3('Setting', 'getvalue', array(
+          'name' => 'quickbooks_autogenerate_invoice_number',
+          'group' => 'QuickBooks Online Settings',
+        ));
+      }
+      catch (Exception $e) {
+        throw new CiviCRM_API3_Exception(
+          E::ts('Error getting Invoice generation setting %1', [1 => $e->getMessage()]),
+          'qbo_invoice_creation'
+        );
+      }
 
       if ($whereToGetInvoiceNumber == 'civi') {
         $new_invoice['DocNumber'] = 'Civi-' . $db_contribution['id'];
@@ -629,13 +640,34 @@ class CRM_Civiquickbooks_Invoice {
         'quickbooks_allow_ach' => 'AllowOnlineACHPayment',
       ];
       foreach ($onlinePaymentOptions as $settingNameInCivi => $qbParam) {
-        $allowCC = $this->getSetting($settingNameInCivi);
+        try {
+          $allowCC = civicrm_api3('Setting', 'getvalue', array(
+            'name' => $settingNameInCivi,
+            'group' => 'QuickBooks Online Settings',
+          ));
+        }
+        catch (Exception $e) {
+          throw new CiviCRM_API3_Exception(
+            E::ts('Error getting Invoice generation setting %1', [1 => $e->getMessage()]),
+            'qbo_invoice_creation'
+          );
+        }
         if ($allowCC == 1) {
           $new_invoice[$qbParam] = 1;
         }
       }
-
-      $customMemo = $this->getSetting('quickbooks_customer_memo');
+      try {
+        $customMemo = civicrm_api3('Setting', 'getvalue', array(
+          'name' => 'quickbooks_customer_memo',
+          'group' => 'QuickBooks Online Settings',
+        ));
+      }
+      catch (Exception $e) {
+        throw new CiviCRM_API3_Exception(
+          E::ts('Error getting Invoice generation setting %1', [1 => $e->getMessage()]),
+          'qbo_invoice_creation'
+        );
+      }
       if ($customMemo != '') {
         $new_invoice['CustomerMemo'] = ['value' => $customMemo];
       }
@@ -941,26 +973,4 @@ class CRM_Civiquickbooks_Invoice {
     civicrm_api3('AccountInvoice', 'create', $record);
     return $responseErrors;
   }
-
-  /**
-   * Get Setting Value
-   * @param  string $name name of setting
-   * @return string       value of setting
-   */
-  public function getSetting($name) {
-    try {
-      $settingValue = civicrm_api3('Setting', 'getvalue', array(
-        'name' => $name,
-        'group' => 'QuickBooks Online Settings',
-      ));
-    }
-    catch (Exception $e) {
-      throw new CiviCRM_API3_Exception(
-        E::ts('Error getting Invoice generation setting %1', [1 => $e->getMessage()]),
-        'qbo_invoice_creation'
-      );
-    }
-    return $settingValue;
-  }
-
 }
