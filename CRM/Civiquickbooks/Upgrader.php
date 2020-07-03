@@ -138,4 +138,13 @@ class CRM_Civiquickbooks_Upgrader extends CRM_Civiquickbooks_Upgrader_Base {
 
     return true;
   }
+
+  public function upgrade_20204() {
+    $this->ctx->log->info('Setting defaults on new settings for compatibility.');
+
+    civicrm_api3('Setting', 'create', [ 'quickbooks_log_dir' => '/tmp/IdsLogs' ]);
+    civicrm_api3('Setting', 'create', [ 'quickbooks_activate_qbo_logging' => 0 ]);
+
+    return true;
+  }
 }

@@ -42,6 +42,9 @@ class CRM_Quickbooks_APIHelper {
 
     $clientID = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_consumer_key"));
     $clientSecret = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_shared_secret"));
+    $logLocation = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_log_dir"));
+    $logActivated = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_activate_qbo_logging"));
+
 
     $stateToken = array(
       'state_token' => $stateTokenValue,
@@ -56,7 +59,12 @@ class CRM_Quickbooks_APIHelper {
       'scope' => "com.intuit.quickbooks.accounting",
       'response_type' => 'code',
       'state' => json_encode($stateToken),
-    ));
+  ));
+
+    self::$quickBooksDataService->setLogLocation($logLocation);
+    if (!$logActivated) {
+        self::$quickBooksDataService->disableLog();
+    }
 
     return self::$quickBooksDataService;
   }
@@ -79,6 +87,9 @@ class CRM_Quickbooks_APIHelper {
     }
 
     $QBCredentials = self::getQuickBooksCredentials();
+    $logLocation = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_log_dir"));
+    $logActivated = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_activate_qbo_logging"));
+
     $dataServiceParams = array(
       'auth_mode' => 'oauth2',
       'ClientID' => $QBCredentials['clientID'],
@@ -94,6 +105,11 @@ class CRM_Quickbooks_APIHelper {
     }
 
     $dataService = \QuickBooksOnline\API\DataService\DataService::Configure($dataServiceParams);
+
+    $dataService->setLogLocation($logLocation);
+    if (!$logActivated) {
+        $dataService->disableLog();
+    }
 
     if (!$forRefreshToken) {
       self::$quickBooksAccountingDataService = $dataService;
