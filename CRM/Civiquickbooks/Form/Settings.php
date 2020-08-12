@@ -153,7 +153,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
 
     civicrm_api3('setting', 'create', $values);
 
-    if ($previousValues['clientID'] != 'quickbooks_consumer_key' || $previousValues['clientSecret'] != 'quickbooks_shared_secret') {
+    if ($previousValues['clientID'] != $values['quickbooks_consumer_key'] || $previousValues['clientSecret'] != $values['quickbooks_shared_secret']) {
       civicrm_api3(
         'setting', 'create', array(
           "quickbooks_access_token" => '',
