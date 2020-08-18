@@ -45,8 +45,8 @@ new keys.  See the [Configuration](#configuration) section below.
 ### To use this extension, you need to generate a QuickBooks Online consumer key and secret.
 
 1. You will need an Intuit Developer Account, sign up at
-   (https://developer.intuit.com/). This account must be linked to the
-   QuickBooks Online company you wish to integrate with.
+   (https://developer.intuit.com/). This account must be added as an user of "Admin" user type to the
+   QuickBooks Online company being integrated.
 2. Once your developer account is created and linked, Go to the "My Apps"
    section and select "Create new app".
 3. Use the "Select APIs" button in the "Just start coding" card, then select the
