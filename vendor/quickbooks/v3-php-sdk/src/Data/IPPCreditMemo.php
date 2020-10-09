@@ -55,10 +55,10 @@ class IPPCreditMemo
 	public $RemainingCredit;
 	/**
 	 * @Definition 
-            					Product: ALL
-            					Description: A credit memo needs to have an invoice number to save successfully
-            					Applicable for IN Region.
-        					
+								Product: ALL
+								Description: A credit memo needs to have an invoice number to save successfully
+								Applicable for IN Region.
+							
 	 * @xmlType element
 	 * @xmlNamespace http://schema.intuit.com/finance/v3
 	 * @xmlMinOccurs 0

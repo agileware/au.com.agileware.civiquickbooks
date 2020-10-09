@@ -1,0 +1,11 @@
+--- src/DataService/DataService.php
++++ src/DataService/DataService.php
+@@ -1668,7 +1668,7 @@ public function getCompanyPreferences()
+      * @return String Id
+      */
+     private function getIDString($id){
+-        if($id instanceof IPPid || $id instanceof QuickBooksOnline\API\Data\IPPid){
++        if($id instanceof IPPid){
+             return (String)$id->value;
+         }else{
+             return (String)$id;

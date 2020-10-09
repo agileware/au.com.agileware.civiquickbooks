@@ -8,7 +8,7 @@ class FacadeClassMapper
     public static function IPPReferenceTypeNameEntity(){
         return [
                //IPPItemLineDetail,IPPPaymentLineDetail,IPPDepositLineDetail
-               'ItemRef', 'ClassRef', 'ItemAccountRef', 'InventorySiteRef', 'TaxCodeRef', 'Entity', 'PaymentMethodRef',
+               'ItemRef', 'ClassRef', 'ItemAccountRef', 'InventorySiteRef', 'TaxCodeRef', 'Entity', 'PaymentMethodRef', 'IntuitObject',
                //IPPTaxLineDetail
                'TaxRateRef',
                //IPPDiscountOverride
@@ -26,7 +26,7 @@ class FacadeClassMapper
                //IPPSalesTransaction
                'RemitToRef','SalesTermRef','SalesRepRef','ShipMethodRef','TemplateRef','ARAccountRef','DepositToAccountRef',
                //IPPTransaction
-               'CurrencyRef',
+               'CurrencyRef', 'RecurDataRef',
                //IPPTxnTaxDetail
                'DefaultTaxCodeRef','TxnTaxCodeRef',
                //IPPTransaction
@@ -46,7 +46,11 @@ class FacadeClassMapper
                //IPPItem
                'UOMSetRef','IncomeAccountRef','ExpenseAccountRef','COGSAccountRef','AssetAccountRef','PrefVendorRef','SalesTaxCodeRef','PurchaseTaxCodeRef',
                //IPPCreditMemeo
-               'InvoiceRef'
+               'InvoiceRef',
+               //IPPCreditCardPaymentTxn
+               'CreditCardAccountRef',
+               //IPPTaxPayment
+               'PaymentAccountRef'
 
         ];
     }
@@ -96,7 +100,6 @@ class FacadeClassMapper
                'DeliveryInfo',
                //IPPPurchase
                'PurchaseEx'
-
         ];
     }
     /**
@@ -187,7 +190,8 @@ class FacadeClassMapper
          'PurchaseTaxRateList' => 'TaxRateList',
          'AdjustmentTaxRateList' => 'TaxRateList',
          //Use JournalEntryEntity to replace Entity
-         'JournalEntryEntity' => 'EntityTypeRef'
+         'JournalEntryEntity' => 'EntityTypeRef',
+         'ScheduleInfo' => 'RecurringScheduleInfo'
        ];
     }
 

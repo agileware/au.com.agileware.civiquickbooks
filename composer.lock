@@ -4,28 +4,28 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3c74532dcc1a8c2762222e157e25cc42",
+    "content-hash": "dd4589b6b8501f39e615df60a4054bf5",
     "packages": [
         {
             "name": "cweagans/composer-patches",
-            "version": "1.6.7",
+            "version": "1.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cweagans/composer-patches.git",
-                "reference": "2e6f72a2ad8d59cd7e2b729f218bf42adb14f590"
+                "reference": "ae02121445ad75f4eaff800cc532b5e6233e2ddf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/2e6f72a2ad8d59cd7e2b729f218bf42adb14f590",
-                "reference": "2e6f72a2ad8d59cd7e2b729f218bf42adb14f590",
+                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/ae02121445ad75f4eaff800cc532b5e6233e2ddf",
+                "reference": "ae02121445ad75f4eaff800cc532b5e6233e2ddf",
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^1.0",
+                "composer-plugin-api": "^1.0 || ^2.0",
                 "php": ">=5.3.0"
             },
             "require-dev": {
-                "composer/composer": "~1.0",
+                "composer/composer": "~1.0 || ~2.0",
                 "phpunit/phpunit": "~4.6"
             },
             "type": "composer-plugin",
@@ -48,20 +48,20 @@
                 }
             ],
             "description": "Provides a way to patch Composer packages.",
-            "time": "2019-08-29T20:11:49+00:00"
+            "time": "2020-09-30T17:56:20+00:00"
         },
         {
             "name": "quickbooks/v3-php-sdk",
-            "version": "v5.3.3",
+            "version": "5.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/intuit/QuickBooks-V3-PHP-SDK.git",
-                "reference": "63ab5ce9a6ae0f16ea137f89416d1537e6536f26"
+                "reference": "862c6d2a03b42cccfcdd5ce00c32f432260f9f77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/intuit/QuickBooks-V3-PHP-SDK/zipball/63ab5ce9a6ae0f16ea137f89416d1537e6536f26",
-                "reference": "63ab5ce9a6ae0f16ea137f89416d1537e6536f26",
+                "url": "https://api.github.com/repos/intuit/QuickBooks-V3-PHP-SDK/zipball/862c6d2a03b42cccfcdd5ce00c32f432260f9f77",
+                "reference": "862c6d2a03b42cccfcdd5ce00c32f432260f9f77",
                 "shasum": ""
             },
             "require": {
@@ -70,7 +70,7 @@
                 "php": ">=5.6.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.7"
+                "phpunit/phpunit": "^5.0 || ^6.0 || ^7.0"
             },
             "suggest": {
                 "ext-curl": "Uses Curl to make HTTP Requests",
@@ -79,9 +79,7 @@
             "type": "library",
             "extra": {
                 "patches_applied": {
-                    "Revert change “Set default use SSL to false”": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/280.patch",
-                    "Rename bootrape.php to bootstrap.php": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/213.patch",
-                    "adding missing use statement, removing invalid if condition check": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/270.patch"
+                    "Revert change “Set default use SSL to false”": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/280.patch"
                 }
             },
             "autoload": {
@@ -95,8 +93,8 @@
             ],
             "authors": [
                 {
-                    "name": "hlu2",
-                    "email": "Hao_Lu@intuit.com"
+                    "name": "bsivalingam",
+                    "email": "brinda_sivalingam@intuit.com"
                 }
             ],
             "description": "The Official PHP SDK for QuickBooks Online Accounting API",
@@ -108,7 +106,7 @@
                 "rest",
                 "smallbusiness"
             ],
-            "time": "2020-01-10T01:16:20+00:00"
+            "time": "2020-09-30T22:20:31+00:00"
         }
     ],
     "packages-dev": [],
@@ -118,5 +116,6 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }

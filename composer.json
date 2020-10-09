@@ -6,9 +6,7 @@
   "extra": {
     "patches": {
       "quickbooks/v3-php-sdk": {
-        "Revert change “Set default use SSL to false”": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/280.patch",
-        "Rename bootrape.php to bootstrap.php": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/213.patch",
-        "adding missing use statement, removing invalid if condition check": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/270.patch"
+        "Revert change “Set default use SSL to false”": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/280.patch"
       }
     }
   }
