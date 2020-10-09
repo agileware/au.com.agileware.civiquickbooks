@@ -34,6 +34,13 @@ function civiquickbooks_civicrm_install() {
 }
 
 /**
+ * Implementation of hook_civicrm_postInstall
+ */
+function civiquickbooks_civicrm_postInstall() {
+  _civiquickbooks_civix_civicrm_postInstall();
+}
+
+/**
  * Implements hook_civicrm_uninstall().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
@@ -121,65 +128,38 @@ function civiquickbooks_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  * Implements hook_civicrm_navigationMenu().
  *
  * Adds entries to the navigation menu.
- *
  */
 function civiquickbooks_civicrm_navigationMenu(&$menu) {
-  $maxID = CRM_Core_DAO::singleValueQuery("SELECT max(id) FROM civicrm_navigation");
-  $navId = $maxID + 1;
+  $item[] = [
+    'label' => E::ts('QuickBooks'),
+    'name' => 'QuickBooks',
+    'url' => NULL,
+    'permission' => 'administer CiviCRM',
+    'operator' => NULL,
+    'separator' => NULL,
+  ];
+  _civiquickbooks_civix_insert_navigation_menu($menu, 'Administer', $item[0]);
 
-  // Get the id of System Settings Menu
-  $administerMenuId = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_Navigation', 'Administer', 'id', 'name');
-  $parentID = !empty($administerMenuId) ? $administerMenuId : NULL;
+  $item[] = [
+    'label' => E::ts('Quickbooks Settings'),
+    'name' => 'Quickbooks Settings',
+    'url' => 'civicrm/quickbooks/settings',
+    'permission' => 'administer CiviCRM',
+    'operator' => NULL,
+    'separator' => NULL,
+  ];
+  _civiquickbooks_civix_insert_navigation_menu($menu, 'Administer/QuickBooks', $item[1]);
 
-  $navigationMenu = array(
-    'attributes' => array(
-      'label' => 'QuickBooks',
-      'name' => 'QuickBooks',
-      'url' => NULL,
-      'permission' => 'administer CiviCRM',
-      'operator' => NULL,
-      'separator' => NULL,
-      'parentID' => $parentID,
-      'active' => 1,
-      'navID' => $navId,
-    ),
-    'child' => array(
-      $navId + 1 => array(
-        'attributes' => array(
-          'label' => 'Quickbooks Settings',
-          'name' => 'Quickbooks Settings',
-          'url' => 'civicrm/quickbooks/settings',
-          'permission' => 'administer CiviCRM',
-          'operator' => NULL,
-          'separator' => NULL,
-          'active' => 1,
-          'parentID' => $navId,
-          'navID' => $navId + 1,
-        ),
-      ),
-
-      $navId + 2 => array(
-        'attributes' => array(
-          'label' => 'Synchronize contacts',
-          'name' => 'Contact Sync',
-          'url' => 'civicrm/a/#/accounts/contact/sync/quickbooks',
-          'permission' => 'administer CiviCRM',
-          'operator' => NULL,
-          'separator' => NULL,
-          'active' => 1,
-          'parentID' => $navId,
-          'navID' => $navId + 2,
-        ),
-      ),
-    ),
-  );
-
-  if ($parentID) {
-    $menu[$parentID]['child'][$navId] = $navigationMenu;
-  }
-  else {
-    $menu[$navId] = $navigationMenu;
-  }
+  $item[] = [
+    'label' => E::ts('Synchronize contacts'),
+    'name' => 'Contact Sync',
+    'url' => 'civicrm/a/#/accounts/contact/sync/quickbooks',
+    'permission' => 'administer CiviCRM',
+    'operator' => NULL,
+    'separator' => NULL,
+  ];
+  _civiquickbooks_civix_insert_navigation_menu($menu, 'Administer/QuickBooks', $item[2]);
+  _civiquickbooks_civix_navigationMenu($menu);
 }
 
 /**
