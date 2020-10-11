@@ -138,20 +138,31 @@ class CRM_Civiquickbooks_Contact {
 
   public function push($limit = PHP_INT_MAX) {
     try {
-      $records = civicrm_api3('account_contact', 'get', array(
+      $records = civicrm_api3('account_contact', 'get', [
           'accounts_needs_update' => 1,
-          'plugin' => $this->plugin,
-          'contact_id' => array('IS NOT NULL' => 1),
-          'connector_id' => 0,
-          'options' => array(
-            'limit' => $limit,
-          ),
-        )
+          'plugin'                => $this->plugin,
+          'contact_id'            => ['IS NOT NULL' => 1],
+          'connector_id'          => 0,
+          'options'               => [
+            'limit' => 0,
+            'sort'  => 'contact_id.modified_date ASC'
+          ],
+        ]
       );
 
       $errors = array();
 
-      foreach ($records['values'] as $account_contact) {
+      // Sort contact records without error data first. This should ensure valid
+      // records to be processed before API limits are hit trying to process
+      // records that have previously failed.
+      uasort($records['values'], function($a, $b) {
+        $ea = (int) empty($a['error_data']);
+        $eb = (int) empty($b['error_data']);
+
+        return ($ea == $eb) ? 0 : (($ea > $eb)? -1 : 1);
+      });
+
+      foreach (array_slice($records['values'], 0, $limit) as $account_contact) {
         // This workaround it not quite useful now. We already have
         // `'contact_id' => array('IS NOT NULL' => 1),` in the api call.  So
         // there should not be any record in our result who has no contact id
