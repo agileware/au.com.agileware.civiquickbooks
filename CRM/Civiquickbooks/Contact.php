@@ -111,21 +111,8 @@ class CRM_Civiquickbooks_Contact {
           'plugin' => $this->plugin,
         ));
       } catch (CiviCRM_API3_Exception $e) {
-        /* If there is no account contact found, either:
-
-        the contact is not recorded by AccountSync,
-
-        OR the contact is recorded but not pushed, so there is no account_contact_id, but we have
-        this contact info in Quickbooks and it is updated.
-
-        In the second case, the consequence could be:
-        1. Duplicated contacts will be created in quickbooks and duplicated account_contact entity will be created.
-        2. Contact push for that particular contact will fail, as quickbooks recognised that is a duplicated contact.
-
-        For both cases, we can not deal with here and make the decision for users.
-
-        So we assume that if no contact can not be found by Quickbooks id, then there is no existing contact record captured by AccountSync
-         */
+        // No existing AccountContact found; the following API call will create one.
+        // Future CIVIQBO-60 entry point for preemptive deduplication.
         continue;
       }
 
@@ -151,22 +138,36 @@ class CRM_Civiquickbooks_Contact {
 
   public function push($limit = PHP_INT_MAX) {
     try {
-      $records = civicrm_api3('account_contact', 'get', array(
+      $records = civicrm_api3('account_contact', 'get', [
           'accounts_needs_update' => 1,
-          'plugin' => $this->plugin,
-          'contact_id' => array('IS NOT NULL' => 1),
-          'connector_id' => 0,
-          'options' => array(
-            'limit' => $limit,
-          ),
-        )
+          'plugin'                => $this->plugin,
+          'contact_id'            => ['IS NOT NULL' => 1],
+          'connector_id'          => 0,
+          'options'               => [
+            'limit' => 0,
+            'sort'  => 'contact_id.modified_date ASC'
+          ],
+        ]
       );
 
       $errors = array();
 
-      foreach ($records['values'] as $account_contact) {
-        //This working-around it not quite useful now. We already have `	'contact_id' => array('IS NOT NULL' => 1),` in the api call.
-        //So there should not be any record in our result who has no contact id and has 25 civicrm contact record in the result of api.contact.get chain call.
+      // Sort contact records without error data first. This should ensure valid
+      // records to be processed before API limits are hit trying to process
+      // records that have previously failed.
+      uasort($records['values'], function($a, $b) {
+        $ea = (int) empty($a['error_data']);
+        $eb = (int) empty($b['error_data']);
+
+        return ($ea == $eb) ? 0 : (($ea > $eb)? -1 : 1);
+      });
+
+      foreach (array_slice($records['values'], 0, $limit) as $account_contact) {
+        // This workaround it not quite useful now. We already have
+        // `'contact_id' => array('IS NOT NULL' => 1),` in the api call.  So
+        // there should not be any record in our result who has no contact id
+        // and has 25 civicrm contact record in the result of api.contact.get
+        // chain call.
         if (!isset($account_contact['contact_id'])) {
           $errors[] = ts('Failed to push a record that has no CiviCRM contact id (account_contact_id: %1). Contact Push failed.', array(1 => $account_contact['accounts_contact_id']));
           continue;
