@@ -27,26 +27,37 @@ class CRM_Civiquickbooks_Contact {
           'contact_id.last_name',
           'contact_id.first_name',
           'contact_id.organization_name',
-          'contact_id.contact_type' ],
+          'contact_id.household_name',
+          'contact_id.contact_type',
+        ],
       ])['values'];
 
       foreach($ac_list as $id => $ac) {
-        if($ac['contact_id.contact_type'] == 'Individual') {
-          $contact = $this->getQBOContactByName($ac['contact_id.last_name'], $ac['contact_id.first_name']);
-
-          if(empty($contact))
-            continue;
-
-          $skip_list[] = $contact->Id;
-
-          $created = civicrm_api3('AccountContact', 'create', [
-            'id' => $ac['id'],
-            'plugin' => $this->plugin,
-            'accounts_contact_id' => $contact->Id,
-            'accounts_data' => json_encode($contact),
-            'error_data' => 'NULL',
-          ]);
+        switch($ac['contact_id.contact_type']) {
+          case 'Individual':
+            $contact = $this->getQBOContactByName($ac['contact_id.last_name'], $ac['contact_id.first_name']);
+            break;
+          case 'Organization':
+            $contact = $this->getQBOContactByName($ac['contact_id.organization_name']);
+            break;
+          case 'Organization':
+            $contact = $this->getQBOContactByName($ac['contact_id.household_name']);
+            break;
         }
+
+
+        if(empty($contact))
+          continue;
+
+        $skip_list[] = $contact->Id;
+
+        $created = civicrm_api3('AccountContact', 'create', [
+          'id' => $ac['id'],
+          'plugin' => $this->plugin,
+          'accounts_contact_id' => $contact->Id,
+          'accounts_data' => json_encode($contact),
+          'error_data' => 'NULL',
+        ]);
       }
     } catch(CiviCRM_API3_Exception $e) {
       Civi::log()->error($e->getMessage());
@@ -449,10 +460,24 @@ class CRM_Civiquickbooks_Contact {
   }
 
   /**
-   * Get a single customer from Quickbooks by name.
+   * Get a single customer from Quickbooks Online by name.
+   *
+   * Quickbooks Online doesn't appear to differentiate between individuals and
+   * companies except by what fields are present on the Customer record - this
+   * function reflects the same by accepting either a FullyQualifiedName or
+   * FamilyName + GivenName pair
+   *
+   * @param $name      Family Name for Individuals or Company /
+   *                   Fully Qualified Name for Organisations
+   * @param $givenName Given Name for Individuals if present; Contact is assumed
+   *                   to be an Organisation otherwise.
    */
-  protected function getQBOContactByName($familyName, $givenName) {
-    $query = sprintf('SELECT * FROM Customer WHERE FamilyName = \'%s\' AND GivenName = \'%s\'', $familyName, $givenName);
+  protected function getQBOContactByName($name, $givenName = NULL) {
+    $query = (
+      empty($givenName)
+      ? sprintf('SELECT * FROM Customer WHERE FullyQualifiedName = \'%s\'', $name)
+      : sprintf('SELECT * FROM Customer WHERE FamilyName = \'%s\' AND GivenName = \'%s\'', $name, $givenName)
+    );
 
     try {
       $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
