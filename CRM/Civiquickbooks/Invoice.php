@@ -1,9 +1,14 @@
 <?php
 
-require getComposerAutoLoadPath();
-
+/** Load CiviX ExtensionUtil class and bundled autoload resolver. **/
 use CRM_Civiquickbooks_ExtensionUtil as E;
 
+require E::path('vendor/autoload.php');
+
+/**
+ * @class CRM_Civiquickbooks_Invoice
+ * Class for operating on Invoices in Quickbooks Online
+ **/
 class CRM_Civiquickbooks_Invoice {
 
   // Flag if account is US

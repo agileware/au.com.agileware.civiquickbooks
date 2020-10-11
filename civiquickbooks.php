@@ -1,4 +1,4 @@
-<?php /** @noinspection HtmlUnknownTarget */
+<?php
 /** @noinspection HtmlUnknownTarget */
 
 require_once 'civiquickbooks.civix.php';
@@ -240,24 +240,6 @@ function civiquickbooks_civicrm_mapAccountsData(&$accountsData, $entity, $plugin
  */
 function civiquickbooks_civicrm_accountsync_plugins(&$plugins) {
   $plugins[] = 'quickbooks';
-}
-
-/**
- * Requires extension base Dir path
- *
- * @return string
- */
-function getExtensionPath() {
-  return E::path();
-}
-
-/**
- * Returns composer autoload path.
- *
- * @return string
- */
-function getComposerAutoLoadPath() {
-  return E::path('vendor/autoload.php');
 }
 
 /**

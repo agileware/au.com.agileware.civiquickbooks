@@ -1,7 +1,14 @@
 <?php
 
-require getComposerAutoLoadPath();
+/** Load CiviX ExtensionUtil class and bundled autoload resolver. **/
+use CRM_Civiquickbooks_ExtensionUtil as E;
 
+require E::path('vendor/autoload.php');
+
+/**
+ * @class CRM_Civiquickbooks_Page_OAuthQBO
+ * Page for completing OAuth 2 handshaking.
+ **/
 class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
   private $consumer_key;
