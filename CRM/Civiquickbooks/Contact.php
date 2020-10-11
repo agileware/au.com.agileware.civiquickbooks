@@ -1,10 +1,17 @@
 <?php
 
-require_once 'library/CustomException.php';
-require getComposerAutoLoadPath();
-
+/** Load CiviX ExtensionUtil class and bundled autoload resolver. **/
 use CRM_Civiquickbooks_ExtensionUtil as E;
 
+require E::path('vendor/autoload.php');
+
+require_once 'library/CustomException.php';
+
+/**
+ * @class CRM_Civiquickbooks_Contact
+ * Class for operating on Customers in Quickbooks Online. These are known as
+ * Contacts to AccountSync
+ **/
 class CRM_Civiquickbooks_Contact {
 
   private $plugin = 'quickbooks';
