@@ -109,6 +109,7 @@ class CRM_Civiquickbooks_Contact {
         $account_contact['id']= civicrm_api3('account_contact', 'getvalue', array(
           'accounts_contact_id' => $contact->Id,
           'plugin' => $this->plugin,
+          'return' => 'id',
         ));
       } catch (CiviCRM_API3_Exception $e) {
         // No existing AccountContact found; the following API call will create one.
@@ -137,6 +138,8 @@ class CRM_Civiquickbooks_Contact {
   }
 
   public function push($limit = PHP_INT_MAX) {
+    $abort_loop = FALSE;
+
     try {
       $records = civicrm_api3('account_contact', 'get', [
           'accounts_needs_update' => 1,
@@ -163,6 +166,9 @@ class CRM_Civiquickbooks_Contact {
       });
 
       foreach (array_slice($records['values'], 0, $limit) as $account_contact) {
+        if($abort_loop)
+          break;
+
         // This workaround it not quite useful now. We already have
         // `'contact_id' => array('IS NOT NULL' => 1),` in the api call.  So
         // there should not be any record in our result who has no contact id
@@ -172,6 +178,10 @@ class CRM_Civiquickbooks_Contact {
           $errors[] = ts('Failed to push a record that has no CiviCRM contact id (account_contact_id: %1). Contact Push failed.', array(1 => $account_contact['accounts_contact_id']));
           continue;
         }
+
+        $error_data = json_decode($account_contact['error_data'], TRUE);
+
+        $failure_count = $error_data['failures'] ?? 0;
 
         try {
           $id = isset($account_contact['accounts_contact_id']) ? $account_contact['accounts_contact_id'] : NULL;
@@ -209,9 +219,22 @@ class CRM_Civiquickbooks_Contact {
 
             if ($last_error = $dataService->getLastError()) {
               $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
+              $error_code = $last_error->getHttpStatusCode();
 
-              $account_contact['error_data'] = json_encode($error_message);
-              throw new Exception('"' . implode("\n", $error_message) . '"');
+              switch($error_code) {
+                case 401:
+                case 403:
+                  // Authentication error.
+                  // Causes: OAuth is not valid, API throttling has occured.
+                  // Stop processing this run.
+                  $abort_loop = TRUE;
+                  throw new CiviCRM_API3_Exception('Authentication failure doing QBO contact push, aborting', 9000 + $error_code);
+                  break;
+                default:
+                  $account_contact['error_data'] = json_encode(['failures' => ++$failure_count, 'error' => $error_message]);
+                  throw new Exception('"' . implode("\n", $error_message) . '"');
+                  break;
+              }
             }
 
             if($result) {
@@ -234,7 +257,7 @@ class CRM_Civiquickbooks_Contact {
             }
           }
           catch (\QuickbooksOnline\API\Exception\IdsException $e) {
-            $account_contact['error_data'] = json_encode([[$e->getCode() => $e->getMessage()]]);
+            $account_contact['error_data'] = json_encode(['failures' => ++$failure_count, 'error' => [$e->getCode(), $e->getMessage()]]);
 
             throw $e;
           }
@@ -246,11 +269,15 @@ class CRM_Civiquickbooks_Contact {
             // This will update the last sync date.
             unset($account_contact['last_sync_date']);
 
+            if($failure_count > 3) {
+              $account_contact['do_not_sync'] = 1;
+            }
+
             civicrm_api3('account_contact', 'create', $account_contact);
           }
         } catch (Exception $e) {
           $errors[] = ts(
-            'Failed to push %1 (%2) with error %3',
+            'Failed to push %1 (%2) with error: %3',
             [
               1 => $account_contact['contact_id'],
               2 => $account_contact['accounts_contact_id'],
@@ -261,7 +288,7 @@ class CRM_Civiquickbooks_Contact {
 
       if ($errors) {
         // since we expect this to wind up in the job log we'll print the errors
-        throw new CRM_Core_Exception(ts("Not all contacts were saved: \n ") . implode("\n  ", $errors), 'incomplete', $errors);
+        throw new CRM_Core_Exception(E::ts("Not all contacts were saved:\n  ") . implode("\n  ", $errors), 'incomplete', $errors);
       }
       return TRUE;
     } catch (CiviCRM_API3_Exception $e) {
