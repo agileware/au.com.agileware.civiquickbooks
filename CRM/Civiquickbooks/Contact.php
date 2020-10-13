@@ -109,6 +109,7 @@ class CRM_Civiquickbooks_Contact {
         $account_contact['id']= civicrm_api3('account_contact', 'getvalue', array(
           'accounts_contact_id' => $contact->Id,
           'plugin' => $this->plugin,
+          'return' => 'id',
         ));
       } catch (CiviCRM_API3_Exception $e) {
         // No existing AccountContact found; the following API call will create one.
