@@ -49,10 +49,10 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
     //the initial value of Client ID and Client Secret is empty string, need to check if they have been set
     if ($this->consumer_key === 0 || $this->consumer_key == '' || !isset($this->consumer_key)) {
-      throw new Exception("Initial Client ID is NOT set!", 1);
+      throw new Exception(E::ts("Initial Client ID is NOT set!"), 1);
     }
     if ($this->shared_secret === 0 || $this->shared_secret == '' || !isset($this->shared_secret)) {
-      throw new Exception("Initial Client Secret is NOT set!", 1);
+      throw new Exception(E::ts("Initial Client Secret is NOT set!"), 1);
     }
 
     $doRedirectForAuth = TRUE;
@@ -126,7 +126,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
           // Successfully tokens and Company details stored in database.
           $this->output = array(
-            'message' => "Access token info retrieved and stored successfully!",
+            'message' => E::ts("Access token info retrieved and stored successfully!"),
             'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page to see the new expiry date of your new access token and key</a>',
           );
 
@@ -135,7 +135,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
           // Output an error with try again message.
 
           $this->output = array(
-            'message' => $e->getMessage(),
+            'message' => E::ts($e->getMessage()),
             'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page and try again.</a>',
           );
         }
@@ -149,7 +149,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
       if ($error == "access_denied") {
         // Output error if User denied the access.
         $this->output = array(
-          'message' => 'You\'ve not authorize the request. Please authorize it to sync CiviCRM with QuickBooks',
+          'message' => E::ts('You\'ve not authorize the request. Please authorize it to sync CiviCRM with QuickBooks'),
           'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page to authorise the Quickbooks CiviCRM App</a>',
         );
       }
@@ -157,7 +157,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
     // If first request without error/code, redirect user for Auth.
     if ($doRedirectForAuth) {
-      $this->output = array('message' => 'Authorizing...');
+      $this->output = array('message' => E::ts('Authorizing...'));
       $this->redirectForAuth();
     }
 

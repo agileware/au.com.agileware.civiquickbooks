@@ -115,7 +115,7 @@ class CRM_Civiquickbooks_Invoice {
             $messages = $e->getMessage();
           }
 
-          $errors[] =$this_error = ts('Failed to store %1 with error %2.', [
+          $errors[] =$this_error = E::ts('Failed to store %1 with error %2.', [
                        1 => $record['contribution_id'],
                        2 => $messages,
                      ]);
@@ -131,11 +131,11 @@ class CRM_Civiquickbooks_Invoice {
 
       if ($errors) {
         // since we expect this to wind up in the job log we'll print the errors
-        throw new CRM_Core_Exception(ts('Not all records were saved: ') . json_encode($errors, JSON_PRETTY_PRINT), 'incomplete', $errors);
+        throw new CRM_Core_Exception(E::ts('Not all records were saved: ') . json_encode($errors, JSON_PRETTY_PRINT), 'incomplete', $errors);
       }
       return TRUE;
     } catch (CiviCRM_API3_Exception $e) {
-      throw new CRM_Core_Exception('Invoice Push aborted due to: ' . $e->getMessage());
+      throw new CRM_Core_Exception(E::ts('Invoice Push aborted due to: ') . $e->getMessage());
     }
   }
 
@@ -160,7 +160,7 @@ class CRM_Civiquickbooks_Invoice {
         } catch(\QuickbooksOnline\API\Exception\IdsException $e) {
           $errors[] = $invoice;
         } catch (CiviCRM_API3_Exception $e) {
-          $errors[] = ts('Failed to store contribution %1 for invoice %2 with error: "%3".  Invoice pull failed.', array(
+          $errors[] = E::ts('Failed to store contribution %1 for invoice %2 with error: "%3".  Invoice pull failed.', array(
             1 => $record['contribution_id'],
             2 => $invoice['Id'],
             3 => $e->getMessage(),
@@ -170,11 +170,11 @@ class CRM_Civiquickbooks_Invoice {
 
       if ($errors) {
         // since we expect this to wind up in the job log we'll print the errors
-        throw new CRM_Core_Exception(ts('Not all records were saved: ') . json_encode($errors, JSON_PRETTY_PRINT), 'incomplete', $errors);
+        throw new CRM_Core_Exception(E::ts('Not all records were saved: ') . json_encode($errors, JSON_PRETTY_PRINT), 'incomplete', $errors);
       }
       return TRUE;
     } catch (CiviCRM_API3_Exception $e) {
-      throw new CRM_Core_Exception('Invoice Pull aborted due to: ' . $e->getMessage());
+      throw new CRM_Core_Exception(E::ts('Invoice Pull aborted due to: ') . $e->getMessage());
     }
   }
 
@@ -306,7 +306,7 @@ class CRM_Civiquickbooks_Invoice {
         ));
 
         if ($result['is_error']) {
-          throw new CiviCRM_API3_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status');
+          throw new CiviCRM_API3_Exception(E::ts('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status'));
         }
 
         $record['accounts_needs_update'] = 0;
@@ -322,10 +322,10 @@ class CRM_Civiquickbooks_Invoice {
     }
     elseif ($invoice_status == 'voided') {
       if ($contribution['contri_status_in_lower'] != 'cancelled') {
-        $result = CRM_Core_DAO::setFieldValue('CRM_Contribute_DAO_Contribution', $record['contribution_id'], 'contribution_status_id', $this->contribution_status_by_value['cancelled'], 'id');
+        $result = CRM_Core_DAO::setFieldValue(E::ts('CRM_Contribute_DAO_Contribution', $record['contribution_id'], 'contribution_status_id', $this->contribution_status_by_value['cancelled'], 'id'));
 
         if ($result == FALSE) {
-          throw new CiviCRM_API3_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status');
+          throw new CiviCRM_API3_Exception(E::ts('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status'));
         }
 
         $record['accounts_needs_update'] = 0;
@@ -461,7 +461,7 @@ class CRM_Civiquickbooks_Invoice {
       ));
 
       if (empty($db_line_items['count'])) {
-        throw new CiviCRM_API3_Exception('No line item in contribution id ' . $contributionID . '; push aborted.', 'qbo_contribution_line_item');
+        throw new CiviCRM_API3_Exception(E::ts('No line item in contribution id ' . $contributionID . '; push aborted.', 'qbo_contribution_line_item'));
       }
 
       $line_items = array();
@@ -564,7 +564,7 @@ class CRM_Civiquickbooks_Invoice {
               $line_item_tax_ref = self::getTaxCode($line_item['sale_tax_acctgCode']);
             } catch (\QuickbooksOnline\API\Exception\IdsException $e) {
               // Don't include any line items wih a non-matching TaxCode in Quickbooks.
-              $tax_errormsg[] = ts('No matching Tax type found in Quickbooks online for %1', array(1 => $line_item['sale_tax_acctgCode']));
+              $tax_errormsg[] = E::ts('No matching Tax type found in Quickbooks online for %1', array(1 => $line_item['sale_tax_acctgCode']));
             }
           }
         }
@@ -626,7 +626,7 @@ class CRM_Civiquickbooks_Invoice {
       }
 
       if (empty($line_items)) {
-        throw new CiviCRM_API3_Exception("No valid line items in the Invoice to push:\n" . $QBO_errormsg, 'qbo_invoice_line_items');
+        throw new CiviCRM_API3_Exception(E::ts("No valid line items in the Invoice to push:\n" . $QBO_errormsg), 'qbo_invoice_line_items');
       }
 
       $new_invoice += array(

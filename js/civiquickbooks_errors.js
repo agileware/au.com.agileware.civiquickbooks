@@ -9,7 +9,7 @@ CRM.$(function($) {
                 result = Object.values(result);
             }
             if(result.length > 0) {
-                CRM.alert(getErrorsText(result),"Contact sync","error");
+                CRM.alert(getErrorsText(result),CRM.ts("Contact sync","error"));
             }
         });
     });
@@ -24,7 +24,7 @@ CRM.$(function($) {
                 result = Object.values(result);
             }
             if(result.length > 0) {
-                CRM.alert(getErrorsText(result),"Invoice sync","error");
+                CRM.alert(getErrorsText(result),CRM.ts("Invoice sync","error"));
             }
         });
     });

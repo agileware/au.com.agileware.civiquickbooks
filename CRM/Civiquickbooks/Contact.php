@@ -76,11 +76,11 @@ class CRM_Civiquickbooks_Contact {
     } catch (CRM_Civiquickbooks_Contact_Exception $e) {
       switch ($e->getCode()) {
         case 0:
-          throw new CRM_Core_Exception('Failed to pull customers from Quickbooks: ' . $e->getMessage());
+          throw new CRM_Core_Exception(E::ts('Failed to pull customers from Quickbooks: ') . $e->getMessage());
 
           break;
         case 1:
-          return ['No customers are updated in Quickbooks since ' . $start_date];
+          return [E::ts('No customers are updated in Quickbooks since ') . $start_date];
 
           break;
         default:
@@ -128,9 +128,9 @@ class CRM_Civiquickbooks_Contact {
           date("Y-m-d H:i:s", strtotime($contact->MetaData->LastUpdatedTime)),
           'id');
       } catch (CiviCRM_API3_Exception $e) {
-        CRM_Core_Session::setStatus(ts('Failed to store ') . $account_contact['accounts_display_name']
-          . ts(' with error ') . $e->getMessage(),
-          ts('Contact Pull failed'));
+        CRM_Core_Session::setStatus(E::ts('Failed to store ') . $account_contact['accounts_display_name']
+          . E::ts(' with error ') . $e->getMessage(),
+          E::ts('Contact Pull failed'));
       }
     }
 
@@ -175,7 +175,7 @@ class CRM_Civiquickbooks_Contact {
         // and has 25 civicrm contact record in the result of api.contact.get
         // chain call.
         if (!isset($account_contact['contact_id'])) {
-          $errors[] = ts('Failed to push a record that has no CiviCRM contact id (account_contact_id: %1). Contact Push failed.', array(1 => $account_contact['accounts_contact_id']));
+          $errors[] = E::ts('Failed to push a record that has no CiviCRM contact id (account_contact_id: %1). Contact Push failed.', array(1 => $account_contact['accounts_contact_id']));
           continue;
         }
 
@@ -228,7 +228,7 @@ class CRM_Civiquickbooks_Contact {
                   // Causes: OAuth is not valid, API throttling has occured.
                   // Stop processing this run.
                   $abort_loop = TRUE;
-                  throw new CiviCRM_API3_Exception('Authentication failure doing QBO contact push, aborting', 9000 + $error_code);
+                  throw new CiviCRM_API3_Exception(E::ts('Authentication failure doing QBO contact push, aborting'), 9000 + $error_code);
                   break;
                 default:
                   $account_contact['error_data'] = json_encode(['failures' => ++$failure_count, 'error' => $error_message]);
@@ -292,7 +292,7 @@ class CRM_Civiquickbooks_Contact {
       }
       return TRUE;
     } catch (CiviCRM_API3_Exception $e) {
-      throw new CRM_Core_Exception('Contact Push aborted due to: ' . $e->getMessage());
+      throw new CRM_Core_Exception(E::ts('Contact Push aborted due to: ') . $e->getMessage());
     }
   }
 
@@ -483,12 +483,12 @@ class CRM_Civiquickbooks_Contact {
     }
     //process and analyse the response result from Quickbooks
     catch(Exception $e) {
-      throw new CRM_Civiquickbooks_Contact_Exception('Error pulling Customers from QBO: ' . $e->getMessage(), 0);
+      throw new CRM_Civiquickbooks_Contact_Exception(E::ts('Error pulling Customers from QBO: ') . $e->getMessage(), 0);
     }
 
     if (empty($customers)) {
       // code 1 represent no customers received from Quickbooks
-      throw new CRM_Civiquickbooks_Contact_Exception('No customers have been updated since the date passed as a parameter', 1);
+      throw new CRM_Civiquickbooks_Contact_Exception(E::ts('No customers have been updated since the date passed as a parameter'), 1);
     }
 
     return $customers;
@@ -530,7 +530,7 @@ class CRM_Civiquickbooks_Contact {
     }
     //process and analyse the response result from Quickbooks
     catch(Exception $e) {
-      throw new CRM_Civiquickbooks_Contact_Exception('Error pulling single Customer from QBO: ' . $e->getMessage(), 0);
+      throw new CRM_Civiquickbooks_Contact_Exception(E::ts('Error pulling single Customer from QBO: ') . $e->getMessage(), 0);
     }
   }
 

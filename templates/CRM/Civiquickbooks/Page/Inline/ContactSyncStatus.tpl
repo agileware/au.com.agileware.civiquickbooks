@@ -22,7 +22,7 @@
                     'plugin' : 'quickbooks',
                     'accounts_needs_update' : 1,
                 });
-                cj(this).replaceWith('<p>Contact is queued for sync with QuickBooks</p>');
+                cj(this).replaceWith('<p>{ts}Contact is queued for sync with QuickBooks{/ts}</p>');
             });
         </script>
 

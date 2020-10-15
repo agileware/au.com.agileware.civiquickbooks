@@ -253,10 +253,10 @@ function civiquickbooks_civicrm_check(&$messages) {
   if ($isRefreshTokenExpired) {
     $messages[] = (new CRM_Utils_Check_Message(
       'quickbooks_refresh_token_expired',
-      ts('QuickBooks refresh is token is expired, <a href="%1">Reauthorize QuickBooks application</a> to continue syncing contacts and contributions updates to QuickBooks.', array(
+      E::ts('QuickBooks refresh is token is expired, <a href="%1">Reauthorize QuickBooks application</a> to continue syncing contacts and contributions updates to QuickBooks.', array(
         1 => CRM_Utils_System::url('civicrm/quickbooks/OAuth', ''),
       )),
-      ts('QuickBooks Token Expired'),
+      E::ts('QuickBooks Token Expired'),
       \Psr\Log\LogLevel::CRITICAL,
       'fa-clock-o'
     ));
@@ -310,22 +310,22 @@ function _civiquickbooks_getErroredInvoicesOfContributions($contributions) {
 function civiquickbooks_civicrm_contactSummaryBlocks(&$blocks) {
   $blocks += [
     'civiquickbooksblock' => [
-      'title' => ts('Civi QuickBooks'),
+      'title' => E::ts('Civi QuickBooks'),
       'blocks' => [],
     ]
   ];
   $blocks['civiquickbooksblock']['blocks']['contactsyncstatus'] = [
-    'title' => ts('Contact Sync Status'),
+    'title' => E::ts('Contact Sync Status'),
     'tpl_file' => 'CRM/Civiquickbooks/Page/Inline/ContactSyncStatus.tpl',
     'edit' => FALSE,
   ];
   $blocks['civiquickbooksblock']['blocks']['contactsyncerrors'] = [
-    'title' => ts('Contact Sync Errors'),
+    'title' => E::ts('Contact Sync Errors'),
     'tpl_file' => 'CRM/Civiquickbooks/Page/Inline/ContactSyncErrors.tpl',
     'edit' => FALSE,
   ];
   $blocks['civiquickbooksblock']['blocks']['invoicesyncerrors'] = [
-    'title' => ts('Invoice Sync Errors'),
+    'title' => E::ts('Invoice Sync Errors'),
     'tpl_file' => 'CRM/Civiquickbooks/Page/Inline/InvoiceSyncErrors.tpl',
     'edit' => FALSE,
   ];

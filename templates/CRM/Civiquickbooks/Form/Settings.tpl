@@ -19,35 +19,35 @@
         {* Add authorization details after the expiryDate information *}
         {if $elementName == 'quickbooks_access_token_expiryDate'}
             {if $showClientKeysMessage}
-                <p class="content">The Client ID and Client Secret are part of the QuickBooks Online App configuration.
+                <p class="content">{ts}The Client ID and Client Secret are part of the QuickBooks Online App configuration.
                     To find the values for these, please <a
                             href="https://developer.intuit.com/app/developer/qbo/docs/develop/authentication-and-authorization/oauth-2.0#obtain-oauth2-credentials-for-your-app"
-                            target="_blank">follow the instructions on the Intuit site</a>.</p>
+                            target="_blank">follow the instructions on the Intuit site</a>.{/ts}</p>
             {/if}
             {if $redirect_url}
                 <p class="content messages status no-popup crm-not-you-message">
                     <strong>
                         {if $isRefreshTokenExpired}
-                            Reauthorize your App:
+                            {ts}Reauthorize your App:{/ts}
                             <br>
                         {else}
-                            Authorize your App:
+                            {ts}Authorize your App:{/ts}
                             <br>
                         {/if}
                     </strong>
                     {if $isRefreshTokenExpired}
-                        Refresh token is expired, you will need to
+                       {ts} Refresh token is expired, you will need to
                         <a class="redirect_url" href="{$redirect_url}" title="Authorize Quickbooks Application">Reauthorize</a>
                         the QuickBooks application.
                         <br>
-                        All contacts and contributions updates won't get synced with QuickBooks.
+                        All contacts and contributions updates won't get synced with QuickBooks.{/ts}
                     {else}
-                        Once a Consumer Key and Shared Secret have been configured, you will need to
+                       {ts} Once a Consumer Key and Shared Secret have been configured, you will need to
                         <a class="redirect_url" href="{$redirect_url}" title="Authorize Quickbooks Application">Authorize</a>
                         the QuickBooks application.
                         <br>
                         <br>
-                        You must add this Redirect URI to your application:
+                        You must add this Redirect URI to your application:{/ts}
                         <br>
                         {$redirect_url}
                     {/if}

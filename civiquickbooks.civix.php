@@ -298,7 +298,7 @@ function _civiquickbooks_civix_civicrm_caseTypes(&$caseTypes) {
   foreach (_civiquickbooks_civix_glob(__DIR__ . '/xml/case/*.xml') as $file) {
     $name = preg_replace('/\.xml$/', '', basename($file));
     if ($name != CRM_Case_XMLProcessor::mungeCaseType($name)) {
-      $errorMessage = sprintf("Case-type file name is malformed (%s vs %s)", $name, CRM_Case_XMLProcessor::mungeCaseType($name));
+      $errorMessage = sprintf(E::ts("Case-type file name is malformed (%s vs %s)", $name, CRM_Case_XMLProcessor::mungeCaseType($name)));
       throw new CRM_Core_Exception($errorMessage);
     }
     $caseTypes[$name] = [
