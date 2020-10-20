@@ -58,13 +58,37 @@ class CRM_Civiquickbooks_Contact {
 
         $skip_list[] = $contact->Id;
 
-        $created = civicrm_api3('AccountContact', 'create', [
-          'id' => $ac['id'],
+        $existing = civicrm_api3('AccountContact', 'get', [
           'plugin' => $this->plugin,
           'accounts_contact_id' => $contact->Id,
-          'accounts_data' => json_encode($contact),
-          'error_data' => 'NULL',
+          'return' => ['id', 'contact_id.display_name', 'contact_id'],
         ]);
+
+        if(!$existing['count']) {
+          $created = civicrm_api3('AccountContact', 'create', [
+            'id' => $ac['id'],
+            'plugin' => $this->plugin,
+            'accounts_contact_id' => $contact->Id,
+            'accounts_data' => json_encode($contact),
+            'error_data' => 'NULL',
+          ]);
+        }
+        else {
+          $existing = $existing['values'][$existing['id']];
+
+          $created = civicrm_api3('AccountContact', 'create', [
+            'id' => $id['ac'],
+            'plugin' => $this->plugin,
+            'accounts_needs_update' => 0,
+            'do_not_sync' => 1,
+            'error_data' => [
+              'error' => E::ts(
+                'Matches QBO Contact %1, which is already synced to %2 (%3). Deduplication is required.',
+                [1 => $contact->Id, 2 => $existing['contact_id.display_name'], 3 => $existing['contact_id']]
+              ),
+            ]
+          ]);
+        }
       }
     } catch(CiviCRM_API3_Exception $e) {
       Civi::log()->error($e->getMessage());
