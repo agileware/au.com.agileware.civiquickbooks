@@ -47,7 +47,7 @@ class CRM_Civiquickbooks_Contact {
           case 'Organization':
             $contact = $this->getQBOContactByName($ac['contact_id.organization_name']);
             break;
-          case 'Organization':
+          case 'Household':
             $contact = $this->getQBOContactByName($ac['contact_id.household_name']);
             break;
         }
