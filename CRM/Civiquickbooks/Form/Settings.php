@@ -139,7 +139,6 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
   public function saveSettings() {
     $settings = $this->getFormSettings();
     $values = array_intersect_key($this->_submittedValues, $settings);
-    $previousValues = CRM_Quickbooks_APIHelper::getQuickBooksCredentials();
 
     // Fix for unsetting a checkbox. When setting a checkbox,
     // quickbooks_bool_value => 1 is returned. But when unsetting a checkbox,
@@ -153,7 +152,12 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
 
     civicrm_api3('setting', 'create', $values);
 
-    if ($previousValues['clientID'] != $values['quickbooks_consumer_key'] || $previousValues['clientSecret'] != $values['quickbooks_shared_secret']) {
+    $previousCredentials = CRM_Quickbooks_APIHelper::getQuickBooksCredentials();
+    $clientIDChanged = $previousCredentials['clientID'] != $settings['quickbooks_consumer_key'];
+    $clientSecretChanged = $previousCredentials['clientSecret'] != $settings['quickbooks_shared_secret'];
+
+    if ($clientIDChanged || $clientSecretChanged) {
+      // invalidate anything that depended on the old Client ID or Shared Secret
       civicrm_api3(
         'setting', 'create', array(
           "quickbooks_access_token" => '',
