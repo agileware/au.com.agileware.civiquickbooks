@@ -145,7 +145,7 @@ return array(
     'name' => 'quickbooks_log_dir',
     'type' => 'String',
     'add' => '2.7', // this is the civiquickboks version number where this was added
-    'default' => '/tmp/IdsLogs',
+    'default' => '/tmp/IdsLogs/',
     'title' => E::ts('QBO Log Directory'),
     'is_domain' => 1,
     'is_contact' => 0,
