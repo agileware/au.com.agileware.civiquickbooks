@@ -21,7 +21,10 @@ class CRM_Civiquickbooks_Invoice {
   protected $contribution_status_by_value;
 
   public function __construct() {
-    $this->contribution_status = civicrm_api3('Contribution', 'getoptions', array('field' => 'contribution_status_id'));
+    $this->contribution_status = civicrm_api3('Contribution', 'getoptions', [
+      'field' => 'contribution_status_id',
+      'context' => "validate"
+    ]);
 
     $this->contribution_status = $this->contribution_status['values'];
 
