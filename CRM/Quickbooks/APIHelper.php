@@ -1,5 +1,7 @@
 <?php
 
+use QuickBooksOnline\API\Core\HttpClients\FaultHandler;
+
 class CRM_Quickbooks_APIHelper {
 
   private static $quickBooksDataService = NULL; //Data service object for login
@@ -232,8 +234,14 @@ class CRM_Quickbooks_APIHelper {
     return $isTokenExpired;
   }
 
-  /* Helper Function to convert faults errors saved by the SDK into something
-     we can store in an Account* error_data */
+  /**
+   * Helper Function to convert faults errors saved by the SDK into something
+   *   we can store in an Account* error_data
+   *
+   * @param FaultHandler $error_response
+   *
+   * @return array|string[]
+   */
   public static function parseErrorResponse($error_response) {
     // Start with a blank set of error messages.
     $error_message = [];
