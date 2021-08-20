@@ -113,11 +113,7 @@ class CRM_Civiquickbooks_Invoice {
           }
 
         } catch (Exception $e) {
-          $messages = json_decode($e->getMessage());
-
-          if (is_null($messages)) {
-            $messages = $e->getMessage();
-          }
+          $messages = $e->getMessage();
 
           $errors[] = $this_error = ts('Failed to store %1 with error %2.', [
             1 => $record['contribution_id'],
