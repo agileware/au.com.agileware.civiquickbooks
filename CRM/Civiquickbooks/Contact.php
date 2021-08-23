@@ -1,6 +1,8 @@
 <?php
 
 /** Load CiviX ExtensionUtil class and bundled autoload resolver. **/
+
+use Civi\Api4\EntityTag;
 use CRM_Civiquickbooks_ExtensionUtil as E;
 
 require E::path('vendor/autoload.php');
@@ -290,6 +292,9 @@ class CRM_Civiquickbooks_Contact {
 
             civicrm_api3('account_contact', 'create', $account_contact);
           }
+
+          // Success! Remove sync error tag
+          CRM_Civiquickbooks_Helper::removeSyncErrorTag($account_contact['contact_id']);
         } catch (Exception $e) {
           $errors[] = ts(
             'Failed to push Contact: %1 (AccountsContact: %2) with error: %3',
@@ -298,6 +303,8 @@ class CRM_Civiquickbooks_Contact {
               2 => $account_contact['accounts_contact_id'],
               3 => $e->getMessage()
             ]);
+          // Add sync error tag
+          CRM_Civiquickbooks_Helper::addSyncErrorTag($account_contact['contact_id']);
         }
       }
 
