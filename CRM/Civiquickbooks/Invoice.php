@@ -118,9 +118,11 @@ class CRM_Civiquickbooks_Invoice {
         } catch (Exception $e) {
           $messages = $e->getMessage();
 
-          $errors[] = $this_error = ts('Failed to push Contribution %1: %2.', [
+          $errors[] = $this_error = ts('Failed to push Contribution: %1 (AccountInvoice: %3) Invoice: %4 with error: %2.', [
             1 => $record['contribution_id'],
             2 => $messages,
+            3 => $record['id'],
+            4 => $record['accounts_invoice_id'],
           ]);
 
           civicrm_api3('AccountInvoice', 'create', [
@@ -177,7 +179,7 @@ class CRM_Civiquickbooks_Invoice {
             $this->saveToCiviCRM($invoice, $record);
           }
         } catch (Exception $e) {
-          $errors[] = ts('Failed to store Contribution: %1 (AccountInvoice: %4) for invoice %2 with error: "%3".  Invoice pull failed.', [
+          $errors[] = ts('Failed to pull Contribution: %1 (AccountInvoice: %4) for QBOInvoice: %2 with error: "%3".  Invoice pull failed.', [
             1 => $record['contribution_id'],
             2 => $invoice instanceof \QuickBooksOnline\API\Data\IPPInvoice ? $invoice->Id : 'UNKNOWN',
             3 => $e->getMessage(),
