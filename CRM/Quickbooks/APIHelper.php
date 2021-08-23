@@ -235,6 +235,28 @@ class CRM_Quickbooks_APIHelper {
   }
 
   /**
+   * Check if the API credentials are authorized.
+   *
+   * @return bool
+   * @throws \Exception
+   */
+  public static function isAuthorized() {
+    $QBCredentials = CRM_Quickbooks_APIHelper::getQuickBooksCredentials();
+    if (empty($QBCredentials['accessToken'])) {
+      return FALSE;
+    }
+    if (empty($QBCredentials['refreshToken'])) {
+      return FALSE;
+    }
+
+    if (self::isTokenExpired($QBCredentials, TRUE)) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  /**
    * Helper Function to convert faults errors saved by the SDK into something
    *   we can store in an Account* error_data
    *
