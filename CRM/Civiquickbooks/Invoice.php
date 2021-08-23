@@ -69,6 +69,15 @@ class CRM_Civiquickbooks_Invoice {
       ]);
       $this->us_company = ($company_country == 'US');
 
+      // Load the dataservice outside of the main loop for performance.
+      try {
+        $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+        $dataService->throwExceptionOnError(FALSE);
+      }
+      catch (Exception $e) {
+        throw new CRM_Core_Exception('Could not get DataService Object: ' . $e->getMessage());
+      }
+
       foreach ($records['values'] as $i => $record) {
         try {
           $accountsInvoice = $this->getAccountsInvoice($record);
@@ -84,12 +93,6 @@ class CRM_Civiquickbooks_Invoice {
           if (!$proceed) {
             continue;
           }
-
-          $responseError = '';
-
-          $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
-
-          $dataService->throwExceptionOnError(FALSE);
 
           if ($accountsInvoice->Id) {
             $result = $dataService->Update($accountsInvoice);
@@ -153,25 +156,32 @@ class CRM_Civiquickbooks_Invoice {
 
       $errors = [];
 
+      // Load the dataservice outside of the main loop for performance.
+      try {
+        $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+      }
+      catch (Exception $e) {
+        throw new CRM_Core_Exception('Could not get DataService Object: ' . $e->getMessage());
+      }
+
       foreach ($records['values'] as $i => $record) {
         try {
-          //double check if the record has been synched or not
+          //double check if the record has been synced or not
           if (!isset($record['accounts_invoice_id']) || !isset($record['accounts_data'])) {
             continue;
           }
 
-          $invoice = $this->getInvoiceFromQBO($record);
+          $invoice = $this->getInvoiceFromQBO($record, $dataService);
 
           if ($invoice instanceof \QuickBooksOnline\API\Data\IPPInvoice) {
             $this->saveToCiviCRM($invoice, $record);
           }
-        } catch (\QuickbooksOnline\API\Exception\IdsException $e) {
-          $errors[] = $invoice;
         } catch (Exception $e) {
-          $errors[] = ts('Failed to store contribution %1 for invoice %2 with error: "%3".  Invoice pull failed.', [
+          $errors[] = ts('Failed to store Contribution: %1 (AccountInvoice: %4) for invoice %2 with error: "%3".  Invoice pull failed.', [
             1 => $record['contribution_id'],
             2 => $invoice instanceof \QuickBooksOnline\API\Data\IPPInvoice ? $invoice->Id : 'UNKNOWN',
             3 => $e->getMessage(),
+            4 => $record['id'],
           ]);
         }
       }
@@ -289,15 +299,15 @@ class CRM_Civiquickbooks_Invoice {
   }
 
   /**
-   * @param $record
+   * @param array $record
+   * @param \QuickBooksOnline\API\DataService\DataService $dataService
    *
    * @return \Exception|\QuickBooksOnline\API\Data\IPPIntuitEntity|string|null
    * @throws \CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\IdsException
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
-  protected function getInvoiceFromQBO($record) {
-    $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+  protected function getInvoiceFromQBO($record, $dataService) {
     $dataService->throwExceptionOnError(FALSE);
 
     $invoice = $dataService->FindById('invoice', $record['accounts_invoice_id']);

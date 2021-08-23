@@ -189,6 +189,7 @@ class CRM_Civiquickbooks_Contact {
       // Load the dataservice outside of the main loop for performance.
       try {
         $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+        $dataService->throwExceptionOnError(FALSE);
       }
       catch (Exception $e) {
         throw new CRM_Core_Exception('Could not get DataService Object: ' . $e->getMessage());
@@ -225,8 +226,6 @@ class CRM_Civiquickbooks_Contact {
           unset($account_contact['api.contact.get']);
 
           try {
-            $dataService->throwExceptionOnError(FALSE);
-
             if ($QBOContact->Id) {
               $result = $dataService->Update($QBOContact);
             }
