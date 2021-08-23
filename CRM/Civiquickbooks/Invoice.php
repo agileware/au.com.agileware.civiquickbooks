@@ -115,7 +115,7 @@ class CRM_Civiquickbooks_Invoice {
         } catch (Exception $e) {
           $messages = $e->getMessage();
 
-          $errors[] = $this_error = ts('Failed to store %1 with error %2.', [
+          $errors[] = $this_error = ts('Failed to push Contribution %1: %2.', [
             1 => $record['contribution_id'],
             2 => $messages,
           ]);
@@ -125,7 +125,7 @@ class CRM_Civiquickbooks_Invoice {
             'error_data' => json_encode([date('c'), ['message' => $messages]]),
           ]);
 
-          CRM_Core_Error::debug_log_message($this_error);
+          \Civi::log()->warning($this_error);
         }
       }
 
@@ -165,14 +165,14 @@ class CRM_Civiquickbooks_Invoice {
           if ($invoice instanceof \QuickBooksOnline\API\Data\IPPInvoice) {
             $this->saveToCiviCRM($invoice, $record);
           }
-        } catch(\QuickbooksOnline\API\Exception\IdsException $e) {
+        } catch (\QuickbooksOnline\API\Exception\IdsException $e) {
           $errors[] = $invoice;
-        } catch (CiviCRM_API3_Exception $e) {
-          $errors[] = ts('Failed to store contribution %1 for invoice %2 with error: "%3".  Invoice pull failed.', array(
+        } catch (Exception $e) {
+          $errors[] = ts('Failed to store contribution %1 for invoice %2 with error: "%3".  Invoice pull failed.', [
             1 => $record['contribution_id'],
-            2 => $invoice['Id'],
+            2 => $invoice instanceof \QuickBooksOnline\API\Data\IPPInvoice ? $invoice->Id : 'UNKNOWN',
             3 => $e->getMessage(),
-          ));
+          ]);
         }
       }
 
@@ -483,7 +483,8 @@ class CRM_Civiquickbooks_Invoice {
       ]);
 
       if (empty($db_line_items['count'])) {
-        throw new CiviCRM_API3_Exception('No line item in contribution id ' . $contributionID . '; push aborted.', 'qbo_contribution_line_item');
+        throw new CiviCRM_API3_Exception('No LineItems for Contribution: ' . $contributionID . '; push aborted.',
+          'qbo_contribution_line_item');
       }
 
       $line_items = [];
@@ -508,36 +509,37 @@ class CRM_Civiquickbooks_Invoice {
       foreach ($db_line_items['values'] as $id => $line_item) {
         //get Inc Account accounting code if it is not collected previously
         if (!isset($item_ref_codes[$line_item['financial_type_id']])) {
-          $tmp = htmlspecialchars_decode(CRM_Financial_BAO_FinancialAccount::getAccountingCode($line_item['financial_type_id']));
+          $entityFinancialAccount = civicrm_api3('EntityFinancialAccount', 'getsingle', [
+            'return' => ["financial_account_id.accounting_code", "financial_account_id.account_type_code"],
+            'entity_id' => $line_item['financial_type_id'],
+            'entity_table' => "civicrm_financial_type",
+            'account_relationship' => "Income Account is",
+          ]);
 
-          $item_ref_codes[$line_item['financial_type_id']] = $tmp;
-          $item_codes[] = $tmp;
+          $accountingCode = htmlspecialchars_decode($entityFinancialAccount['financial_account_id.accounting_code']);
+
+          $item_ref_codes[$line_item['financial_type_id']] = $accountingCode;
+          $item_codes[] = $accountingCode;
         }
 
         $db_line_items['values'][$id]['acctgCode'] = $item_ref_codes[$line_item['financial_type_id']];
 
-        //get Sales Tax Account accounting code if it is not collected previously
+        // get Sales Tax Account accounting code if it is not collected previously
         if (!isset($tax_types[$line_item['financial_type_id']])) {
           try {
-            $result = civicrm_api3('EntityFinancialAccount', 'getsingle', [
-              'sequential' => 1,
-              'return' => ["financial_account_id"],
+            $entityFinancialAccount = civicrm_api3('EntityFinancialAccount', 'getsingle', [
+              'return' => ["financial_account_id.accounting_code", "financial_account_id.account_type_code"],
               'entity_id' => $line_item['financial_type_id'],
               'entity_table' => "civicrm_financial_type",
               'account_relationship' => "Sales Tax Account is",
             ]);
 
-            $result = civicrm_api3('FinancialAccount', 'getsingle', [
-              'sequential' => 1,
-              'id' => $result['financial_account_id'],
-            ]);
-
-            $tmp = htmlspecialchars_decode($result['accounting_code']);
+            $tmp = htmlspecialchars_decode($entityFinancialAccount['financial_account_id.accounting_code']);
 
             // We will use account type code to get state tax code id for US companies
             $tax_types[$line_item['financial_type_id']] = [
               'sale_tax_acctgCode' => $tmp,
-              'sale_tax_account_type_code' => htmlspecialchars_decode($result['account_type_code']),
+              'sale_tax_account_type_code' => htmlspecialchars_decode($entityFinancialAccount['financial_account_id.account_type_code']),
             ];
 
             $tax_codes[] = $tmp;
@@ -565,10 +567,10 @@ class CRM_Civiquickbooks_Invoice {
         $line_item_description = str_replace(['&nbsp;'], ' ', $line_item['label']);
 
         try {
-          $line_item_ref = self::getItem($line_item['acctgCode']);
+          $line_item_ref = self::getQBOItem($line_item['acctgCode']);
         } catch (Exception $e) {
           $item_errormsg[] = ts(
-            'No matching Item for accounting code "%1" (financial type %2) - %3',
+            'No matching QBOItem for FinancialType %2 "Income Account is": Accounting Code: %1. Error: %3',
             [
               1 => $line_item['acctgCode'],
               2 => $line_item['financial_type_id'],
@@ -583,10 +585,17 @@ class CRM_Civiquickbooks_Invoice {
         if (!$this->us_company) {
           if (!empty($line_item['sale_tax_acctgCode'])) {
             try {
-              $line_item_tax_ref = self::getTaxCode($line_item['sale_tax_acctgCode']);
+              $line_item_tax_ref = self::getQBOTaxCode($line_item['sale_tax_acctgCode']);
             } catch (\QuickbooksOnline\API\Exception\IdsException $e) {
               // Don't include any line items wih a non-matching TaxCode in Quickbooks.
-              $tax_errormsg[] = ts('No matching Tax type found in Quickbooks online for %1', [1 => $line_item['sale_tax_acctgCode']]);
+              $tax_errormsg[] = ts(
+                'No matching QBOTaxCode for FinancialType %2 "Sales Tax Account is": Accounting Code: %1. Error: %3',
+                [
+                  1 => $line_item['sale_tax_acctgCode'],
+                  2 => $line_item['financial_type_id'],
+                  3 => $e->getMessage(),
+                ]
+              );
             }
           }
         }
@@ -648,7 +657,7 @@ class CRM_Civiquickbooks_Invoice {
       }
 
       if (empty($line_items)) {
-        throw new CiviCRM_API3_Exception("No valid line items in the Invoice to push:\n" . $QBO_errormsg, 'qbo_invoice_line_items');
+        throw new CiviCRM_API3_Exception("No valid LineItems in Contribution to push:\n" . $QBO_errormsg, 'qbo_invoice_line_items');
       }
 
       $new_invoice += [
@@ -763,7 +772,7 @@ class CRM_Civiquickbooks_Invoice {
    * @throws \CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
-  public static function getItem($name) {
+  public static function getQBOItem($name) {
     $items =& \Civi::$statics[__CLASS__][__FUNCTION__];
 
     if (!isset($items[$name])) {
@@ -784,7 +793,7 @@ class CRM_Civiquickbooks_Invoice {
   }
 
   /**
-   * Get TaxCode id from QBO by Namde
+   * Get TaxCode id from QBO by Name
    *
    * @param $name - Name of Tax Code.
    *
@@ -792,7 +801,7 @@ class CRM_Civiquickbooks_Invoice {
    * @throws \CiviCRM_API3_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
-  public static function getTaxCode($name) {
+  public static function getQBOTaxCode($name) {
     $codes =& \Civi::$statics[__CLASS__][__FUNCTION__];
 
     if (empty($name)) {
