@@ -547,7 +547,7 @@ class CRM_Civiquickbooks_Contact {
         throw new Exception('"' . implode("\n", $error_message) . '"');
       }
 
-      return current($customers) ?: NULL;
+      return is_array($customers) ? current($customers) : NULL;
     }
     //process and analyse the response result from Quickbooks
     catch(Exception $e) {

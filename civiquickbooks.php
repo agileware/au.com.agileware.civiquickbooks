@@ -187,10 +187,14 @@ function civiquickbooks_civicrm_mapAccountsData(&$accountsData, $entity, $plugin
   /* Map primary email address */
   foreach ($mappedFields as $quickbooksField => $civicrmField) {
     if (isset($accountsData[$quickbooksField])) {
-      if ($quickbooksField == 'PrimaryEmailAddr') {
-        $exploded_by_comma = explode(',', $accountsData[$quickbooksField]['Address']);
-
-        $accountsData['civicrm_formatted'][$civicrmField] = trim($exploded_by_comma[0]);
+      if ($quickbooksField === 'PrimaryEmailAddr') {
+        if (is_array($accountsData[$quickbooksField]['Address'])){
+          $exploded_by_comma = explode(',', $accountsData[$quickbooksField]['Address']);
+          $accountsData['civicrm_formatted'][$civicrmField] = trim($exploded_by_comma[0]);
+        }
+        else {
+          $accountsData['civicrm_formatted'][$civicrmField] = $accountsData[$quickbooksField]['Address'];
+        }
       }
       else {
         $accountsData['civicrm_formatted'][$civicrmField] = $accountsData[$quickbooksField];
