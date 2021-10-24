@@ -1,6 +1,8 @@
 <?php
 
 /** Load CiviX ExtensionUtil class and bundled autoload resolver. **/
+
+use Civi\Api4\EntityTag;
 use CRM_Civiquickbooks_ExtensionUtil as E;
 
 require E::path('vendor/autoload.php');
@@ -165,43 +167,37 @@ class CRM_Civiquickbooks_Contact {
     $abort_loop = FALSE;
 
     try {
-      $records = civicrm_api3('account_contact', 'get', [
-          'accounts_needs_update' => 1,
-          'plugin'                => $this->plugin,
-          'contact_id'            => ['IS NOT NULL' => 1],
-          'connector_id'          => 0,
-          'options'               => [
-            'limit' => 0,
-            'sort'  => 'contact_id.modified_date ASC'
-          ],
-        ]
-      );
-
-      $errors = array();
-
+      $accountContactParams = [
+        'accounts_needs_update' => 1,
+        'plugin'                => $this->plugin,
+        'contact_id'            => ['IS NOT NULL' => 1],
+        'connector_id'          => 0,
+        'error_data' => ['IS NULL' => 1],
+        'options'               => [
+          'limit' => 0,
+          'sort'  => 'contact_id.modified_date ASC'
+        ],
+      ];
       // Sort contact records without error data first. This should ensure valid
       // records to be processed before API limits are hit trying to process
       // records that have previously failed.
-      uasort($records['values'], function($a, $b) {
-        $ea = (int) empty($a['error_data']);
-        $eb = (int) empty($b['error_data']);
+      $records = civicrm_api3('account_contact', 'get', $accountContactParams)['values'];
+      $accountContactParams['error_data'] = ['IS NOT NULL' => 1];
+      $records = array_merge($records, civicrm_api3('account_contact', 'get', $accountContactParams)['values']);
+      $errors = [];
 
-        return ($ea == $eb) ? 0 : (($ea > $eb)? -1 : 1);
-      });
+      // Load the dataservice outside of the main loop for performance.
+      try {
+        $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+        $dataService->throwExceptionOnError(FALSE);
+      }
+      catch (Exception $e) {
+        throw new CRM_Core_Exception('Could not get DataService Object: ' . $e->getMessage());
+      }
 
-      foreach (array_slice($records['values'], 0, $limit) as $account_contact) {
+      foreach (array_slice($records, 0, $limit) as $account_contact) {
         if($abort_loop)
           break;
-
-        // This workaround it not quite useful now. We already have
-        // `'contact_id' => array('IS NOT NULL' => 1),` in the api call.  So
-        // there should not be any record in our result who has no contact id
-        // and has 25 civicrm contact record in the result of api.contact.get
-        // chain call.
-        if (!isset($account_contact['contact_id'])) {
-          $errors[] = ts('Failed to push a record that has no CiviCRM contact id (account_contact_id: %1). Contact Push failed.', array(1 => $account_contact['accounts_contact_id']));
-          continue;
-        }
 
         $error_data = json_decode($account_contact['error_data'], TRUE);
 
@@ -230,10 +226,6 @@ class CRM_Civiquickbooks_Contact {
           unset($account_contact['api.contact.get']);
 
           try {
-            $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
-
-            $dataService->throwExceptionOnError(FALSE);
-
             if ($QBOContact->Id) {
               $result = $dataService->Update($QBOContact);
             }
@@ -299,14 +291,19 @@ class CRM_Civiquickbooks_Contact {
 
             civicrm_api3('account_contact', 'create', $account_contact);
           }
+
+          // Success! Remove sync error tag
+          CRM_Civiquickbooks_Helper::removeSyncErrorTag($account_contact['contact_id']);
         } catch (Exception $e) {
           $errors[] = ts(
-            'Failed to push %1 (%2) with error: %3',
+            'Failed to push Contact: %1 (AccountsContact: %2) with error: %3',
             [
               1 => $account_contact['contact_id'],
               2 => $account_contact['accounts_contact_id'],
               3 => $e->getMessage()
             ]);
+          // Add sync error tag
+          CRM_Civiquickbooks_Helper::addSyncErrorTag($account_contact['contact_id']);
         }
       }
 
@@ -550,7 +547,7 @@ class CRM_Civiquickbooks_Contact {
         throw new Exception('"' . implode("\n", $error_message) . '"');
       }
 
-      return current($customers) ?: NULL;
+      return is_array($customers) ? current($customers) : NULL;
     }
     //process and analyse the response result from Quickbooks
     catch(Exception $e) {
