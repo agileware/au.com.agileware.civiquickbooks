@@ -54,9 +54,13 @@ new keys.  See the [Configuration](#configuration) section below.
 4. From the App dashboard, select the "OAuth 2.0 keys"
 5. In the "Production Keys" section, copy the "Client ID" and "Client Secret"
    keys.
-7. Paste these values into the CiviQuickBooks Online Settings page and submit.
-8. Copy the Redirect URI that is present into the "Production Keys" section of
+6. Paste these values into the CiviQuickBooks Online Settings page and submit.
+7. Copy the Redirect URI that is present into the "Production Keys" section of
    your App in the Intuit Developer site.
+
+CiviQuickBooks Online Settings page is shown below.
+
+![](doc/civiquickbooks-settings.png)
 
 #### Authorise CiviQuickBooks access to your QuickBooks Online account.
 
