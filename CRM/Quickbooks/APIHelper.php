@@ -91,6 +91,7 @@ class CRM_Quickbooks_APIHelper {
     $QBCredentials = self::getQuickBooksCredentials();
     $logLocation = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_log_dir"));
     $logActivated = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_activate_qbo_logging"));
+    $baseUrl = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_baseurl"));
 
     $dataServiceParams = array(
       'auth_mode' => 'oauth2',
@@ -99,7 +100,7 @@ class CRM_Quickbooks_APIHelper {
       'accessTokenKey' => $QBCredentials['accessToken'],
       'refreshTokenKey' => $QBCredentials['refreshToken'],
       'QBORealmID' => $QBCredentials['realMId'],
-      'baseUrl' => "Production",
+      'baseUrl' => $baseUrl,
     );
 
     if ($forRefreshToken) {
