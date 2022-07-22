@@ -154,6 +154,16 @@ item to have a specified Tax account.
         recored in the `account type code` of the `sales tax financial account`
         of matched `financial type`.
 
+### Are you using a QuickBooks Online Production or Sandbox account?
+
+This extension currently assumes that it will be connected to a QuickBooks Online, Production account.
+If instead, you wish to connect this to a QuickBooks Online Sandbox account then change this line from `Production` to `Sandbox`.
+https://github.com/agileware/au.com.agileware.civiquickbooks/blob/2d1019f7929c33de568c4826e45118f69532234e/CRM/Quickbooks/APIHelper.php#L102
+
+And when you have finished testing in the Sandbox account, then change back to `Production`.
+
+This will be provided as a configurable option on the Settings page at a future date.
+
 # Special Notes:
 
 1. As line items that have no matched QuickBooks product/service name filled out
