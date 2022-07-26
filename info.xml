@@ -2,7 +2,7 @@
 <extension key="au.com.agileware.civiquickbooks" type="module">
   <file>civiquickbooks</file>
   <name>QuickBooks Online Integration</name>
-  <description>A CiviCRM extension which integrates CiviCRM with QuickBooks Online</description>
+  <description>CiviCRM extension which integrates CiviCRM with QuickBooks Online.</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Agileware</author>
@@ -14,8 +14,8 @@
     <url desc="Support">https://agileware.com.au/contact</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2021-10-25</releaseDate>
-  <version>2.8.2</version>
+  <releaseDate>2022-07-26</releaseDate>
+  <version>2.8.3</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.0</ver>
@@ -23,7 +23,7 @@
   <requires>
     <ext>nz.co.fuzion.accountsync</ext>
   </requires>
-  <comments></comments>
+  <comments>Development and support for this Extension is funded solely by Agileware and CiviCRM community contributions. Agileware does not receive any funding at all for this Extension from the CiviCRM Partner program or CiviCRM LLC. Agileware welcome any funding to help continue paying Agileware staff to continue contributing to the CiviCRM community and Extensions. You can donate to Agileware using https://www.paypal.me/agileware</comments>
   <civix>
     <namespace>CRM/Civiquickbooks</namespace>
   </civix>

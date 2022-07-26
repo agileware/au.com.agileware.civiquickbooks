@@ -29,15 +29,14 @@ new keys.  See the [Configuration](#configuration) section below.
 1. Ensure the CiviContribute component is enabled
 2. Download the [latest version of this
    extension](https://github.com/agileware/au.com.agileware.civiquickbooks/releases)
-3. Unzip in the CiviCRM extension directory, as defined in 'System Settings /
-   Directories'.
+3. Unzip in the CiviCRM extension directory, as defined in `System Settings /
+   Directories`.
 4. Download the CiviCRM extension, **[Account
    Sync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync/archive/master.tar.gz)**.
-5. In CiviCRM, go to 'System Settings / Extensions' and enable both extensions,
+5. In CiviCRM, go to `System Settings / Extensions` and enable both extensions,
    **Account Sync** and **QuickBooks Online Integration**.
-6. 'QuickBooks' will now be available in the 'Administer' menu.
-7. Click on the 'QuickBooks' menu to display the CiviQuickBooks Online Settings
-   page.
+6. `QuickBooks` will now be available in the `Administer` menu.
+7. Click on the `QuickBooks` menu to display the `QuickBooks Online Settings` page.
 8. Update the CiviQuickBooks Online configuration as detailed below.
 
 ## Configuration
@@ -45,17 +44,17 @@ new keys.  See the [Configuration](#configuration) section below.
 ### To use this extension, you need to generate a QuickBooks Online consumer key and secret.
 
 1. You will need an Intuit Developer Account, sign up at
-   (https://developer.intuit.com/). This account must be added as a user of "Admin" user type to the
+   (https://developer.intuit.com/). This account must be added as a user of `Admin` user type to the
    QuickBooks Online company being integrated.
-2. Once your developer account is created and linked, Go to the "My Apps"
-   section and select "Create new app".
-3. Use the "Select APIs" button in the "Just start coding" card, then select the
+2. Once your developer account is created and linked, Go to the `My Apps`
+   section and select `Create new app`.
+3. Use the `Select APIs` button in the `Just start coding` card, then select the
    Accounting API.
-4. From the App dashboard, select the "OAuth 2.0 keys"
-5. In the "Production Keys" section, copy the "Client ID" and "Client Secret"
+4. From the App dashboard, select the `OAuth 2.0 keys`
+5. In the `Production Keys` section, copy the `Client ID` and `Client Secret`
    keys.
 6. Paste these values into the CiviQuickBooks Online Settings page and submit.
-7. Copy the Redirect URI that is present into the "Production Keys" section of
+7. Copy the Redirect URI that is present into the `Production Keys` section of
    your App in the Intuit Developer site.
 
 CiviQuickBooks Online Settings page is shown below.
@@ -64,14 +63,14 @@ CiviQuickBooks Online Settings page is shown below.
 
 #### Authorise CiviQuickBooks access to your QuickBooks Online account.
 
-1. Click the 'Authorize' link as shown below the 'Access Token Expiry Date'
+1. Click the `Authorize` link as shown below the `Access Token Expiry Date`
    field.
 2. The QuickBooks Online Authentication page will now be displayed.
 3. Follow the instructions and to complete the authentication process.
 4. After authentication, you will be redirected back to CiviCRM.
-5. Open the CiviQuickBooks settings page.
+5. Open the `QuickBooks Online Settings` page.
 6. To confirm QuickBooks Online authentication a date will be shown in the
-   'Access Token Expiry Date' field. If no date is shown then authentication has
+   `Access Token Expiry Date` field. If no date is shown then authentication has
    failed. Repeat the process.
 
 ### Map your QuickBooks product/service to CiviCRM Financial account codes
@@ -83,7 +82,7 @@ Financial account codes to correctly code each Invoice in QuickBooks Online.
    ([https://sandbox.qbo.intuit.com/app/items](https://sandbox.qbo.intuit.com/app/items))
 2. Identify each QuickBooks Product/Service that you what to sync with CiviCRM
 3. Open the CiviCRM Financial Account setting page
-   (civicrm/admin/financial/financialAccount) and update the 'Acctg Code' of
+   (civicrm/admin/financial/financialAccount) and update the `Acctg Code` of
    corresponding Financial account to be the same as each QuickBooks
    Product/Service name:
    ![Product Name -> Acctg Code](doc/product_name-to-acctg_code.png)
@@ -92,12 +91,12 @@ Financial account codes to correctly code each Invoice in QuickBooks Online.
    Account.
 5. During sync, the Contribution line item will be set to the corresponding
    QuickBooks Product/Service.
-6. When a CiviCRM 'Acctg Code' does not match any QuickBooks Product/Service
+6. When a CiviCRM `Acctg Code` does not match any QuickBooks Product/Service
    name, which means that the there is no product/service in QuickBooks has the
    same name, that particular line item will **NOT** be pushed through the
    invoice.
 
-### Map your QuickBooks tax account name to corresponding CiviCRM financial type's Sales Tax Account's `acctg code`. 
+### Map your QuickBooks tax account name to corresponding CiviCRM financial type`s Sales Tax Account`s `acctg code`. 
 
 When the extension pushes an invoice to QuickBooks Online, it requires every
 item to have a specified Tax account.
@@ -106,23 +105,23 @@ item to have a specified Tax account.
 
 1. Go to `GST` > `Rates&Settings`. There are many tax accounts listed there,
    with names in column `Tax name`, copy the tax name you want and paste it into
-   the 'Acctg code' field of corresponding Tax financial account.
+   the `Acctg code` field of corresponding Tax financial account.
 2. Open the CiviCRM Financial Account setting page
-   (civicrm/admin/financial/financialAccount) and update the 'Acctg Code' of
+   (civicrm/admin/financial/financialAccount) and update the `Acctg Code` of
    corresponding Financial account to be the same as each QuickBooks tax account
    name.
 3. If a financial type does not contain any GST, a financial account also needs
    to be created with the corresponding Tax account name in QuickBooks filled
    out. For example, create a new financial account called `NO GST` with GST
    rate as `0`, `acctg code`as `GST free` (a tax account name which has GST rate
-   as `0` also). And assign that financial account as corresponding line item's
+   as `0` also). And assign that financial account as corresponding line item`s
    `Sales Tax account`.
 4. When setting up Contributions in CiviCRM, ensure that the Financial Type for
    the Contribution/line item is set to use the correct Financial Account as the
    `Sales Tax Account`.
 5. During sync, the Contribution line item will be assigned with corresponding
    Tax account.
-6. When a CiviCRM 'Acctg Code' does not match any QuickBooks Tax account name,
+6. When a CiviCRM `Acctg Code` does not match any QuickBooks Tax account name,
    which means that the there is no tax account in QuickBooks has the same name,
    that particular line item will **NOT** be pushed through the invoice.
 
@@ -140,7 +139,7 @@ item to have a specified Tax account.
         the `acctg code` field.
       - All those associated financial accounts need to have `Tax Rate Name` of
         desired tax rate account in QuickBooks as the `account type code` field
-        in CiviCRM. e.g. 'California' as the `financial type code`.
+        in CiviCRM. e.g. `California` as the `financial type code`.
       - Make sure that all the financial types of line items have the same value
         of `account type code` in the `sales tax financial account`. The
         extension will pick the first line item that is taxable and with a
@@ -154,15 +153,15 @@ item to have a specified Tax account.
         recored in the `account type code` of the `sales tax financial account`
         of matched `financial type`.
 
-### Are you using a QuickBooks Online Production or Sandbox account?
+### Are you using a QuickBooks Online Production or Development account?
 
-This extension currently assumes that it will be connected to a QuickBooks Online, Production account.
-If instead, you wish to connect this to a QuickBooks Online Sandbox account then change this line from `Production` to `Sandbox`.
-https://github.com/agileware/au.com.agileware.civiquickbooks/blob/2d1019f7929c33de568c4826e45118f69532234e/CRM/Quickbooks/APIHelper.php#L102
+This extension currently assumes that it will be connected to a QuickBooks Online, `Production` account.
+If instead, you wish to connect this to a QuickBooks Online `Development` account then open the `QuickBooks Online Settings` page and change the `Environment` option from `Production` to `Development`.
+When you have finished testing in the Development account, then change the `Environment` option back to `Production`.
 
-And when you have finished testing in the Sandbox account, then change back to `Production`.
-
-This will be provided as a configurable option on the Settings page at a future date.
+For more details on the QuickBooks Online environments, see:
+* https://developer.intuit.com/app/developer/qbo/docs/develop/sandboxes
+* https://developer.intuit.com/app/developer/qbo/docs/develop/sdks-and-samples-collections/php/configuration
 
 # Special Notes:
 
@@ -175,6 +174,12 @@ This will be provided as a configurable option on the Settings page at a future 
    information about those none-pushed items will be noted down as `customer
    memo` field. The `id` of the problematic financial type and its `acctg code`
    will be listed. In that case, you need to manually fix the invoice manually.
+
+# Funding for this CiviCRM extension
+
+Development and support for this Extension is funded solely by Agileware and CiviCRM community contributions. Agileware does not receive any funding at all for this Extension from the CiviCRM Partner program or CiviCRM LLC. Agileware welcome any funding to help continue paying Agileware staff to continue contributing to the CiviCRM community and Extensions.
+
+[:heart: Donate to Agileware](https://www.paypal.me/agileware) to tell us how much you appreciate Agileware's CiviCRM open source work and community contributions.
 
 # About the Authors
 
