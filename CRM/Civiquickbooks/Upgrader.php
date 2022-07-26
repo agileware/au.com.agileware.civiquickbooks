@@ -44,10 +44,4 @@ class CRM_Civiquickbooks_Upgrader extends CRM_Civiquickbooks_Upgrader_Base {
     return TRUE;
   }
 
-  public function upgrade_20205() {
-    $this->ctx->log->info('Setting base_url environment.');
-    civicrm_api3('Setting', 'create', ['quickbooks_baseurl' => 'production']);
-    return TRUE;
-  }
-
 }
