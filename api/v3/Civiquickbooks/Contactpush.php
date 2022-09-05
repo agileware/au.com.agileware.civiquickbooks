@@ -10,6 +10,27 @@
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC/API+Architecture+Standards
  */
 function _civicrm_api3_civiquickbooks_ContactPush_spec(&$spec) {
+  $spec['start_date'] = [
+    'api.default' => 'yesterday',
+    'type' => CRM_Utils_Type::T_DATE,
+    'name' => 'start_date',
+    'title' => 'Sync Start Date',
+    'description' => 'date to start pushing from',
+  ];
+  $spec['connector_id'] = [
+    'api.default' => 0,
+    'type' => CRM_Utils_Type::T_INT,
+    'name' => 'connector_id',
+    'title' => 'Connector ID',
+    'description' => 'Connector ID if using nz.co.fuzion.connectors, else 0',
+  ];
+  $spec['contact_id'] = [
+    'name' => 'contact_id',
+    'title' => 'contact ID',
+    'description' => 'ID of the CiviCRM contact',
+    'api.required' => 0,
+    'type' => CRM_Utils_Type::T_INT,
+  ];
 }
 
 /**
@@ -28,14 +49,10 @@ function civicrm_api3_civiquickbooks_ContactPush($params) {
   }
 
   $options = _civicrm_api3_get_options_from_params($params);
+  $params['limit'] = $options['limit'];
 
   $quickbooks = new CRM_Civiquickbooks_Contact();
-  $output = $quickbooks->push($options['limit']);
-
-  // ALTERNATIVE: $returnValues = array(); // OK, success
-  // ALTERNATIVE: $returnValues = array("Some value"); // OK, return a single value
-
-  // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
+  $output = $quickbooks->push($params);
 
   return civicrm_api3_create_success($output, $params, 'Civiquickbooks', 'Contactpush');
 }

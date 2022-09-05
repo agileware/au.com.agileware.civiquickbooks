@@ -162,21 +162,33 @@ class CRM_Civiquickbooks_Contact {
     return $result;
   }
 
-  public function push($limit = PHP_INT_MAX) {
+  /**
+   * @param array $params
+   *
+   * @return bool
+   * @throws \CRM_Core_Exception
+   */
+  public function push($params) {
     $abort_loop = FALSE;
+    $params['limit'] = $params['limit'] ?? PHP_INT_MAX;
 
     try {
       $accountContactParams = [
         'accounts_needs_update' => 1,
         'plugin'                => $this->plugin,
         'contact_id'            => ['IS NOT NULL' => 1],
-        'connector_id'          => 0,
+        'connector_id'          => $params['connector_id'],
         'error_data' => ['IS NULL' => 1],
         'options'               => [
           'limit' => 0,
           'sort'  => 'contact_id.modified_date ASC'
         ],
       ];
+      // If we specified a CiviCRM contact ID just push that contact.
+      if (!empty($params['contact_id'])) {
+        $accountContactParams['contact_id'] = $params['contact_id'];
+        $accountContactParams['accounts_needs_update'] = 0;
+      }
       // Sort contact records without error data first. This should ensure valid
       // records to be processed before API limits are hit trying to process
       // records that have previously failed.
@@ -194,7 +206,7 @@ class CRM_Civiquickbooks_Contact {
         throw new CRM_Core_Exception('Could not get DataService Object: ' . $e->getMessage());
       }
 
-      foreach (array_slice($records, 0, $limit) as $account_contact) {
+      foreach (array_slice($records, 0, $params['limit']) as $account_contact) {
         if($abort_loop)
           break;
 
