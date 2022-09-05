@@ -10,12 +10,12 @@
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC/API+Architecture+Standards
  */
 function _civicrm_api3_civiquickbooks_InvoicePush_spec(&$spec) {
-  $spec['contribution_id'] = array(
+  $spec['contribution_id'] = [
     'type' => CRM_Utils_Type::T_INT,
     'name' => 'contribution_id',
     'title' => 'Contribution ID',
     'description' => 'contribution id (optional, overrides needs_update flag)',
-  );
+  ];
 }
 
 /**

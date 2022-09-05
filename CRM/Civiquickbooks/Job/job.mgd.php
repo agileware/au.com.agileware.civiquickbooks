@@ -4,12 +4,12 @@
 // database as appropriate. For more details, see "hook_civicrm_managed" at:
 // http://wiki.civicrm.org/confluence/display/CRMDOC42/Hook+Reference
 
-return array(
-  0 => array(
+return [
+  0 => [
     'name' => 'Civiquickbooks Contact Push Job',
     'entity' => 'Job',
     'update' => 'never',
-    'params' => array(
+    'params' => [
       'version' => 3,
       'name' => 'Civiquickbooks Contact Push Job',
       'description' => 'Push updated contacts to Quickbooks',
@@ -17,13 +17,13 @@ return array(
       'api_action' => 'Contactpush',
       'run_frequency' => 'Always',
       'parameters' => '',
-    ),
-  ),
-  1 => array(
+    ],
+  ],
+  1 => [
     'name' => 'Civiquickbooks Contact Pull Job',
     'entity' => 'Job',
     'update' => 'never',
-    'params' => array(
+    'params' => [
       'version' => 3,
       'name' => 'Civiquickbooks Contact Pull Job',
       'description' => 'Pull updated contacts from Civiquickbooks',
@@ -31,13 +31,13 @@ return array(
       'api_action' => 'Contactpull',
       'run_frequency' => 'Always',
       'parameters' => "start_date=yesterday",
-    ),
-  ),
-  2 => array(
+    ],
+  ],
+  2 => [
     'name' => 'Civiquickbooks Invoice Push Job',
     'entity' => 'Job',
     'update' => 'never',
-    'params' => array(
+    'params' => [
       'version' => 3,
       'name' => 'Civiquickbooks Invoice Push Job',
       'description' => 'Push updated invoices to Quickbooks',
@@ -45,13 +45,13 @@ return array(
       'api_action' => 'Invoicepush',
       'run_frequency' => 'Always',
       'parameters' => '',
-    ),
-  ),
-  3 => array(
+    ],
+  ],
+  3 => [
     'name' => 'Civiquickbooks Invoice Pull Job',
     'entity' => 'Job',
     'update' => 'never',
-    'params' => array(
+    'params' => [
       'version' => 3,
       'name' => 'Civiquickbooks Invoice Pull Job',
       'description' => 'Pull updated invoices from Quickbooks',
@@ -59,6 +59,6 @@ return array(
       'api_action' => 'Invoicepull',
       'run_frequency' => 'Always',
       'parameters' => '',
-    ),
-  ),
-);
+    ],
+  ],
+];

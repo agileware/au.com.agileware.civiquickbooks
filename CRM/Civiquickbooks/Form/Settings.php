@@ -9,16 +9,16 @@ use CRM_Civiquickbooks_ExtensionUtil as E;
  */
 class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
 
-  private $_settingFilter = array('group' => 'civiquickbooks');
+  private $_settingFilter = ['group' => 'civiquickbooks'];
 
   // Form re-used from CiviXero
-  private $_submittedValues = array();
+  private $_submittedValues = [];
 
-  private $_settings = array();
+  private $_settings = [];
 
   public function buildQuickForm() {
     $settings = $this->getFormSettings();
-    $description = array();
+    $description = [];
 
     $QBCredentials = CRM_Quickbooks_APIHelper::getQuickBooksCredentials();
 
@@ -27,10 +27,10 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
         $add = 'add' . $setting['quick_form_type'];
 
         if ($add == 'addElement') {
-          $this->$add($setting['html_type'], $name, $setting['title'], CRM_Utils_Array::value('html_attributes', $setting, array()));
+          $this->$add($setting['html_type'], $name, $setting['title'], CRM_Utils_Array::value('html_attributes', $setting, []));
         }
         elseif ($setting['html_type'] == 'Select') {
-          $optionValues = array();
+          $optionValues = [];
           if (!empty($setting['pseudoconstant']) && !empty($setting['pseudoconstant']['optionGroupName'])) {
             $optionValues = CRM_Core_OptionGroup::values($setting['pseudoconstant']['optionGroupName'], FALSE, FALSE, FALSE, NULL, 'name');
           }
@@ -49,13 +49,13 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
       }
     }
 
-    $this->addButtons(array(
-      array(
+    $this->addButtons([
+      [
         'type' => 'submit',
         'name' => ts('Submit'),
         'isDefault' => TRUE,
-      ),
-    ));
+      ],
+    ]);
 
     $exdate_element = $this->_elements[$this->_elementIndex['quickbooks_access_token_expiryDate']];
     $exdate_element->freeze();
@@ -107,7 +107,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
     // auto-rendered in the loop -- such as "qfKey" and "buttons". These
     // items don't have labels. We'll identify renderable by filtering on
     // the 'label'.
-    $elementNames = array();
+    $elementNames = [];
     foreach ($this->_elements as $element) {
       $label = $element->getLabel();
       if (!empty($label)) {
@@ -124,9 +124,9 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
    */
   public function getFormSettings() {
     if (empty($this->_settings)) {
-      $settings = civicrm_api3('setting', 'getfields', array('filters' => $this->_settingFilter));
+      $settings = civicrm_api3('setting', 'getfields', ['filters' => $this->_settingFilter]);
     }
-    $extraSettings = civicrm_api3('setting', 'getfields', array('filters' => array('group' => 'accountsync')));
+    $extraSettings = civicrm_api3('setting', 'getfields', ['filters' => ['group' => 'accountsync']]);
     $settings = $settings['values'] + $extraSettings['values'];
     return $settings;
   }
@@ -159,13 +159,13 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
     if ($clientIDChanged || $clientSecretChanged) {
       // invalidate anything that depended on the old Client ID or Shared Secret
       civicrm_api3(
-        'setting', 'create', array(
+        'setting', 'create', [
           "quickbooks_access_token" => '',
           "quickbooks_refresh_token" => '',
           "quickbooks_realmId" => '',
           "quickbooks_access_token_expiryDate" => '',
           "quickbooks_refresh_token_expiryDate" => '',
-        )
+        ]
       );
     }
 
@@ -178,8 +178,8 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
    * @see CRM_Core_Form::setDefaultValues()
    */
   public function setDefaultValues() {
-    $existing = civicrm_api3('setting', 'get', array('return' => array_keys($this->getFormSettings())));
-    $defaults = array();
+    $existing = civicrm_api3('setting', 'get', ['return' => array_keys($this->getFormSettings())]);
+    $defaults = [];
     $domainID = CRM_Core_Config::domainID();
     foreach ($existing['values'][$domainID] as $name => $value) {
       $defaults[$name] = $value;

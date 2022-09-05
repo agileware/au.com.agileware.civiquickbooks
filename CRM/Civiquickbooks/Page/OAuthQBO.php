@@ -44,8 +44,8 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
   public function run() {
     //get current value in the database
-    $this->consumer_key = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_consumer_key"));
-    $this->shared_secret = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_shared_secret"));
+    $this->consumer_key = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_consumer_key"]);
+    $this->shared_secret = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_shared_secret"]);
 
     //the initial value of Client ID and Client Secret is empty string, need to check if they have been set
     if ($this->consumer_key === 0 || $this->consumer_key == '' || !isset($this->consumer_key)) {
@@ -59,7 +59,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
     // Check if its a request from QuickBooks after redirection.
     if (isset($_GET['state']) && isset($_GET['code']) && isset($_GET['realmId'])) {
-      $stateToken = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_state_token"));;
+      $stateToken = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_state_token"]);;
       $state = $_GET['state'];
       $state = json_decode($state, TRUE);
 
@@ -89,13 +89,13 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
           $tokenExpiresIn = DateTime::createFromFormat('Y/m/d H:i:s', $tokenExpiresIn);
 
           // Save all the required settings.
-          civicrm_api3('Setting', 'create', array(
+          civicrm_api3('Setting', 'create', [
             'quickbooks_access_token' => $accessToken,
             'quickbooks_refresh_token' => $refreshToken,
             'quickbooks_realmId' => $realmId,
             'quickbooks_access_token_expiryDate' => $tokenExpiresIn->format("Y-m-d H:i:s"),
             'quickbooks_refresh_token_expiryDate' => $refreshTokenExpiresIn->format("Y-m-d H:i:s"),
-          ));
+          ]);
 
           // Get Data service object for accounting ( Including Access & Refresh token plus realmId)
           $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
@@ -111,33 +111,33 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
           $_company_country = (isset($_company_country['CompanyInfo'])) ? $_company_country['CompanyInfo']['Country'] : 'AU';
 
           try {
-            civicrm_api3('Setting', 'create', array('quickbooks_company_country' => $_company_country));
+            civicrm_api3('Setting', 'create', ['quickbooks_company_country' => $_company_country]);
           } catch (CiviCRM_API3_Exception $e) {
             // Handle error here.
             $errorMessage = $e->getMessage();
             $errorCode = $e->getErrorCode();
             $errorData = $e->getExtraParams();
-            return array(
+            return [
               'error' => $errorMessage,
               'error_code' => $errorCode,
               'error_data' => $errorData,
-            );
+            ];
           }
 
           // Successfully tokens and Company details stored in database.
-          $this->output = array(
+          $this->output = [
             'message' => "Access token info retrieved and stored successfully!",
             'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page to see the new expiry date of your new access token and key</a>',
-          );
+          ];
 
         } catch (\QuickBooksOnline\API\Exception\IdsException $e) {
           // Exception while interacting with QuickBooks
           // Output an error with try again message.
 
-          $this->output = array(
+          $this->output = [
             'message' => $e->getMessage(),
             'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page and try again.</a>',
-          );
+          ];
         }
       }
     }
@@ -148,16 +148,16 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
       $error = $_GET['error'];
       if ($error == "access_denied") {
         // Output error if User denied the access.
-        $this->output = array(
+        $this->output = [
           'message' => 'You\'ve not authorize the request. Please authorize it to sync CiviCRM with QuickBooks',
           'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page to authorise the Quickbooks CiviCRM App</a>',
-        );
+        ];
       }
     }
 
     // If first request without error/code, redirect user for Auth.
     if ($doRedirectForAuth) {
-      $this->output = array('message' => 'Authorizing...');
+      $this->output = ['message' => 'Authorizing...'];
       $this->redirectForAuth();
     }
 

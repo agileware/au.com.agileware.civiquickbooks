@@ -54,7 +54,6 @@ class CRM_Civiquickbooks_Contact {
             break;
         }
 
-
         if(empty($contact))
           continue;
 
@@ -119,7 +118,7 @@ class CRM_Civiquickbooks_Contact {
       if(in_array($contact->Id, $skip_list))
         continue;
 
-      $account_contact = array(
+      $account_contact = [
         'accounts_display_name' => $contact->DisplayName,
         // AccountSync API can not parse this date format correctly, if we use the DAO directly, it has no problem.
         // 'accounts_modified_date' => date('Y-m-d H:i:s', strtotime($contact['MetaData']['LastUpdatedTime'])),
@@ -129,14 +128,14 @@ class CRM_Civiquickbooks_Contact {
         'accounts_needs_update' => 0,
         'sequential' => 1,
         'error_data' => 'NULL',
-      );
+      ];
 
       try {
-        $account_contact['id']= civicrm_api3('account_contact', 'getvalue', array(
+        $account_contact['id']= civicrm_api3('account_contact', 'getvalue', [
           'accounts_contact_id' => $contact->Id,
           'plugin' => $this->plugin,
           'return' => 'id',
-        ));
+        ]);
       } catch (CiviCRM_API3_Exception $e) {
         // No existing AccountContact found; the following API call will create one.
         // Future CIVIQBO-60 entry point for preemptive deduplication.
@@ -442,7 +441,7 @@ class CRM_Civiquickbooks_Contact {
 
 
   protected function mapToCustomer($contact, $accountsID, $customer_data) {
-    $customer = array(
+    $customer = [
       "BillAddr"           => self::getBillingAddr($contact),
       "Title"              => $contact['individual_prefix'],
       "GivenName"          => $contact['first_name'],
@@ -452,13 +451,13 @@ class CRM_Civiquickbooks_Contact {
       "FullyQualifiedName" => $contact['display_name'],
       "CompanyName"        => $contact['organization_name'],
       "DisplayName"        => $contact['display_name'],
-      "PrimaryPhone"       => array(
+      "PrimaryPhone"       => [
         "FreeFormNumber" => self::getBillingPhone($contact),
-      ),
-      "PrimaryEmailAddr"   => array(
+      ],
+      "PrimaryEmailAddr"   => [
         "Address"        => self::getBillingEmail($contact),
-      ),
-    );
+      ],
+    ];
 
     // This sets the company name field for Individuals to be their current
     // employer (if the contact has a current employer). Presumbably contacts of
