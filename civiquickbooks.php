@@ -15,16 +15,6 @@ function civiquickbooks_civicrm_config(&$config) {
 }
 
 /**
- * Implements hook_civicrm_xmlMenu().
- *
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
- */
-function civiquickbooks_civicrm_xmlMenu(&$files) {
-  _civiquickbooks_civix_civicrm_xmlMenu($files);
-}
-
-/**
  * Implements hook_civicrm_install().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
@@ -77,54 +67,6 @@ function civiquickbooks_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
 }
 
 /**
- * Implements hook_civicrm_managed().
- *
- * Generate a list of entities to create/deactivate/delete when this module
- * is installed, disabled, uninstalled.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_managed
- */
-function civiquickbooks_civicrm_managed(&$entities) {
-  _civiquickbooks_civix_civicrm_managed($entities);
-}
-
-/**
- * Implements hook_civicrm_caseTypes().
- *
- * Generate a list of case-types.
- *
- * Note: This hook only runs in CiviCRM 4.4+.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
- */
-function civiquickbooks_civicrm_caseTypes(&$caseTypes) {
-  _civiquickbooks_civix_civicrm_caseTypes($caseTypes);
-}
-
-/**
- * Implements hook_civicrm_angularModules().
- *
- * Generate a list of Angular modules.
- *
- * Note: This hook only runs in CiviCRM 4.5+. It may
- * use features only available in v4.6+.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
- */
-function civiquickbooks_civicrm_angularModules(&$angularModules) {
-  _civiquickbooks_civix_civicrm_angularModules($angularModules);
-}
-
-/**
- * Implements hook_civicrm_alterSettingsFolders().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterSettingsFolders
- */
-function civiquickbooks_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
-  _civiquickbooks_civix_civicrm_alterSettingsFolders($metaDataFolders);
-}
-
-/**
  * Implements hook_civicrm_navigationMenu().
  *
  * Adds entries to the navigation menu.
@@ -174,15 +116,15 @@ function civiquickbooks_civicrm_mapAccountsData(&$accountsData, $entity, $plugin
     return;
   }
 
-  $accountsData['civicrm_formatted'] = array();
+  $accountsData['civicrm_formatted'] = [];
 
-  $mappedFields = array(
+  $mappedFields = [
     'DisplayName' => 'display_name',
     'GivenName' => 'first_name',
     'MiddleName' => 'middle_name',
     'FamilyName' => 'last_name',
     'PrimaryEmailAddr' => 'email',
-  );
+  ];
 
   /* Map primary email address */
   foreach ($mappedFields as $quickbooksField => $civicrmField) {
@@ -204,11 +146,11 @@ function civiquickbooks_civicrm_mapAccountsData(&$accountsData, $entity, $plugin
 
   /* Map Billing Address */
   if (isset($accountsData['BillAddr']) && is_array($accountsData['BillAddr'])) {
-    $addressMappedFields = array(
+    $addressMappedFields = [
       'Line1' => 'street_address',
       'City' => 'city',
       'PostalCode' => 'postal_code',
-    );
+    ];
 
     foreach ($addressMappedFields as $quickbooksField => $civicrmField) {
       if (isset($accountsData['BillAddr'][$quickbooksField])) {
@@ -218,11 +160,11 @@ function civiquickbooks_civicrm_mapAccountsData(&$accountsData, $entity, $plugin
   }
   /* Map Shipping Address */
   elseif (isset($accountsData['ShipAddr']) && is_array($accountsData['ShipAddr'])) {
-    $addressMappedFields = array(
+    $addressMappedFields = [
       'Line1' => 'street_address',
       'City' => 'city',
       'PostalCode' => 'postal_code',
-    );
+    ];
 
     foreach ($addressMappedFields as $quickbooksField => $civicrmField) {
       if (isset($accountsData['ShipAddr'][$quickbooksField])) {
@@ -257,9 +199,9 @@ function civiquickbooks_civicrm_check(&$messages) {
   if ($isRefreshTokenExpired) {
     $messages[] = (new CRM_Utils_Check_Message(
       'quickbooks_refresh_token_expired',
-      ts('QuickBooks refresh is token is expired, <a href="%1">Reauthorize QuickBooks application</a> to continue syncing contacts and contributions updates to QuickBooks.', array(
+      ts('QuickBooks refresh is token is expired, <a href="%1">Reauthorize QuickBooks application</a> to continue syncing contacts and contributions updates to QuickBooks.', [
         1 => CRM_Utils_System::url('civicrm/quickbooks/OAuth', ''),
-      )),
+      ]),
       ts('QuickBooks Token Expired'),
       \Psr\Log\LogLevel::CRITICAL,
       'fa-clock-o'
@@ -282,11 +224,11 @@ function _civiquickbooks_account_plugin_name() {
  * @param $contactid
  */
 function _civiquickbooks_getContactContributions($contactid) {
-  $contributions = civicrm_api3("Contribution", "get", array(
+  $contributions = civicrm_api3("Contribution", "get", [
     "contact_id" => $contactid,
-    "return"     => array("contribution_id"),
+    "return"     => ["contribution_id"],
     "sequential" => TRUE,
-  ));
+  ]);
   $contributions = array_column($contributions["values"], "id");
   return $contributions;
 }
@@ -297,12 +239,12 @@ function _civiquickbooks_getContactContributions($contactid) {
  * @param $contributions
  */
 function _civiquickbooks_getErroredInvoicesOfContributions($contributions) {
-  $invoices = civicrm_api3("AccountInvoice", "get", array(
+  $invoices = civicrm_api3("AccountInvoice", "get", [
     "plugin"          => _civiquickbooks_account_plugin_name(),
     "sequential"      => TRUE,
-    "contribution_id" => array("IN" => $contributions),
-    "error_data"      => array("<>" => ""),
-  ));
+    "contribution_id" => ["IN" => $contributions],
+    "error_data"      => ["<>" => ""],
+  ]);
   return $invoices;
 }
 
@@ -357,8 +299,17 @@ function civiquickbooks_civicrm_pageRun(&$page) {
     CRM_Civiquickbooks_Page_Inline_ContactSyncErrors::addContactSyncErrorsBlock($page, $contactID);
     CRM_Civiquickbooks_Page_Inline_InvoiceSyncErrors::addInvoiceSyncErrorsBlock($page, $contactID);
 
-    CRM_Core_Region::instance('contact-basic-info-right')->add(array(
+    CRM_Core_Region::instance('contact-basic-info-right')->add([
       'template' => "CRM/Civiquickbooks/ContactSyncBlock.tpl",
-    ));
+    ]);
   }
+}
+
+/**
+ * Implements hook_civicrm_entityTypes().
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
+ */
+function civiquickbooks_civicrm_entityTypes(&$entityTypes) {
+  _civiquickbooks_civix_civicrm_entityTypes($entityTypes);
 }
