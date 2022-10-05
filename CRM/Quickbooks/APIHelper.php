@@ -42,18 +42,18 @@ class CRM_Quickbooks_APIHelper {
     $redirectUrl = self::getRedirectUrl();
     $stateTokenValue = self::generateStateToken(40);
 
-    $clientID = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_consumer_key"));
-    $clientSecret = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_shared_secret"));
-    $logLocation = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_log_dir"));
-    $logActivated = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_activate_qbo_logging"));
+    $clientID = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_consumer_key"]);
+    $clientSecret = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_shared_secret"]);
+    $logLocation = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_log_dir"]);
+    $logActivated = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_activate_qbo_logging"]);
 
 
-    $stateToken = array(
+    $stateToken = [
       'state_token' => $stateTokenValue,
-    );
+    ];
     Civi::settings()->set('quickbooks_state_token', $stateTokenValue);
 
-    self::$quickBooksDataService = \QuickBooksOnline\API\DataService\DataService::Configure(array(
+    self::$quickBooksDataService = \QuickBooksOnline\API\DataService\DataService::Configure([
       'auth_mode' => 'oauth2',
       'ClientID' => $clientID,
       'ClientSecret' => $clientSecret,
@@ -61,7 +61,7 @@ class CRM_Quickbooks_APIHelper {
       'scope' => "com.intuit.quickbooks.accounting",
       'response_type' => 'code',
       'state' => json_encode($stateToken),
-  ));
+    ]);
 
     self::$quickBooksDataService->setLogLocation($logLocation);
     if (!$logActivated) {
@@ -89,11 +89,11 @@ class CRM_Quickbooks_APIHelper {
     }
 
     $QBCredentials = self::getQuickBooksCredentials();
-    $logLocation = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_log_dir"));
-    $logActivated = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_activate_qbo_logging"));
-    $baseUrl = civicrm_api3('Setting', 'getvalue', array('name' => "quickbooks_baseurl"));
+    $logLocation = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_log_dir"]);
+    $logActivated = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_activate_qbo_logging"]);
+    $baseUrl = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_baseurl"]);
 
-    $dataServiceParams = array(
+    $dataServiceParams = [
       'auth_mode' => 'oauth2',
       'ClientID' => $QBCredentials['clientID'],
       'ClientSecret' => $QBCredentials['clientSecret'],
@@ -101,7 +101,7 @@ class CRM_Quickbooks_APIHelper {
       'refreshTokenKey' => $QBCredentials['refreshToken'],
       'QBORealmID' => $QBCredentials['realMId'],
       'baseUrl' => $baseUrl,
-    );
+    ];
 
     if ($forRefreshToken) {
       unset($dataServiceParams['accessTokenKey']);
@@ -167,12 +167,12 @@ class CRM_Quickbooks_APIHelper {
         $accessToken = $refreshedAccessTokenObj->getAccessToken();
         $refreshToken = $refreshedAccessTokenObj->getRefreshToken();
 
-        civicrm_api3('Setting', 'create', array(
+        civicrm_api3('Setting', 'create', [
           'quickbooks_access_token' => $accessToken,
           'quickbooks_refresh_token' => $refreshToken,
           'quickbooks_access_token_expiryDate' => $tokenExpiresIn->format("Y-m-d H:i:s"),
           'quickbooks_refresh_token_expiryDate' => $refreshTokenExpiresIn->format("Y-m-d H:i:s"),
-        ));
+        ]);
 
       } catch (\QuickBooksOnline\API\Exception\IdsException $e) {
 
@@ -187,7 +187,7 @@ class CRM_Quickbooks_APIHelper {
    * @throws CiviCRM_API3_Exception
    */
   public static function getQuickBooksCredentials() {
-    $quickBooksSettings = civicrm_api3('Setting', 'get', array('group' => "QuickBooks Online Settings"));
+    $quickBooksSettings = civicrm_api3('Setting', 'get', ['group' => "QuickBooks Online Settings"]);
     $quickBooksSettings = $quickBooksSettings['values'][$quickBooksSettings['id']];
     $clientID = $quickBooksSettings["quickbooks_consumer_key"];
     $clientSecret = $quickBooksSettings["quickbooks_shared_secret"];
@@ -197,7 +197,7 @@ class CRM_Quickbooks_APIHelper {
     $tokenExpiryDate = $quickBooksSettings["quickbooks_access_token_expiryDate"];
     $refreshTokenExpiryDate = $quickBooksSettings["quickbooks_refresh_token_expiryDate"];
 
-    return array(
+    return [
       'clientID' => $clientID,
       'clientSecret' => $clientSecret,
       'accessToken' => $accessToken,
@@ -205,7 +205,7 @@ class CRM_Quickbooks_APIHelper {
       'realMId' => $realMId,
       'accessTokenExpiryDate' => $tokenExpiryDate,
       'refreshTokenExpiryDate' => $refreshTokenExpiryDate,
-    );
+    ];
   }
 
   /**

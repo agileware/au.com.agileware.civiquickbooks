@@ -54,7 +54,6 @@ class CRM_Civiquickbooks_Contact {
             break;
         }
 
-
         if(empty($contact))
           continue;
 
@@ -119,7 +118,7 @@ class CRM_Civiquickbooks_Contact {
       if(in_array($contact->Id, $skip_list))
         continue;
 
-      $account_contact = array(
+      $account_contact = [
         'accounts_display_name' => $contact->DisplayName,
         // AccountSync API can not parse this date format correctly, if we use the DAO directly, it has no problem.
         // 'accounts_modified_date' => date('Y-m-d H:i:s', strtotime($contact['MetaData']['LastUpdatedTime'])),
@@ -129,14 +128,14 @@ class CRM_Civiquickbooks_Contact {
         'accounts_needs_update' => 0,
         'sequential' => 1,
         'error_data' => 'NULL',
-      );
+      ];
 
       try {
-        $account_contact['id']= civicrm_api3('account_contact', 'getvalue', array(
+        $account_contact['id']= civicrm_api3('account_contact', 'getvalue', [
           'accounts_contact_id' => $contact->Id,
           'plugin' => $this->plugin,
           'return' => 'id',
-        ));
+        ]);
       } catch (CiviCRM_API3_Exception $e) {
         // No existing AccountContact found; the following API call will create one.
         // Future CIVIQBO-60 entry point for preemptive deduplication.
@@ -163,21 +162,33 @@ class CRM_Civiquickbooks_Contact {
     return $result;
   }
 
-  public function push($limit = PHP_INT_MAX) {
+  /**
+   * @param array $params
+   *
+   * @return bool
+   * @throws \CRM_Core_Exception
+   */
+  public function push($params) {
     $abort_loop = FALSE;
+    $params['limit'] = $params['limit'] ?? PHP_INT_MAX;
 
     try {
       $accountContactParams = [
         'accounts_needs_update' => 1,
         'plugin'                => $this->plugin,
         'contact_id'            => ['IS NOT NULL' => 1],
-        'connector_id'          => 0,
+        'connector_id'          => $params['connector_id'],
         'error_data' => ['IS NULL' => 1],
         'options'               => [
           'limit' => 0,
           'sort'  => 'contact_id.modified_date ASC'
         ],
       ];
+      // If we specified a CiviCRM contact ID just push that contact.
+      if (!empty($params['contact_id'])) {
+        $accountContactParams['contact_id'] = $params['contact_id'];
+        $accountContactParams['accounts_needs_update'] = 0;
+      }
       // Sort contact records without error data first. This should ensure valid
       // records to be processed before API limits are hit trying to process
       // records that have previously failed.
@@ -195,7 +206,7 @@ class CRM_Civiquickbooks_Contact {
         throw new CRM_Core_Exception('Could not get DataService Object: ' . $e->getMessage());
       }
 
-      foreach (array_slice($records, 0, $limit) as $account_contact) {
+      foreach (array_slice($records, 0, $params['limit']) as $account_contact) {
         if($abort_loop)
           break;
 
@@ -442,7 +453,7 @@ class CRM_Civiquickbooks_Contact {
 
 
   protected function mapToCustomer($contact, $accountsID, $customer_data) {
-    $customer = array(
+    $customer = [
       "BillAddr"           => self::getBillingAddr($contact),
       "Title"              => $contact['individual_prefix'],
       "GivenName"          => $contact['first_name'],
@@ -452,13 +463,13 @@ class CRM_Civiquickbooks_Contact {
       "FullyQualifiedName" => $contact['display_name'],
       "CompanyName"        => $contact['organization_name'],
       "DisplayName"        => $contact['display_name'],
-      "PrimaryPhone"       => array(
+      "PrimaryPhone"       => [
         "FreeFormNumber" => self::getBillingPhone($contact),
-      ),
-      "PrimaryEmailAddr"   => array(
+      ],
+      "PrimaryEmailAddr"   => [
         "Address"        => self::getBillingEmail($contact),
-      ),
-    );
+      ],
+    ];
 
     // This sets the company name field for Individuals to be their current
     // employer (if the contact has a current employer). Presumbably contacts of
