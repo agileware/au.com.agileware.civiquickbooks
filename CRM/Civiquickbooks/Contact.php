@@ -534,8 +534,8 @@ class CRM_Civiquickbooks_Contact {
   protected function getQBOContactByName($name, $givenName = NULL) {
     $query = (
       empty($givenName)
-      ? sprintf('SELECT * FROM Customer WHERE FullyQualifiedName = \'%s\'', $name)
-      : sprintf('SELECT * FROM Customer WHERE FamilyName = \'%s\' AND GivenName = \'%s\'', $name, $givenName)
+      ? sprintf("SELECT * FROM Customer WHERE FullyQualifiedName = '%s'", addslashes($name))
+      : sprintf("SELECT * FROM Customer WHERE FamilyName = '%s' AND GivenName = '%s'", addslashes($name), addslashes($givenName))
     );
 
     try {
