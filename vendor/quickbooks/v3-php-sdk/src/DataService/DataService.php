@@ -858,11 +858,11 @@ class DataService
 
         // Builds resource Uri
         $httpsPostBody = $this->executeObjectSerializer($entity, $urlResource);
-        $className = get_class($entity);
-        if(strpos($className, CoreConstants::PAYMENTCLASSNAME) !== false){
-          $appendString = CoreConstants::VOID_QUERYPARAMETER_PAYMENT;
-        }else{
-          $appendString = CoreConstants::VOID_QUERYPARAMETER_GENERAL;
+        $className = $this->getEntityResourceName($entity);
+        if(in_array($className, CoreConstants::PAYMENTCLASSNAME)) {
+            $appendString = CoreConstants::VOID_QUERYPARAMETER_PAYMENT;
+        } else{
+            $appendString = CoreConstants::VOID_QUERYPARAMETER_GENERAL;
         }
         $uri = implode(CoreConstants::SLASH_CHAR, array('company', $this->serviceContext->realmId, $urlResource . $appendString));
         // Creates request
@@ -922,7 +922,7 @@ class DataService
      * @throws IdsException, SdkException
      *
      */
-    public function DownloadPDF($entity, $dir=null)
+    public function DownloadPDF($entity, $dir=null, $returnPdfString = false)
     {
         $this->validateEntityId($entity);
         $this->verifyOperationAccess($entity, __FUNCTION__);
@@ -944,9 +944,12 @@ class DataService
             $this->lastError = $faultHandler;
             //Add allow for through exception if users set it up
             return null;
+        } elseif ($returnPdfString) {
+            return $responseBody;
         } else {
             $this->lastError = false;
-            return $this->processDownloadedContent(new ContentWriter($responseBody), $responseCode, $this->getExportFileNameForPDF($entity, "pdf"), $dir);
+            
+            return $this->processDownloadedContent(new ContentWriter($responseBody), $responseCode, $dir, $this->getExportFileNameForPDF($entity, "pdf"));
         }
     }
 
@@ -1661,7 +1664,7 @@ class DataService
      * @param string $fileName
      * @return mixed full path with filename or open handler
      */
-    protected function processDownloadedContent(ContentWriter $writer, $responseCode, $fileName = null, $dir)
+    protected function processDownloadedContent(ContentWriter $writer, $responseCode, $dir, $fileName = null)
     {
         $writer->setPrefix($this->getPrefixFromSettings());
         try {

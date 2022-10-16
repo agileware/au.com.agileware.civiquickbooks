@@ -9,5 +9,10 @@
         "Revert change “Set default use SSL to false”": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/280.patch"
       }
     }
+  },
+  "config": {
+    "allow-plugins": {
+      "cweagans/composer-patches": true
+    }
   }
 }

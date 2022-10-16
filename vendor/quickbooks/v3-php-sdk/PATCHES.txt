@@ -5,11 +5,3 @@ Revert change “Set default use SSL to false”
 Source: https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/280.patch
 
 
-Rename bootrape.php to bootstrap.php
-Source: https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/213.patch
-
-
-adding missing use statement, removing invalid if condition check
-Source: https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/270.patch
-
-

@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => '__root__',
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => 'a9542cdc77fa78a185e428fb1c9aa528b388a036',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
+    ),
+    'versions' => array(
+        '__root__' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'a9542cdc77fa78a185e428fb1c9aa528b388a036',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'cweagans/composer-patches' => array(
+            'pretty_version' => '1.7.2',
+            'version' => '1.7.2.0',
+            'reference' => 'e9969cfc0796e6dea9b4e52f77f18e1065212871',
+            'type' => 'composer-plugin',
+            'install_path' => __DIR__ . '/../cweagans/composer-patches',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'quickbooks/v3-php-sdk' => array(
+            'pretty_version' => '5.4.7',
+            'version' => '5.4.7.0',
+            'reference' => 'f2116e24a67971bcdb53cc1f56574e57b1a403f2',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../quickbooks/v3-php-sdk',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

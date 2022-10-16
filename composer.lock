@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "cweagans/composer-patches",
-            "version": "1.7.0",
+            "version": "1.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cweagans/composer-patches.git",
-                "reference": "ae02121445ad75f4eaff800cc532b5e6233e2ddf"
+                "reference": "e9969cfc0796e6dea9b4e52f77f18e1065212871"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/ae02121445ad75f4eaff800cc532b5e6233e2ddf",
-                "reference": "ae02121445ad75f4eaff800cc532b5e6233e2ddf",
+                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/e9969cfc0796e6dea9b4e52f77f18e1065212871",
+                "reference": "e9969cfc0796e6dea9b4e52f77f18e1065212871",
                 "shasum": ""
             },
             "require": {
@@ -48,20 +48,24 @@
                 }
             ],
             "description": "Provides a way to patch Composer packages.",
-            "time": "2020-09-30T17:56:20+00:00"
+            "support": {
+                "issues": "https://github.com/cweagans/composer-patches/issues",
+                "source": "https://github.com/cweagans/composer-patches/tree/1.7.2"
+            },
+            "time": "2022-01-25T19:21:20+00:00"
         },
         {
             "name": "quickbooks/v3-php-sdk",
-            "version": "5.4.4",
+            "version": "5.4.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/intuit/QuickBooks-V3-PHP-SDK.git",
-                "reference": "862c6d2a03b42cccfcdd5ce00c32f432260f9f77"
+                "reference": "f2116e24a67971bcdb53cc1f56574e57b1a403f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/intuit/QuickBooks-V3-PHP-SDK/zipball/862c6d2a03b42cccfcdd5ce00c32f432260f9f77",
-                "reference": "862c6d2a03b42cccfcdd5ce00c32f432260f9f77",
+                "url": "https://api.github.com/repos/intuit/QuickBooks-V3-PHP-SDK/zipball/f2116e24a67971bcdb53cc1f56574e57b1a403f2",
+                "reference": "f2116e24a67971bcdb53cc1f56574e57b1a403f2",
                 "shasum": ""
             },
             "require": {
@@ -77,11 +81,6 @@
                 "guzzlehttp/guzzle": "Uses Guzzle to make HTTP Requests"
             },
             "type": "library",
-            "extra": {
-                "patches_applied": {
-                    "Revert change “Set default use SSL to false”": "https://patch-diff.githubusercontent.com/raw/intuit/QuickBooks-V3-PHP-SDK/pull/280.patch"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "QuickBooksOnline\\API\\": "src/"
@@ -93,8 +92,8 @@
             ],
             "authors": [
                 {
-                    "name": "bsivalingam",
-                    "email": "brinda_sivalingam@intuit.com"
+                    "name": "abisalehalliprasan",
+                    "email": "anil_kumar3@intuit.com"
                 }
             ],
             "description": "The Official PHP SDK for QuickBooks Online Accounting API",
@@ -106,7 +105,11 @@
                 "rest",
                 "smallbusiness"
             ],
-            "time": "2020-09-30T22:20:31+00:00"
+            "support": {
+                "issues": "https://github.com/intuit/QuickBooks-V3-PHP-SDK/issues",
+                "source": "https://github.com/intuit/QuickBooks-V3-PHP-SDK/tree/5.4.7"
+            },
+            "time": "2021-02-09T02:18:32+00:00"
         }
     ],
     "packages-dev": [],
@@ -117,5 +120,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.3.0"
 }
