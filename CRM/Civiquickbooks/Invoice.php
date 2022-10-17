@@ -705,7 +705,7 @@ class CRM_Civiquickbooks_Invoice {
       }
 
       if ($whereToGetInvoiceNumber == 'civi') {
-        $new_invoice['DocNumber'] = $invoice_prefix . sprintf("%07d", $db_contribution['id']);
+        $new_invoice['DocNumber'] = sprintf($invoice_prefix . '%s', $db_contribution['id'] , '');
       }
       elseif ($whereToGetInvoiceNumber == 'qb') {
         $new_invoice['AutoDocNumber'] = 1;

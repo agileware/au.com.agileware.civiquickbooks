@@ -158,23 +158,6 @@ return [
     ],
     'quick_form_type' => 'Element',
   ],
-  'quickbooks_invoice_prefix' => [
-    'group_name' => E::ts('QuickBooks Online Settings'),
-    'group' => 'civiquickbooks',
-    'name' => 'quickbooks_invoice_prefix',
-    'type' => 'String',
-    'default' => 'Civi-',
-    'title' => E::ts('Invoice Prefix'),
-    'is_domain' => 1,
-    'is_contact' => 0,
-    'description' => E::ts('Will be prefixed to Transaction ID when creating an invoices in QBO.'),
-    'help_text' => E::ts('Will be prefixed to Transaction ID when creating an invoice in QBO.'),
-    'html_type' => 'Text',
-    'html_attributes' => [
-      'size' => 10,
-    ],
-    'quick_form_type' => 'Element',
-  ],
   'quickbooks_log_dir' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',
@@ -260,6 +243,31 @@ return [
     'html_attributes' => [
       'civi' => E::ts('CiviCRM'),
       'qb' => E::ts('QuickBooks'),
+    ],
+    'quick_form_type' => 'Element',
+  ],
+  'quickbooks_invoice_prefix' => [
+    'group_name' => E::ts('QuickBooks Online Settings'),
+    'group' => 'civiquickbooks',
+    'name' => 'quickbooks_invoice_prefix',
+    'type' => 'String',
+    'default' => 'Civi-%07d',
+    'title' => E::ts('Invoice Prefix'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => E::ts(
+      'Will be prefixed to Transaction ID when CiviCRM generates an Invoice number for QBO. You can optionally include a format specifier <a href="%1">for printf</a> e.g. %2 will enforce 7 digits with 0 as padding (123 => Civi-0000123)',
+      [ 1 => 'https://www.php.net/manual/en/function.printf.php',
+        2 => 'Civi-%07d'
+      ]),
+    'help_text' => E::ts(
+      'Will be prefixed to Transaction ID when CiviCRM generates an Invoice number for QBO. You can optionally include a format specifier <a href="%1">for printf</a> e.g. %2 will enforce 7 digits with 0 as padding (123 => Civi-0000123)',
+      [ 1 => 'https://www.php.net/manual/en/function.printf.php',
+        2 => 'Civi-%07d'
+      ]),
+    'html_type' => 'Text',
+    'html_attributes' => [
+      'size' => 10,
     ],
     'quick_form_type' => 'Element',
   ],
