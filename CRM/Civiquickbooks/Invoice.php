@@ -999,7 +999,7 @@ class CRM_Civiquickbooks_Invoice {
   protected function savePushResponse($result, $record, $responseErrors = NULL) {
 
     if (!$result) {
-      $responseErrors = $dataService->getLastError();
+      $responseErrors = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject()->getLastError();
     }
 
     if (!empty($responseErrors)) {
