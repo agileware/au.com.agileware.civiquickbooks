@@ -344,7 +344,7 @@ class CRM_Civiquickbooks_Invoice {
         }
 
         $record['accounts_needs_update'] = 0;
-        $record['accounts_status_id'] = 3;
+        $record['accounts_status_id'] = 'cancelled';
 
         CRM_Core_DAO::setFieldValue(
           'CRM_Accountsync_DAO_AccountInvoice',
@@ -937,7 +937,7 @@ class CRM_Civiquickbooks_Invoice {
       'accounts_needs_update' => 1,
       'plugin' => $this->plugin,
       'connector_id' => 0,
-      'accounts_status_id' => ['NOT IN', 3],
+      'accounts_status_id' => ['NOT IN', 'completed'],
       'options' => [
         'sort' => 'error_data ASC',
         'limit' => $limit,
@@ -964,7 +964,7 @@ class CRM_Civiquickbooks_Invoice {
     $criteria = [
       'plugin' => $this->plugin,
       'connector_id' => 0,
-      'accounts_status_id' => ['NOT IN', [1, 3]],
+      'accounts_status_id' => ['NOT IN', ['completed', 'cancelled']],
       'accounts_invoice_id' => ['IS NOT NULL' => 1],
       'accounts_data' => ['IS NOT NULL' => 1],
       'error_data' => ['IS NULL' => 1],
