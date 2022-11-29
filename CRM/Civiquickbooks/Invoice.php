@@ -1,6 +1,8 @@
 <?php
 
 /** Load CiviX ExtensionUtil class and bundled autoload resolver. **/
+
+use Civi\Api4\AccountInvoice;
 use CRM_Civiquickbooks_ExtensionUtil as E;
 
 require E::path('vendor/autoload.php');
@@ -78,7 +80,7 @@ class CRM_Civiquickbooks_Invoice {
         throw new CRM_Core_Exception('Could not get DataService Object: ' . $e->getMessage());
       }
 
-      foreach ($records['values'] as $i => $record) {
+      foreach ($records as $i => $record) {
         try {
           $accountsInvoice = $this->getAccountsInvoice($record);
 
@@ -166,7 +168,7 @@ class CRM_Civiquickbooks_Invoice {
         throw new CRM_Core_Exception('Could not get DataService Object: ' . $e->getMessage());
       }
 
-      foreach ($records['values'] as $i => $record) {
+      foreach ($records as $i => $record) {
         try {
           //double check if the record has been synced or not
           if (!isset($record['accounts_invoice_id']) || !isset($record['accounts_data'])) {
@@ -933,61 +935,38 @@ class CRM_Civiquickbooks_Invoice {
    * @throws \CiviCRM_API3_Exception
    */
   protected function findPushContributions($params, $limit) {
-    $criteria = [
-      'accounts_needs_update' => 1,
-      'plugin' => $this->plugin,
-      'connector_id' => 0,
-      'accounts_status_id' => ['NOT IN', 'completed'],
-      'options' => [
-        'sort' => 'error_data ASC',
-        'limit' => $limit,
-      ],
-    ];
+    $accountInvoices = AccountInvoice::get()
+      ->addWhere('plugin', '=', $this->plugin)
+      ->addWhere('connector_id', '=', 0)
+      ->addWhere('accounts_status_id:name', 'NOT IN', ['completed'])
+      ->addOrderBy('error_data', 'ASC')
+      ->setLimit($limit);
     if (isset($params['contribution_id'])) {
-      $criteria['contribution_id'] = $params['contribution_id'];
-      unset($criteria['accounts_needs_update']);
+      $accountInvoices->addWhere('contribution_id', '=', $params['contribution_id']);
     }
-
-    $records = civicrm_api3('AccountInvoice', 'get', $criteria);
-
-    if (!isset($params['contribution_id'])) {
-      $criteria['accounts_status_id'] = ['IS NULL' => 1];
-
-      $nullrec = civicrm_api3('AccountInvoice', 'get', $criteria);
-      $records['values'] = array_merge($records['values'], $nullrec['values']);
+    else {
+      $accountInvoices->addWhere('accounts_needs_update', '=', TRUE);
     }
-
-    return $records;
+    return $accountInvoices->execute()->getArrayCopy();
   }
 
   protected function findPullContributions($params, $limit) {
-    $criteria = [
-      'plugin' => $this->plugin,
-      'connector_id' => 0,
-      'accounts_status_id' => ['NOT IN', ['completed', 'cancelled']],
-      'accounts_invoice_id' => ['IS NOT NULL' => 1],
-      'accounts_data' => ['IS NOT NULL' => 1],
-      'error_data' => ['IS NULL' => 1],
-      'options' => [
-        'sort' => 'error_data',
-        'limit' => $limit,
-      ],
-    ];
+    $accountInvoices = AccountInvoice::get()
+      ->addWhere('plugin', '=', $this->plugin)
+      ->addWhere('connector_id', '=', 0)
+      ->addWhere('accounts_status_id:name', 'NOT IN', ['completed', 'cancelled'])
+      ->addWhere('accounts_invoice_id', 'IS NOT NULL')
+      ->addWhere('accounts_data', 'IS NOT NULL')
+      ->addWhere('error_data', 'IS NULL')
+      ->addOrderBy('error_data', 'ASC')
+      ->setLimit($limit);
     if (isset($params['contribution_id'])) {
-      $criteria['contribution_id'] = $params['contribution_id'];
-      unset($criteria['accounts_needs_update']);
+      $accountInvoices->addWhere('contribution_id', '=', $params['contribution_id']);
     }
-
-    $records = civicrm_api3('AccountInvoice', 'get', $criteria);
-
-    if (!isset($params['contribution_id'])) {
-      $criteria['accounts_status_id'] = ['IS NULL' => 1];
-
-      $nullrec = civicrm_api3('AccountInvoice', 'get', $criteria);
-      $records['values'] = array_merge($records['values'], $nullrec['values']);
+    else {
+      $accountInvoices->addWhere('accounts_needs_update', '=', TRUE);
     }
-
-    return $records;
+    return $accountInvoices->execute()->getArrayCopy();
   }
 
   /**
