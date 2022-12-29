@@ -67,44 +67,6 @@ function civiquickbooks_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
 }
 
 /**
- * Implements hook_civicrm_navigationMenu().
- *
- * Adds entries to the navigation menu.
- */
-function civiquickbooks_civicrm_navigationMenu(&$menu) {
-  $item[] = [
-    'label' => E::ts('QuickBooks'),
-    'name' => 'QuickBooks',
-    'url' => NULL,
-    'permission' => 'administer CiviCRM',
-    'operator' => NULL,
-    'separator' => NULL,
-  ];
-  _civiquickbooks_civix_insert_navigation_menu($menu, 'Administer', $item[0]);
-
-  $item[] = [
-    'label' => E::ts('Quickbooks Settings'),
-    'name' => 'Quickbooks Settings',
-    'url' => 'civicrm/quickbooks/settings',
-    'permission' => 'administer CiviCRM',
-    'operator' => NULL,
-    'separator' => NULL,
-  ];
-  _civiquickbooks_civix_insert_navigation_menu($menu, 'Administer/QuickBooks', $item[1]);
-
-  $item[] = [
-    'label' => E::ts('Synchronize contacts'),
-    'name' => 'Contact Sync',
-    'url' => 'civicrm/a/#/accounts/contact/sync/quickbooks',
-    'permission' => 'administer CiviCRM',
-    'operator' => NULL,
-    'separator' => NULL,
-  ];
-  _civiquickbooks_civix_insert_navigation_menu($menu, 'Administer/QuickBooks', $item[2]);
-  _civiquickbooks_civix_navigationMenu($menu);
-}
-
-/**
  * Map quickbooks accounts data to generic data.
  *
  * @param array $accountsData
