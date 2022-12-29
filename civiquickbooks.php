@@ -24,6 +24,22 @@ function civiquickbooks_civicrm_install() {
 }
 
 /**
+ * Implementation of hook_civicrm_postInstall
+ */
+function civiquickbooks_civicrm_postInstall() {
+  _civiquickbooks_civix_civicrm_postInstall();
+}
+
+/**
+ * Implements hook_civicrm_uninstall().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
+ */
+function civiquickbooks_civicrm_uninstall() {
+  _civiquickbooks_civix_civicrm_uninstall();
+}
+
+/**
  * Implements hook_civicrm_enable().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
@@ -33,41 +49,21 @@ function civiquickbooks_civicrm_enable() {
 }
 
 /**
- * Implements hook_civicrm_navigationMenu().
+ * Implements hook_civicrm_disable().
  *
- * Adds entries to the navigation menu.
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
  */
-function civiquickbooks_civicrm_navigationMenu(&$menu) {
-  $item[] = [
-    'label' => E::ts('QuickBooks'),
-    'name' => 'QuickBooks',
-    'url' => NULL,
-    'permission' => 'administer CiviCRM',
-    'operator' => NULL,
-    'separator' => NULL,
-  ];
-  _civiquickbooks_civix_insert_navigation_menu($menu, 'Administer', $item[0]);
+function civiquickbooks_civicrm_disable() {
+  _civiquickbooks_civix_civicrm_disable();
+}
 
-  $item[] = [
-    'label' => E::ts('Quickbooks Settings'),
-    'name' => 'Quickbooks Settings',
-    'url' => 'civicrm/quickbooks/settings',
-    'permission' => 'administer CiviCRM',
-    'operator' => NULL,
-    'separator' => NULL,
-  ];
-  _civiquickbooks_civix_insert_navigation_menu($menu, 'Administer/QuickBooks', $item[1]);
-
-  $item[] = [
-    'label' => E::ts('Synchronize contacts'),
-    'name' => 'Contact Sync',
-    'url' => 'civicrm/a/#/accounts/contact/sync/quickbooks',
-    'permission' => 'administer CiviCRM',
-    'operator' => NULL,
-    'separator' => NULL,
-  ];
-  _civiquickbooks_civix_insert_navigation_menu($menu, 'Administer/QuickBooks', $item[2]);
-  _civiquickbooks_civix_navigationMenu($menu);
+/**
+ * Implements hook_civicrm_upgrade().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
+ */
+function civiquickbooks_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
+  return _civiquickbooks_civix_civicrm_upgrade($op, $queue);
 }
 
 /**
@@ -269,4 +265,13 @@ function civiquickbooks_civicrm_pageRun(&$page) {
       'template' => "CRM/Civiquickbooks/ContactSyncBlock.tpl",
     ]);
   }
+}
+
+/**
+ * Implements hook_civicrm_entityTypes().
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
+ */
+function civiquickbooks_civicrm_entityTypes(&$entityTypes) {
+  _civiquickbooks_civix_civicrm_entityTypes($entityTypes);
 }

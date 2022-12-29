@@ -9,7 +9,7 @@
         <access_arguments>access CiviCRM</access_arguments>
     </item>
     <item>
-        <path>civicrm/quickbooks/settings</path>
+        <path>civicrm/admin/setting/quickbooks</path>
         <page_callback>CRM_Civiquickbooks_Form_Settings</page_callback>
         <title>QuickBooks Online Settings</title>
         <access_arguments>access CiviCRM</access_arguments>
