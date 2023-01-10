@@ -262,6 +262,7 @@ class CRM_Civiquickbooks_Contact {
                   $abort_loop = TRUE;
                   throw new CiviCRM_API3_Exception('Authentication failure doing QBO contact push, aborting', 9000 + $error_code);
                   break;
+
                 default:
                   $account_contact['error_data'] = json_encode(['failures' => ++$failure_count, 'error' => $error_message]);
                   throw new Exception('"' . implode("\n", $error_message) . '"');
@@ -333,6 +334,12 @@ class CRM_Civiquickbooks_Contact {
     }
   }
 
+  /**
+   * @param array $contact
+   *
+   * @return mixed|string
+   * @throws \CRM_Core_Exception
+   */
   public static function getBillingEmail($contact) {
     if (is_array($contact)) {
       $contact = $contact['id'];
@@ -366,6 +373,12 @@ class CRM_Civiquickbooks_Contact {
     return '';
   }
 
+  /**
+   * @param array $contact
+   *
+   * @return array
+   * @throws \CRM_Core_Exception
+   */
   public static function getBillingAddr($contact) {
     if (is_array($contact)) {
       $contact = $contact['id'];
@@ -420,6 +433,12 @@ class CRM_Civiquickbooks_Contact {
     return [];
   }
 
+  /**
+   * @param array $contact
+   *
+   * @return mixed|string
+   * @throws \CRM_Core_Exception
+   */
   public static function getBillingPhone($contact) {
     if (is_array($contact)) {
       $contact = $contact['id'];
@@ -456,7 +475,14 @@ class CRM_Civiquickbooks_Contact {
     return '';
   }
 
-
+  /**
+   * @param array $contact
+   * @param string $accountsID
+   * @param array|NULL $customer_data
+   *
+   * @return mixed|null
+   * @throws \Exception
+   */
   protected function mapToCustomer($contact, $accountsID, $customer_data) {
     $customer = [
       "BillAddr"           => self::getBillingAddr($contact),
@@ -499,6 +525,11 @@ class CRM_Civiquickbooks_Contact {
 
   /**
    * Get all the customers from Quickbooks by providing a modification date.
+   *
+   * @param string $start_date_string
+   *
+   * @return array
+   * @throws \CRM_Civiquickbooks_Contact_Exception
    */
   protected function getQBOContacts($start_date_string) {
     $date = date('c', strtotime($start_date_string));
@@ -539,9 +570,9 @@ class CRM_Civiquickbooks_Contact {
    * function reflects the same by accepting either a FullyQualifiedName or
    * FamilyName + GivenName pair
    *
-   * @param $name      Family Name for Individuals or Company /
+   * @param string $name      Family Name for Individuals or Company /
    *                   Fully Qualified Name for Organisations
-   * @param $givenName Given Name for Individuals if present; Contact is assumed
+   * @param string $givenName Given Name for Individuals if present; Contact is assumed
    *                   to be an Organisation otherwise.
    */
   protected function getQBOContactByName($name, $givenName = NULL) {
@@ -570,7 +601,6 @@ class CRM_Civiquickbooks_Contact {
       throw new CRM_Civiquickbooks_Contact_Exception('Error pulling single Customer from QBO: ' . $e->getMessage(), 0);
     }
   }
-
 
 }
 
