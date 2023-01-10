@@ -28,20 +28,15 @@ class CRM_Civiquickbooks_Contact {
     // Attempt to match up AccountContacts pending sync to existing QBO
     // Customers.
     try {
-      $ac_list = civicrm_api3('AccountContact', 'get', [
-        'accounts_contact_id' => [ 'IS NULL' => 1 ],
-        'plugin' => $this->plugin,
-        'return' => [
-          'contact_id',
-          'contact_id.last_name',
-          'contact_id.first_name',
-          'contact_id.organization_name',
-          'contact_id.household_name',
-          'contact_id.contact_type',
-        ],
-      ])['values'];
+      $ac_list = AccountContact::get(FALSE)
+        ->addSelect('contact_id', 'contact_id.last_name', 'contact_id.first_name', 'contact_id.organization_name', 'contact_id.household_name', 'contact_id.contact_type')
+        ->addWhere('accounts_contact_id', 'IS NULL')
+        ->addWhere('plugin', '=', $this->plugin)
+        ->addWhere('connector_id', '=', 0)
+        ->addWhere('do_not_sync', '=', FALSE)
+        ->execute();
 
-      foreach($ac_list as $id => $ac) {
+      foreach($ac_list as $ac) {
         switch($ac['contact_id.contact_type']) {
           case 'Individual':
             $contact = $this->getQBOContactByName($ac['contact_id.last_name'], $ac['contact_id.first_name']);
@@ -54,19 +49,22 @@ class CRM_Civiquickbooks_Contact {
             break;
         }
 
-        if(empty($contact))
+        if (empty($contact)) {
           continue;
+        }
 
         $skip_list[] = $contact->Id;
 
-        $existing = civicrm_api3('AccountContact', 'get', [
-          'plugin' => $this->plugin,
-          'accounts_contact_id' => $contact->Id,
-          'return' => ['id', 'contact_id.display_name', 'contact_id'],
-        ]);
+        $existingAccountContact = AccountContact::get(FALSE)
+          ->addSelect('id', 'contact_id.display_name', 'contact_id')
+          ->addWhere('plugin', '=', $this->plugin)
+          ->addWhere('connector_id', '=', 0)
+          ->addWhere('accounts_contact_id', '=', $contact->Id)
+          ->execute()
+          ->first();
 
-        if(!$existing['count']) {
-          $created = civicrm_api3('AccountContact', 'create', [
+        if(empty($existingAccountContact)) {
+          civicrm_api3('AccountContact', 'create', [
             'id' => $ac['id'],
             'plugin' => $this->plugin,
             'accounts_contact_id' => $contact->Id,
@@ -75,23 +73,22 @@ class CRM_Civiquickbooks_Contact {
           ]);
         }
         else {
-          $existing = $existing['values'][$existing['id']];
-
-          $created = civicrm_api3('AccountContact', 'create', [
-            'id' => $id['ac'],
+          civicrm_api3('AccountContact', 'create', [
+            'id' => $ac['id'],
             'plugin' => $this->plugin,
             'accounts_needs_update' => 0,
             'do_not_sync' => 1,
             'error_data' => [
               'error' => E::ts(
                 'Matches QBO Contact %1, which is already synced to %2 (%3). Deduplication is required.',
-                [1 => $contact->Id, 2 => $existing['contact_id.display_name'], 3 => $existing['contact_id']]
+                [1 => $contact->Id, 2 => $existingAccountContact['contact_id.display_name'], 3 => $existingAccountContact['contact_id']]
               ),
             ]
           ]);
         }
       }
-    } catch(CiviCRM_API3_Exception $e) {
+    }
+    catch (Exception $e) {
       Civi::log()->error($e->getMessage());
     }
 
@@ -130,17 +127,24 @@ class CRM_Civiquickbooks_Contact {
         'error_data' => 'NULL',
       ];
 
-      try {
-        $account_contact['id']= civicrm_api3('account_contact', 'getvalue', [
-          'accounts_contact_id' => $contact->Id,
-          'plugin' => $this->plugin,
-          'return' => 'id',
-        ]);
-      } catch (CiviCRM_API3_Exception $e) {
+      $matchedAccountContact = AccountContact::get(FALSE)
+        ->addWhere('plugin', '=', $this->plugin)
+        ->addWhere('connector_id', '=', 0)
+        ->addWhere('accounts_contact_id', '=', $contact->Id)
+        ->execute()
+        ->first();
+
+      if (empty($matchedAccountContact)) {
         // No existing AccountContact found; the following API call will create one.
         // Future CIVIQBO-60 entry point for preemptive deduplication.
         continue;
       }
+      if ($matchedAccountContact['do_not_sync']) {
+        // This contact is marked as Do Not Sync
+        continue;
+      }
+
+      $account_contact['id'] = $matchedAccountContact['id'];
 
       //create/update account contact entity.
       try {
@@ -173,28 +177,29 @@ class CRM_Civiquickbooks_Contact {
     $params['limit'] = $params['limit'] ?? PHP_INT_MAX;
 
     try {
-      $accountContactParams = [
-        'accounts_needs_update' => 1,
-        'plugin'                => $this->plugin,
-        'contact_id'            => ['IS NOT NULL' => 1],
-        'connector_id'          => $params['connector_id'],
-        'error_data' => ['IS NULL' => 1],
-        'options'               => [
-          'limit' => 0,
-          'sort'  => 'contact_id.modified_date ASC'
-        ],
-      ];
+      $accountContacts = AccountContact::get(FALSE)
+        ->addWhere('plugin', '=', $this->plugin)
+        ->addWhere('connector_id', '=', $params['connector_id'])
+        ->addWhere('do_not_sync', '=', FALSE)
+        ->addWhere('error_data', 'IS NULL')
+        // Sort contact records without error data first. This should ensure valid
+        // records to be processed before API limits are hit trying to process
+        // records that have previously failed.
+        ->addOrderBy('error_data', 'ASC')
+        ->addOrderBy('contact_id.modified_date', 'ASC');
+
       // If we specified a CiviCRM contact ID just push that contact.
       if (!empty($params['contact_id'])) {
-        $accountContactParams['contact_id'] = $params['contact_id'];
-        $accountContactParams['accounts_needs_update'] = 0;
+        $accountContacts
+          ->addWhere('contact_id', '=', $params['contact_id'])
+          ->addWhere('accounts_needs_update', '=', FALSE);
       }
-      // Sort contact records without error data first. This should ensure valid
-      // records to be processed before API limits are hit trying to process
-      // records that have previously failed.
-      $records = civicrm_api3('account_contact', 'get', $accountContactParams)['values'];
-      $accountContactParams['error_data'] = ['IS NOT NULL' => 1];
-      $records = array_merge($records, civicrm_api3('account_contact', 'get', $accountContactParams)['values']);
+      else {
+        $accountContacts
+          ->addWhere('contact_id', 'IS NOT NULL')
+          ->addWhere('accounts_needs_update', '=', TRUE);
+      }
+      $records = $accountContacts->execute()->getArrayCopy();
       $errors = [];
 
       // Load the dataservice outside of the main loop for performance.
@@ -323,7 +328,7 @@ class CRM_Civiquickbooks_Contact {
         throw new CRM_Core_Exception(E::ts("Not all contacts were saved:\n  ") . implode("\n  ", $errors), 'incomplete', $errors);
       }
       return TRUE;
-    } catch (CiviCRM_API3_Exception $e) {
+    } catch (Exception $e) {
       throw new CRM_Core_Exception('Contact Push aborted due to: ' . $e->getMessage());
     }
   }
