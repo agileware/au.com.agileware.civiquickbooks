@@ -1,0 +1,35 @@
+name: civix upgrade
+on:
+  push
+env:
+   COMPOSER_COMPILE: all
+jobs:
+  upgrade-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Install civix and regenerate module
+        run: |
+          composer global config minimum-stability dev
+          composer global config --no-plugins allow-plugins.civicrm/composer-downloads-plugin true
+          composer global config --no-plugins allow-plugins.civicrm/composer-compile-plugin true
+          composer global require civicrm/civix
+          /home/runner/.composer/vendor/bin/civix upgrade
+      - name: Commit and push changes
+        uses: devops-infra/action-commit-push@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          add_timestamp: true
+          commit_prefix: "CIVIBLD-287 [AUTO] "
+          commit_message: "civix upgraded"
+          force: false
+          target_branch: civix-upgrade
+      - name: Create pull request
+        uses: devops-infra/action-pull-request@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          body: "**Automated pull request** - civix regenerated"
+          title: "Automated pull request - civix regenerated"
+          assignee: "agileware-fj"
+          label: "auto"
