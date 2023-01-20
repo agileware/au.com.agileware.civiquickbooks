@@ -18,7 +18,7 @@
   <version>2.9.2</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.0</ver>
+    <ver>5.38</ver>
   </compatibility>
   <requires>
     <ext>nz.co.fuzion.accountsync</ext>
@@ -26,11 +26,15 @@
   <comments>Development and support for this Extension is funded solely by Agileware and CiviCRM community contributions. Agileware does not receive any funding at all for this Extension from the CiviCRM Partner program or CiviCRM LLC. Agileware welcome any funding to help continue paying Agileware staff to continue contributing to the CiviCRM community and Extensions. You can donate to Agileware using https://www.paypal.me/agileware</comments>
   <civix>
     <namespace>CRM/Civiquickbooks</namespace>
-    <format>22.05.2</format>
+    <format>22.12.1</format>
   </civix>
   <mixins>
     <mixin>menu-xml@1.0.0</mixin>
     <mixin>mgd-php@1.0.0</mixin>
     <mixin>setting-php@1.0.0</mixin>
   </mixins>
+  <classloader>
+    <psr0 prefix="CRM_" path="."/>
+  </classloader>
+  <upgrader>CRM_Civiquickbooks_Upgrader</upgrader>
 </extension>

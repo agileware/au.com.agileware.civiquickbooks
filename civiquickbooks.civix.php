@@ -24,7 +24,7 @@ class CRM_Civiquickbooks_ExtensionUtil {
    *   Translated text.
    * @see ts
    */
-  public static function ts($text, $params = []) {
+  public static function ts($text, $params = []): string {
     if (!array_key_exists('domain', $params)) {
       $params['domain'] = [self::LONG_NAME, NULL];
     }
@@ -41,7 +41,7 @@ class CRM_Civiquickbooks_ExtensionUtil {
    *   Ex: 'http://example.org/sites/default/ext/org.example.foo'.
    *   Ex: 'http://example.org/sites/default/ext/org.example.foo/css/foo.css'.
    */
-  public static function url($file = NULL) {
+  public static function url($file = NULL): string {
     if ($file === NULL) {
       return rtrim(CRM_Core_Resources::singleton()->getUrl(self::LONG_NAME), '/');
     }
@@ -91,23 +91,17 @@ function _civiquickbooks_civix_mixin_polyfill() {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_config
  */
-function _civiquickbooks_civix_civicrm_config(&$config = NULL) {
+function _civiquickbooks_civix_civicrm_config($config = NULL) {
   static $configured = FALSE;
   if ($configured) {
     return;
   }
   $configured = TRUE;
 
-  $template = CRM_Core_Smarty::singleton();
-
   $extRoot = __DIR__ . DIRECTORY_SEPARATOR;
   $extDir = $extRoot . 'templates';
-
-  if (is_array($template->template_dir)) {
-    array_unshift($template->template_dir, $extDir);
-  }
-  else {
-    $template->template_dir = [$extDir, $template->template_dir];
+  if (file_exists($extDir)) {
+    CRM_Core_Smarty::singleton()->addTemplateDir($extDir);
   }
 
   $include_path = $extRoot . PATH_SEPARATOR . get_include_path();
@@ -122,36 +116,7 @@ function _civiquickbooks_civix_civicrm_config(&$config = NULL) {
  */
 function _civiquickbooks_civix_civicrm_install() {
   _civiquickbooks_civix_civicrm_config();
-  if ($upgrader = _civiquickbooks_civix_upgrader()) {
-    $upgrader->onInstall();
-  }
   _civiquickbooks_civix_mixin_polyfill();
-}
-
-/**
- * Implements hook_civicrm_postInstall().
- *
- * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_postInstall
- */
-function _civiquickbooks_civix_civicrm_postInstall() {
-  _civiquickbooks_civix_civicrm_config();
-  if ($upgrader = _civiquickbooks_civix_upgrader()) {
-    if (is_callable([$upgrader, 'onPostInstall'])) {
-      $upgrader->onPostInstall();
-    }
-  }
-}
-
-/**
- * Implements hook_civicrm_uninstall().
- *
- * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_uninstall
- */
-function _civiquickbooks_civix_civicrm_uninstall() {
-  _civiquickbooks_civix_civicrm_config();
-  if ($upgrader = _civiquickbooks_civix_upgrader()) {
-    $upgrader->onUninstall();
-  }
 }
 
 /**
@@ -159,59 +124,9 @@ function _civiquickbooks_civix_civicrm_uninstall() {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_enable
  */
-function _civiquickbooks_civix_civicrm_enable() {
+function _civiquickbooks_civix_civicrm_enable(): void {
   _civiquickbooks_civix_civicrm_config();
-  if ($upgrader = _civiquickbooks_civix_upgrader()) {
-    if (is_callable([$upgrader, 'onEnable'])) {
-      $upgrader->onEnable();
-    }
-  }
   _civiquickbooks_civix_mixin_polyfill();
-}
-
-/**
- * (Delegated) Implements hook_civicrm_disable().
- *
- * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_disable
- * @return mixed
- */
-function _civiquickbooks_civix_civicrm_disable() {
-  _civiquickbooks_civix_civicrm_config();
-  if ($upgrader = _civiquickbooks_civix_upgrader()) {
-    if (is_callable([$upgrader, 'onDisable'])) {
-      $upgrader->onDisable();
-    }
-  }
-}
-
-/**
- * (Delegated) Implements hook_civicrm_upgrade().
- *
- * @param $op string, the type of operation being performed; 'check' or 'enqueue'
- * @param $queue CRM_Queue_Queue, (for 'enqueue') the modifiable list of pending up upgrade tasks
- *
- * @return mixed
- *   based on op. for 'check', returns array(boolean) (TRUE if upgrades are pending)
- *   for 'enqueue', returns void
- *
- * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_upgrade
- */
-function _civiquickbooks_civix_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  if ($upgrader = _civiquickbooks_civix_upgrader()) {
-    return $upgrader->onUpgrade($op, $queue);
-  }
-}
-
-/**
- * @return CRM_Civiquickbooks_Upgrader
- */
-function _civiquickbooks_civix_upgrader() {
-  if (!file_exists(__DIR__ . '/CRM/Civiquickbooks/Upgrader.php')) {
-    return NULL;
-  }
-  else {
-    return CRM_Civiquickbooks_Upgrader_Base::instance();
-  }
 }
 
 /**
