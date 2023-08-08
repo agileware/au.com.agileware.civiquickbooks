@@ -270,12 +270,3 @@ function civiquickbooks_civicrm_pageRun(&$page) {
     ]);
   }
 }
-
-/**
- * Implements hook_civicrm_entityTypes().
- *
- * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
- */
-function civiquickbooks_civicrm_entityTypes(&$entityTypes) {
-  _civiquickbooks_civix_civicrm_entityTypes($entityTypes);
-}
