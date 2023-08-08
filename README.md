@@ -15,6 +15,7 @@ extension has been developed and tested with:
 1. QuickBooks Online, Australia (AU)
 2. QuickBooks Online, United States (USA)
 3. QuickBooks Online, United Kingdom (UK)
+4. QuickBooks Online, Canada (CA)
 
 CiviQuickBooks will only synchronise contacts to Quickbooks Online from your
 CiviCRM when a Contribution is added to them, either through online payments or
@@ -76,11 +77,11 @@ CiviQuickBooks Online Settings page is shown below.
 ### Map your QuickBooks product/service to CiviCRM Financial account codes
 
 Each QuickBooks Product/Service has a unique name. This is used in the CiviCRM
-Financial account codes to correctly code each Invoice in QuickBooks Online.
+Financial Account codes to correctly code each Invoice in QuickBooks Online.
 
 1. Open the QuickBooks Company, go to product/service settings page
-   ([https://sandbox.qbo.intuit.com/app/items](https://sandbox.qbo.intuit.com/app/items))
-2. Identify each QuickBooks Product/Service that you what to sync with CiviCRM
+   ([https://sandbox.qbo.intuit.com/app/items](https://sandbox.qbo.intuit.com/app/items)).
+2. Identify each QuickBooks Product/Service that you want to sync with CiviCRM.
 3. Open the CiviCRM Financial Account setting page
    (civicrm/admin/financial/financialAccount) and update the `Acctg Code` of
    corresponding Financial account to be the same as each QuickBooks
@@ -92,7 +93,7 @@ Financial account codes to correctly code each Invoice in QuickBooks Online.
 5. During sync, the Contribution line item will be set to the corresponding
    QuickBooks Product/Service.
 6. When a CiviCRM `Acctg Code` does not match any QuickBooks Product/Service
-   name, which means that the there is no product/service in QuickBooks has the
+   name, which means that no product/service in QuickBooks has the
    same name, that particular line item will **NOT** be pushed through the
    invoice.
 
@@ -171,9 +172,9 @@ For more details on the QuickBooks Online environments, see:
    have even one item in it after the filtering, the invoice will not be pushed
    successfully.
 2. As long as an invoice has at least one item in it after filtering, the
-   information about those none-pushed items will be noted down as `customer
+   information about those non-pushed items will be noted down as `customer
    memo` field. The `id` of the problematic financial type and its `acctg code`
-   will be listed. In that case, you need to manually fix the invoice manually.
+   will be listed. In that case, you need to fix the invoice manually.
 
 # Funding for this CiviCRM extension
 
