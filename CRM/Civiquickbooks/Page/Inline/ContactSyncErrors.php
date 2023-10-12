@@ -28,7 +28,7 @@ class CRM_Civiquickbooks_Page_Inline_ContactSyncErrors extends CRM_Core_Page {
 
       $page->assign('accountContactId', $account_contact['id']);
 
-      if (!empty($account_contact["error_data"])) {
+      if (!empty($account_contact['error_data'])) {
         $hasContactErrors = TRUE;
       }
 

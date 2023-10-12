@@ -28,12 +28,12 @@ class CRM_Civiquickbooks_Page_Inline_InvoiceSyncErrors extends CRM_Core_Page {
 
       $page->assign('accountContactId', $account_contact['id']);
 
-      $contributions = _civiquickbooks_getContactContributions($account_contact["contact_id"]);
+      $contributions = _civiquickbooks_getContactContributions($account_contact['contact_id']);
       if (count($contributions)) {
         $invoices = _civiquickbooks_getErroredInvoicesOfContributions($contributions);
-        if ($invoices["count"]) {
+        if ($invoices['count']) {
           $hasInvoiceErrors = TRUE;
-          $page->assign('erroredInvoices', $invoices["count"]);
+          $page->assign('erroredInvoices', $invoices['count']);
         }
       }
 

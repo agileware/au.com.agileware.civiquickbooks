@@ -43,10 +43,5 @@ function civicrm_api3_civiquickbooks_Contactpull($params) {
   $quickbooks = new CRM_Civiquickbooks_Contact();
   $result = $quickbooks->pull($params);
 
-  // ALTERNATIVE: $returnValues = array(); // OK, success
-  // ALTERNATIVE: $returnValues = array("Some value"); // OK, return a single value
-
-  // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
-
   return civicrm_api3_create_success($result, $params, 'Civiquickbooks', 'Contactpull');
 }

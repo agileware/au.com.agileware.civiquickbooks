@@ -66,7 +66,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
     $isRefreshTokenExpired = CRM_Quickbooks_APIHelper::isTokenExpired($QBCredentials, TRUE);
 
     if ((!empty($QBCredentials['clientID']) && !empty($QBCredentials['clientSecret']) && empty($QBCredentials['accessToken']) && empty($QBCredentials['refreshToken']) && empty($QBCredentials['realMId'])) || $isRefreshTokenExpired) {
-      $url = str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/OAuth", NULL, TRUE, NULL));
+      $url = str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/quickbooks/OAuth', NULL, TRUE, NULL));
       $this->assign('redirect_url', $url);
     }
 
@@ -79,9 +79,9 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
 
     $this->assign('showClientKeysMessage', $showClientKeysMessage);
 
-    $this->assign("description_array", $description);
+    $this->assign('description_array', $description);
 
-    $this->assign("pageTitle", 'QuickBooks Online Settings');
+    $this->assign('pageTitle', 'QuickBooks Online Settings');
 
     // export form elements
     $this->assign('elementNames', $this->getRenderableElementNames());

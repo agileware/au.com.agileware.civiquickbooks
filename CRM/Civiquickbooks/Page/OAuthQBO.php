@@ -44,22 +44,22 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
   public function run() {
     //get current value in the database
-    $this->consumer_key = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_consumer_key"]);
-    $this->shared_secret = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_shared_secret"]);
+    $this->consumer_key = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_consumer_key']);
+    $this->shared_secret = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_shared_secret']);
 
     //the initial value of Client ID and Client Secret is empty string, need to check if they have been set
     if ($this->consumer_key === 0 || $this->consumer_key == '' || !isset($this->consumer_key)) {
-      throw new Exception("Initial Client ID is NOT set!", 1);
+      throw new Exception('Initial Client ID is NOT set!', 1);
     }
     if ($this->shared_secret === 0 || $this->shared_secret == '' || !isset($this->shared_secret)) {
-      throw new Exception("Initial Client Secret is NOT set!", 1);
+      throw new Exception('Initial Client Secret is NOT set!', 1);
     }
 
     $doRedirectForAuth = TRUE;
 
     // Check if its a request from QuickBooks after redirection.
     if (isset($_GET['state']) && isset($_GET['code']) && isset($_GET['realmId'])) {
-      $stateToken = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_state_token"]);;
+      $stateToken = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_state_token']);;
       $state = $_GET['state'];
       $state = json_decode($state, TRUE);
 
@@ -93,8 +93,8 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
             'quickbooks_access_token' => $accessToken,
             'quickbooks_refresh_token' => $refreshToken,
             'quickbooks_realmId' => $realmId,
-            'quickbooks_access_token_expiryDate' => $tokenExpiresIn->format("Y-m-d H:i:s"),
-            'quickbooks_refresh_token_expiryDate' => $refreshTokenExpiresIn->format("Y-m-d H:i:s"),
+            'quickbooks_access_token_expiryDate' => $tokenExpiresIn->format('Y-m-d H:i:s'),
+            'quickbooks_refresh_token_expiryDate' => $refreshTokenExpiresIn->format('Y-m-d H:i:s'),
           ]);
 
           // Get Data service object for accounting ( Including Access & Refresh token plus realmId)

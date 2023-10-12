@@ -30,7 +30,7 @@ return [
       'api_entity' => 'Civiquickbooks',
       'api_action' => 'Contactpull',
       'run_frequency' => 'Always',
-      'parameters' => "start_date=yesterday",
+      'parameters' => 'start_date=yesterday',
     ],
   ],
   2 => [

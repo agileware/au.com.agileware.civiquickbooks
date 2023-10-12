@@ -150,7 +150,7 @@ class CRM_Civiquickbooks_Contact {
           'CRM_Accountsync_DAO_AccountContact',
           $created['values'][0]['id'],
           'accounts_modified_date',
-          date("Y-m-d H:i:s", strtotime($contact->MetaData->LastUpdatedTime)),
+          date('Y-m-d H:i:s', strtotime($contact->MetaData->LastUpdatedTime)),
           'id');
       } catch (CiviCRM_API3_Exception $e) {
         CRM_Core_Session::setStatus(ts('Failed to store ') . $account_contact['accounts_display_name']

@@ -60,7 +60,7 @@ class CRM_Quickbooks_APIHelper {
       'ClientID' => $clientID,
       'ClientSecret' => $clientSecret,
       'RedirectURI' => $redirectUrl,
-      'scope' => "com.intuit.quickbooks.accounting",
+      'scope' => 'com.intuit.quickbooks.accounting',
       'response_type' => 'code',
       'state' => json_encode($stateToken),
     ]);
@@ -137,7 +137,7 @@ class CRM_Quickbooks_APIHelper {
    * @return mixed
    */
   private static function getRedirectUrl() {
-    return str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/OAuth", NULL, TRUE, NULL));
+    return str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/quickbooks/OAuth', NULL, TRUE, NULL));
   }
 
   /**
