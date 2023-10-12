@@ -158,30 +158,12 @@ return [
     ],
     'quick_form_type' => 'Element',
   ],
-  'quickbooks_log_dir' => [
-    'group_name' => E::ts('QuickBooks Online Settings'),
-    'group' => 'civiquickbooks',
-    'name' => 'quickbooks_log_dir',
-    'type' => 'String',
-    'add' => '2.7', // this is the civiquickboks version number where this was added
-    'default' => '/tmp/IdsLogs/',
-    'title' => E::ts('QBO Log Directory'),
-    'is_domain' => 1,
-    'is_contact' => 0,
-    'description' => E::ts('Absolute path to writable file system directory for QBO logs.'),
-    'help_text' => E::ts('Absolute path to writable file system directory for QBO logs.'),
-    'html_type' => 'Text',
-    'html_attributes' => [
-      'size' => 30,
-    ],
-    'quick_form_type' => 'Element',
-  ],
   'quickbooks_activate_qbo_logging' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',
     'name' => 'quickbooks_activate_qbo_logging',
     'type' => 'Boolean',
-    'add' => '2.7', // this is the civiquickboks version number where this was added
+    'add' => '2.7',
     'default' => 0,
     'title' => E::ts('Activate QBO logging?'),
     'is_domain' => 1,
