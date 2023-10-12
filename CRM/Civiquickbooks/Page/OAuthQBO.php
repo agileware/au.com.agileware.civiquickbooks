@@ -126,8 +126,8 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
           // Successfully tokens and Company details stored in database.
           $this->output = [
-            'message' => "Access token info retrieved and stored successfully!",
-            'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page to see the new expiry date of your new access token and key</a>',
+            'message' => 'Access token updated',
+            'redirect_url' => '<a href="' . str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/quickbooks/settings', NULL, TRUE, NULL)) . '">View the CiviQuickbooks settings page to see new access token expiry date</a>',
           ];
 
         } catch (\QuickBooksOnline\API\Exception\IdsException $e) {
@@ -136,7 +136,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
           $this->output = [
             'message' => $e->getMessage(),
-            'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page and try again.</a>',
+            'redirect_url' => '<a href="' . str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/quickbooks/settings', NULL, TRUE, NULL)) . '">View the CiviQuickbooks settings page to try again.</a>',
           ];
         }
       }
@@ -149,8 +149,8 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
       if ($error == "access_denied") {
         // Output error if User denied the access.
         $this->output = [
-          'message' => 'You\'ve not authorize the request. Please authorize it to sync CiviCRM with QuickBooks',
-          'redirect_url' => '<a href="' . str_replace("&amp;", "&", CRM_Utils_System::url("civicrm/quickbooks/settings", NULL, TRUE, NULL)) . '">Click here to go back to CiviQuickbooks settings page to authorise the Quickbooks CiviCRM App</a>',
+          'message' => 'Unauthorized request. Please authorize CiviCRM to sync with QuickBooks',
+          'redirect_url' => '<a href="' . str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/quickbooks/settings', NULL, TRUE, NULL)) . '">View the CiviQuickbooks settings page to authorize CiviCRM to sync with QuickBooks.</a>',
         ];
       }
     }
