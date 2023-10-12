@@ -42,11 +42,13 @@ class CRM_Quickbooks_APIHelper {
     $redirectUrl = self::getRedirectUrl();
     $stateTokenValue = self::generateStateToken(40);
 
-    $clientID = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_consumer_key"]);
-    $clientSecret = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_shared_secret"]);
-    $logLocation = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_log_dir"]);
-    $logActivated = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_activate_qbo_logging"]);
+    $clientID = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_consumer_key']);
+    $clientSecret = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_shared_secret']);
 
+	$config = CRM_Core_Config::singleton();
+    $logLocation = $config->configAndLogDir;
+
+    $logActivated = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_activate_qbo_logging']);
 
     $stateToken = [
       'state_token' => $stateTokenValue,
@@ -63,10 +65,12 @@ class CRM_Quickbooks_APIHelper {
       'state' => json_encode($stateToken),
     ]);
 
-    self::$quickBooksDataService->setLogLocation($logLocation);
-    if (!$logActivated) {
-        self::$quickBooksDataService->disableLog();
-    }
+	if ($logActivated) {
+		self::$quickBooksDataService->setLogLocation($logLocation);
+		self::$quickBooksDataService->enableLog();
+	} else {
+		self::$quickBooksDataService->disableLog();
+	}
 
     return self::$quickBooksDataService;
   }
@@ -89,9 +93,12 @@ class CRM_Quickbooks_APIHelper {
     }
 
     $QBCredentials = self::getQuickBooksCredentials();
-    $logLocation = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_log_dir"]);
-    $logActivated = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_activate_qbo_logging"]);
-    $baseUrl = civicrm_api3('Setting', 'getvalue', ['name' => "quickbooks_baseurl"]);
+
+	$config = CRM_Core_Config::singleton();
+	$logLocation = $config->configAndLogDir;
+
+    $logActivated = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_activate_qbo_logging']);
+    $baseUrl = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_baseurl']);
 
     $dataServiceParams = [
       'auth_mode' => 'oauth2',
@@ -109,8 +116,10 @@ class CRM_Quickbooks_APIHelper {
 
     $dataService = \QuickBooksOnline\API\DataService\DataService::Configure($dataServiceParams);
 
-    $dataService->setLogLocation($logLocation);
-    if (!$logActivated) {
+    if ($logActivated) {
+	    $dataService->setLogLocation($logLocation);
+	    $dataService->enableLog();
+    } else {
         $dataService->disableLog();
     }
 
