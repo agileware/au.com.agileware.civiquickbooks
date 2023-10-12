@@ -99,11 +99,6 @@ function _civiquickbooks_civix_civicrm_config($config = NULL) {
   $configured = TRUE;
 
   $extRoot = __DIR__ . DIRECTORY_SEPARATOR;
-  $extDir = $extRoot . 'templates';
-  if (file_exists($extDir)) {
-    CRM_Core_Smarty::singleton()->addTemplateDir($extDir);
-  }
-
   $include_path = $extRoot . PATH_SEPARATOR . get_include_path();
   set_include_path($include_path);
   _civiquickbooks_civix_mixin_polyfill();
@@ -145,8 +140,8 @@ function _civiquickbooks_civix_insert_navigation_menu(&$menu, $path, $item) {
   if (empty($path)) {
     $menu[] = [
       'attributes' => array_merge([
-        'label'      => CRM_Utils_Array::value('name', $item),
-        'active'     => 1,
+        'label' => $item['name'] ?? NULL,
+        'active' => 1,
       ], $item),
     ];
     return TRUE;
@@ -209,15 +204,4 @@ function _civiquickbooks_civix_fixNavigationMenuItems(&$nodes, &$maxNavID, $pare
       _civiquickbooks_civix_fixNavigationMenuItems($nodes[$origKey]['child'], $maxNavID, $nodes[$origKey]['attributes']['navID']);
     }
   }
-}
-
-/**
- * (Delegated) Implements hook_civicrm_entityTypes().
- *
- * Find any *.entityType.php files, merge their content, and return.
- *
- * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
- */
-function _civiquickbooks_civix_civicrm_entityTypes(&$entityTypes) {
-  $entityTypes = array_merge($entityTypes, []);
 }
