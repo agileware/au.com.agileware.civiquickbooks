@@ -127,7 +127,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
           // Successfully tokens and Company details stored in database.
           $this->output = [
             'message' => 'Access token updated',
-            'redirect_url' => '<a href="' . str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/quickbooks/settings', NULL, TRUE, NULL)) . '">View the CiviQuickbooks settings page to see new access token expiry date</a>',
+            'redirect_url' => '<a href="' . str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/admin/setting/quickbooks', NULL, TRUE, NULL)) . '">View the CiviQuickbooks settings page to see new access token expiry date</a>',
           ];
 
         } catch (\QuickBooksOnline\API\Exception\IdsException $e) {
@@ -136,7 +136,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
           $this->output = [
             'message' => $e->getMessage(),
-            'redirect_url' => '<a href="' . str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/quickbooks/settings', NULL, TRUE, NULL)) . '">View the CiviQuickbooks settings page to try again.</a>',
+            'redirect_url' => '<a href="' . str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/admin/setting/quickbooks', NULL, TRUE, NULL)) . '">View the CiviQuickbooks settings page to try again.</a>',
           ];
         }
       }
@@ -150,7 +150,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
         // Output error if User denied the access.
         $this->output = [
           'message' => 'Unauthorized request. Please authorize CiviCRM to sync with QuickBooks',
-          'redirect_url' => '<a href="' . str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/quickbooks/settings', NULL, TRUE, NULL)) . '">View the CiviQuickbooks settings page to authorize CiviCRM to sync with QuickBooks.</a>',
+          'redirect_url' => '<a href="' . str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/admin/setting/quickbooks', NULL, TRUE, NULL)) . '">View the CiviQuickbooks settings page to authorize CiviCRM to sync with QuickBooks.</a>',
         ];
       }
     }
