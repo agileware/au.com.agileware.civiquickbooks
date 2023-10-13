@@ -7,8 +7,6 @@ use CRM_Civiquickbooks_ExtensionUtil as E;
 
 require E::path('vendor/autoload.php');
 
-require_once 'library/CustomException.php';
-
 /**
  * @class CRM_Civiquickbooks_Contact
  * Class for operating on Customers in Quickbooks Online. These are known as
@@ -604,10 +602,6 @@ class CRM_Civiquickbooks_Contact {
 
 }
 
-/**
- * it uses Class declared in library/CustomException.php
- * Class ContactPullGetQBCustomersException
- */
-class CRM_Civiquickbooks_Contact_Exception extends CustomException {
+class CRM_Civiquickbooks_Contact_Exception extends CRM_Core_Exception {
 
 }
