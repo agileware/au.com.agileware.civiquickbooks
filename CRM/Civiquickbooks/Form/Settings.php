@@ -27,7 +27,7 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
         $add = 'add' . $setting['quick_form_type'];
 
         if ($add == 'addElement') {
-          $this->$add($setting['html_type'], $name, $setting['title'], CRM_Utils_Array::value('html_attributes', $setting, []));
+		  $this->$add($setting['html_type'], $name, $setting['title'], $setting['html_attributes'] ?? NULL);
         }
         elseif ($setting['html_type'] == 'Select') {
           $optionValues = [];
@@ -67,8 +67,8 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Core_Form {
 
     if ((!empty($QBCredentials['clientID']) && !empty($QBCredentials['clientSecret']) && empty($QBCredentials['accessToken']) && empty($QBCredentials['refreshToken']) && empty($QBCredentials['realMId'])) || $isRefreshTokenExpired) {
       $url = str_replace('&amp;', '&', CRM_Utils_System::url('civicrm/quickbooks/OAuth', NULL, TRUE, NULL));
-      $this->assign('redirect_url', $url);
     }
+	$this->assign('redirect_url', $url ?? NULL);
 
     $this->assign('isRefreshTokenExpired', $isRefreshTokenExpired);
 
