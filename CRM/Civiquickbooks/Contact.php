@@ -2,7 +2,7 @@
 
 /** Load CiviX ExtensionUtil class and bundled autoload resolver. **/
 
-use Civi\Api4\EntityTag;
+use Civi\Api4\{EntityTag,AccountContact};
 use CRM_Civiquickbooks_ExtensionUtil as E;
 
 require E::path('vendor/autoload.php');
