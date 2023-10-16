@@ -553,7 +553,7 @@ class CRM_Civiquickbooks_Invoice {
             // We will use account type code to get state tax code id for US companies
             $tax_types[$line_item['financial_type_id']] = [
               'sale_tax_acctgCode' => $tmp,
-              'sale_tax_account_type_code' => htmlspecialchars_decode($entityFinancialAccount['financial_account_id.account_type_code']),
+              'sale_tax_account_type_code' => htmlspecialchars_decode($entityFinancialAccount['financial_account_id.account_type_code'] ?? NULL),
             ];
 
             $tax_codes[] = $tmp;
