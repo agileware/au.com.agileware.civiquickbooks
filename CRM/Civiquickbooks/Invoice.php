@@ -958,14 +958,12 @@ class CRM_Civiquickbooks_Invoice {
       ->addWhere('accounts_invoice_id', 'IS NOT NULL')
       ->addWhere('accounts_data', 'IS NOT NULL')
       ->addWhere('error_data', 'IS NULL')
-      ->addOrderBy('error_data', 'ASC')
       ->setLimit($limit);
+
     if (isset($params['contribution_id'])) {
       $accountInvoices->addWhere('contribution_id', '=', $params['contribution_id']);
     }
-    else {
-      $accountInvoices->addWhere('accounts_needs_update', '=', TRUE);
-    }
+
     return $accountInvoices->execute()->getArrayCopy();
   }
 
