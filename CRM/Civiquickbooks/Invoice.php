@@ -346,7 +346,7 @@ class CRM_Civiquickbooks_Invoice {
         }
 
         $record['accounts_needs_update'] = 0;
-        $record['accounts_status_id'] = 'cancelled';
+        $record['accounts_status_id'] = 'completed';
 
         CRM_Core_DAO::setFieldValue(
           'CRM_Accountsync_DAO_AccountInvoice',
