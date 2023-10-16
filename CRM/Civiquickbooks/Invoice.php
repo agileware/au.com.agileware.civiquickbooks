@@ -346,7 +346,7 @@ class CRM_Civiquickbooks_Invoice {
         }
 
         $record['accounts_needs_update'] = 0;
-        $record['accounts_status_id'] = 'cancelled';
+        $record['accounts_status_id'] = 'completed';
 
         CRM_Core_DAO::setFieldValue(
           'CRM_Accountsync_DAO_AccountInvoice',
@@ -553,7 +553,7 @@ class CRM_Civiquickbooks_Invoice {
             // We will use account type code to get state tax code id for US companies
             $tax_types[$line_item['financial_type_id']] = [
               'sale_tax_acctgCode' => $tmp,
-              'sale_tax_account_type_code' => htmlspecialchars_decode($entityFinancialAccount['financial_account_id.account_type_code']),
+              'sale_tax_account_type_code' => htmlspecialchars_decode($entityFinancialAccount['financial_account_id.account_type_code'] ?? NULL),
             ];
 
             $tax_codes[] = $tmp;
@@ -958,14 +958,12 @@ class CRM_Civiquickbooks_Invoice {
       ->addWhere('accounts_invoice_id', 'IS NOT NULL')
       ->addWhere('accounts_data', 'IS NOT NULL')
       ->addWhere('error_data', 'IS NULL')
-      ->addOrderBy('error_data', 'ASC')
       ->setLimit($limit);
+
     if (isset($params['contribution_id'])) {
       $accountInvoices->addWhere('contribution_id', '=', $params['contribution_id']);
     }
-    else {
-      $accountInvoices->addWhere('accounts_needs_update', '=', TRUE);
-    }
+
     return $accountInvoices->execute()->getArrayCopy();
   }
 

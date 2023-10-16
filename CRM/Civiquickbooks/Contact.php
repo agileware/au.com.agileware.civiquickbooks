@@ -2,12 +2,10 @@
 
 /** Load CiviX ExtensionUtil class and bundled autoload resolver. **/
 
-use Civi\Api4\EntityTag;
+use Civi\Api4\{EntityTag,AccountContact};
 use CRM_Civiquickbooks_ExtensionUtil as E;
 
 require E::path('vendor/autoload.php');
-
-require_once 'library/CustomException.php';
 
 /**
  * @class CRM_Civiquickbooks_Contact
@@ -174,7 +172,6 @@ class CRM_Civiquickbooks_Contact {
    */
   public function push($params) {
     $abort_loop = FALSE;
-    $params['limit'] = $params['limit'] ?? PHP_INT_MAX;
 
     try {
       $accountContacts = AccountContact::get(FALSE)
@@ -191,14 +188,19 @@ class CRM_Civiquickbooks_Contact {
       // If we specified a CiviCRM contact ID just push that contact.
       if (!empty($params['contact_id'])) {
         $accountContacts
-          ->addWhere('contact_id', '=', $params['contact_id'])
-          ->addWhere('accounts_needs_update', '=', FALSE);
+          ->addWhere('contact_id', '=', $params['contact_id']);
       }
       else {
         $accountContacts
           ->addWhere('contact_id', 'IS NOT NULL')
           ->addWhere('accounts_needs_update', '=', TRUE);
       }
+
+      if(!empty($params['limit'])) {
+        $accountContacts
+          ->setLimit($params['limit']);
+      }
+
       $records = $accountContacts->execute()->getArrayCopy();
       $errors = [];
 
@@ -211,7 +213,7 @@ class CRM_Civiquickbooks_Contact {
         throw new CRM_Core_Exception('Could not get DataService Object: ' . $e->getMessage());
       }
 
-      foreach (array_slice($records, 0, $params['limit']) as $account_contact) {
+      foreach ($records as $account_contact) {
         if($abort_loop)
           break;
 
@@ -222,9 +224,7 @@ class CRM_Civiquickbooks_Contact {
         try {
           $id = isset($account_contact['accounts_contact_id']) ? $account_contact['accounts_contact_id'] : NULL;
 
-          // NOTE if we store the json string in the response directly using Accountsync API, it will serialized it for us automatically.
-          // And when we get it out using api, it will deserialize automatically for us.
-          $accounts_data = isset($account_contact['accounts_contact_id']) ? $account_contact['accounts_data'] : NULL;
+          $accounts_data = isset($account_contact['accounts_data']) ? json_decode($account_contact['accounts_data'], TRUE) : [];
 
           $QBOContact = $this->mapToCustomer(
               civicrm_api3('contact', 'getsingle', [ 'id' => $account_contact['contact_id'] ]),
@@ -604,10 +604,6 @@ class CRM_Civiquickbooks_Contact {
 
 }
 
-/**
- * it uses Class declared in library/CustomException.php
- * Class ContactPullGetQBCustomersException
- */
-class CRM_Civiquickbooks_Contact_Exception extends CustomException {
+class CRM_Civiquickbooks_Contact_Exception extends CRM_Core_Exception {
 
 }

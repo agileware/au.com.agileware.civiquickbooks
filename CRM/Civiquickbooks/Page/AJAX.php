@@ -33,7 +33,7 @@ class CRM_Civiquickbooks_Page_AJAX extends CRM_Core_Page {
       $contributions = _civiquickbooks_getContactContributions($contactid);
       $invoices = _civiquickbooks_getErroredInvoicesOfContributions($contributions);
       foreach ($invoices['values'] as $invoice) {
-        $syncerrors = array_merge($syncerrors, json_decode($invoice['error_data"], TRUE));
+        $syncerrors = array_merge($syncerrors, json_decode($invoice['error_data'], TRUE));
       }
     }
     CRM_Utils_JSON::output($syncerrors);

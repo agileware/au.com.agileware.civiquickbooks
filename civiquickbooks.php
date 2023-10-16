@@ -31,39 +31,12 @@ function civiquickbooks_civicrm_postInstall() {
 }
 
 /**
- * Implements hook_civicrm_uninstall().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
- */
-function civiquickbooks_civicrm_uninstall() {
-  _civiquickbooks_civix_civicrm_uninstall();
-}
-
-/**
  * Implements hook_civicrm_enable().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
 function civiquickbooks_civicrm_enable() {
   _civiquickbooks_civix_civicrm_enable();
-}
-
-/**
- * Implements hook_civicrm_disable().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
- */
-function civiquickbooks_civicrm_disable() {
-  _civiquickbooks_civix_civicrm_disable();
-}
-
-/**
- * Implements hook_civicrm_upgrade().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
- */
-function civiquickbooks_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  return _civiquickbooks_civix_civicrm_upgrade($op, $queue);
 }
 
 /**
