@@ -108,7 +108,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
           $_company_country = $companyInfo->Country;
 
           //if getting no response, set country settings as AU company.
-          $_company_country = (isset($_company_country['CompanyInfo'])) ? $_company_country['CompanyInfo']['Country'] : 'AU';
+          $_company_country = (!empty($_company_country)) ? $_company_country : 'AU';
 
           try {
             civicrm_api3('Setting', 'create', ['quickbooks_company_country' => $_company_country]);
