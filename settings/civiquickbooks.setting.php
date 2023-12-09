@@ -15,11 +15,11 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Initial client id retrieved from quickbooks website'),
     'help_text' => E::ts('Initial client id retrieved from quickbooks website'),
-    'html_type' => 'Text',
+    'html_type' => 'text',
     'html_attributes' => [
       'size' => 50,
     ],
-    'quick_form_type' => 'Element',
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_shared_secret' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
@@ -33,11 +33,11 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Initial client secret retrieved from quickbooks website'),
     'help_text' => E::ts('Initial client secret retrieved from quickbooks website'),
-    'html_type' => 'Text',
+    'html_type' => 'text',
     'html_attributes' => [
       'size' => 50,
     ],
-    'quick_form_type' => 'Element',
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_baseurl' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
@@ -51,18 +51,21 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Development or Production mode.'),
     'help_text' => E::ts('Use Development to test with your sandbox.'),
-    'html_type' => 'Select',
-    'html_attributes' => array(
+    'html_type' => 'select',
+    'options' => array(
       'Production' => E::ts('Production'),
       'Development' => E::ts('Development'),
     ),
-    'quick_form_type' => 'Element',
+    'html_attributes' => [
+      'class' => 'crm-select2',
+    ],
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_access_token' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',
     'name' => 'quickbooks_access_token',
-    'type' => 'String',
+    'type' => 'string',
     'html_type' => NULL,
     'add' => '4.7',
     'default' => '',
@@ -76,7 +79,7 @@ return [
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',
     'name' => 'quickbooks_refresh_token',
-    'type' => 'String',
+    'type' => 'string',
     'html_type' => NULL,
     'add' => '4.7',
     'default' => '',
@@ -90,7 +93,7 @@ return [
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',
     'name' => 'quickbooks_state_token',
-    'type' => 'String',
+    'type' => 'string',
     'html_type' => NULL,
     'add' => '4.7',
     'default' => '',
@@ -112,12 +115,12 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Expiry date of the current access token'),
     'help_text' => E::ts('Expiry date of the current access token'),
-    'html_type' => 'Text',
+    'html_type' => 'text',
     'html_attributes' => [
       'size' => 50,
       'readonly' => 'true',
     ],
-    'quick_form_type' => 'Element',
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_refresh_token_expiryDate' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
@@ -131,12 +134,12 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Expiry date of the current refresh token'),
     'help_text' => E::ts('Expiry date of the current refresh token'),
-    'html_type' => 'Text',
+    'html_type' => 'text',
     'html_attributes' => [
       'size' => 50,
       'readonly' => 'true',
     ],
-    'quick_form_type' => 'Element',
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_email_invoice' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
@@ -150,13 +153,16 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Whether an email should be sent to the Invoicee when a new Invoice is created in Quickbooks.'),
     'help_text' => E::ts('Whether an email should be sent to the Invoicee when a new Invoice is created in Quickbooks.'),
-    'html_type' => 'Select',
-    'html_attributes' => [
+    'html_type' => 'select',
+    'options' => [
       'never' => E::ts('Never'),
       'unpaid' => E::ts('Unpaid Invoices Only'),
       'always' => E::ts('Always'),
     ],
-    'quick_form_type' => 'Element',
+    'html_attributes' => [
+      'class' => 'crm-select2',
+    ],
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_activate_qbo_logging' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
@@ -171,7 +177,7 @@ return [
     'description' => E::ts('If selected, QBO will log potentially sensitive data to the QBO Log Directory.'),
     'help_text' => E::ts('If selected, QBO will log potentially sensitive data to the QBO Log Directory.'),
     'html_type' => 'checkbox',
-    'quick_form_type' => 'Element',
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_realmId' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
@@ -185,7 +191,7 @@ return [
     'is_contact' => 0,
     'description' => E::ts('realmId retrieved when got access token'),
     'help_text' => E::ts('realmId retrieved when got access token'),
-    'html_type' => 'Text',
+    'html_type' => 'text',
     'html_attributes' => [
       'size' => 50,
       'readonly' => 'true',
@@ -203,7 +209,7 @@ return [
     'is_contact' => 0,
     'description' => E::ts('QuickBooks company country code for differentiating US and other countries during including tax in invoices.'),
     'help_text' => E::ts('QuickBooks company country code for differentiating US and other countries during including tax in invoices.'),
-    'html_type' => 'Text',
+    'html_type' => 'text',
     'html_attributes' => [
       'size' => 50,
       'readonly' => 'true',
@@ -221,12 +227,15 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Whether the invoice numbers should be generated in CiviCRM or QuickBooks.'),
     'help_text' => E::ts('Whether the invoice numbers should be generated in CiviCRM or QuickBooks.'),
-    'html_type' => 'Select',
-    'html_attributes' => [
+    'html_type' => 'select',
+    'options' => [
       'civi' => E::ts('CiviCRM'),
       'qb' => E::ts('QuickBooks'),
     ],
-    'quick_form_type' => 'Element',
+    'html_attributes' => [
+      'class' => 'crm-select2',
+    ],
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_invoice_prefix' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
@@ -247,17 +256,17 @@ return [
       [ 1 => 'https://www.php.net/manual/en/function.printf.php',
         2 => 'Civi-%07d'
       ]),
-    'html_type' => 'Text',
+    'html_type' => 'text',
     'html_attributes' => [
       'size' => 10,
     ],
-    'quick_form_type' => 'Element',
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_allow_ach' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',
     'name' => 'quickbooks_allow_ach',
-    'type' => 'String',
+    'type' => 'Boolean',
     'add' => '4.7',
     'default' => '0',
     'title' => E::ts('Allow ACH Payment?'),
@@ -265,18 +274,14 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Specifies if invoices can be paid with online bank transfers'),
     'help_text' => E::ts('Specifies if invoices can be paid with online bank transfers'),
-    'html_type' => 'Select',
-    'html_attributes' => [
-      '1' => E::ts('Yes'),
-      '0' => E::ts('No'),
-    ],
-    'quick_form_type' => 'Element',
+    'html_type' => 'checkbox',
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_allow_creditcard' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
     'group' => 'civiquickbooks',
     'name' => 'quickbooks_allow_creditcard',
-    'type' => 'String',
+    'type' => 'Boolean',
     'add' => '4.7',
     'default' => '0',
     'title' => E::ts('Allow Online Credit Card Payment?'),
@@ -284,12 +289,8 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Specifies if online credit card payments are allowed for invoices'),
     'help_text' => E::ts('Specifies if online credit card payments are allowed for invoices'),
-    'html_type' => 'Select',
-    'html_attributes' => [
-      '1' => E::ts('Yes'),
-      '0' => E::ts('No'),
-    ],
-    'quick_form_type' => 'Element',
+    'html_type' => 'checkbox',
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
   'quickbooks_customer_memo' => [
     'group_name' => E::ts('QuickBooks Online Settings'),
@@ -303,10 +304,10 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Custom Memo text (instead of the contribution source)'),
     'help_text' => E::ts('if you enter text into this field it will be displayed on the invoice as the Memo instead of the source'),
-    'html_type' => 'Textarea',
+    'html_type' => 'textarea',
     'html_attributes' => [
       'size' => 200,
     ],
-    'quick_form_type' => 'Element',
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
 ];
