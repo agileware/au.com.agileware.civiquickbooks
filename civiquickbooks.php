@@ -24,13 +24,6 @@ function civiquickbooks_civicrm_install() {
 }
 
 /**
- * Implementation of hook_civicrm_postInstall
- */
-function civiquickbooks_civicrm_postInstall() {
-  _civiquickbooks_civix_civicrm_postInstall();
-}
-
-/**
  * Implements hook_civicrm_enable().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
