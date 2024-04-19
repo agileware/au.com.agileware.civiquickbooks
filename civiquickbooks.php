@@ -40,6 +40,24 @@ function civiquickbooks_civicrm_enable() {
 }
 
 /**
+ * Implements hook_civicrm_alterSettingsMetaData(().
+ *
+ * This hook sets the default for each setting to our preferred value.
+ * It can still be overridden by specifically setting the setting.
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_alterSettingsMetaData/
+ */
+function civiquickbooks_civicrm_alterSettingsMetaData(array &$settingsMetaData): void {
+  $weight = 100;
+  foreach ($settingsMetaData as $index => $setting) {
+    if (($setting['group'] ?? '') === 'accountsync') {
+      $settingsMetaData[$index]['settings_pages'] = ['quickbooks' => ['weight' => $weight]];
+    }
+    $weight++;
+  }
+}
+
+/**
  * Map quickbooks accounts data to generic data.
  *
  * @param array $accountsData
