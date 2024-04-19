@@ -14,8 +14,8 @@
     <url desc="Support">https://agileware.com.au/contact</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2023-10-13</releaseDate>
-  <version>2.9.4</version>
+  <releaseDate>2024-04-19</releaseDate>
+  <version>2.9.5</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.38</ver>
