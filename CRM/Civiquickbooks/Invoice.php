@@ -558,7 +558,18 @@ class CRM_Civiquickbooks_Invoice {
 
             $tax_codes[] = $tmp;
           } catch (CiviCRM_API3_Exception $e) {
+            $tax_errormsg[] = ts(
+              'Could not load "Sales Tax Account is" relationship for FinancialType %1. Error: %2',
+              [
+                1 => $line_item['financial_type_id'],
+                2 => $e->getMessage(),
+              ]
+            );
 
+            $tax_types[$line_item['financial_type_id']] = [
+              'sale_tax_acctgCode' => NULL,
+              'sale_tax_account_type_code' => NULL,
+            ];
           }
         }
 
@@ -569,8 +580,6 @@ class CRM_Civiquickbooks_Invoice {
       }
 
       $i = 1;
-
-      $QBO_errormsg = [];
 
       $item_errormsg = [];
 
@@ -632,11 +641,12 @@ class CRM_Civiquickbooks_Invoice {
             ],
             'UnitPrice' => $lineTotal / $line_item['qty'] * 1.00,
             'Qty' => $line_item['qty'] * 1,
-            'TaxCodeRef' => [
-              'value' => $line_item_tax_ref,
-            ],
           ],
         ];
+
+        if(!empty($line_item_tax_ref)) {
+          $tmp['SalesItemLineDetail']['TaxCodeRef'] = [ 'value' => $line_item_tax_ref ];
+        }
 
         $line_items[] = $tmp;
         $i += 1;
