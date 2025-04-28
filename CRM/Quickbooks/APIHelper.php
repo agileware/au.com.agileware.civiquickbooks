@@ -1,6 +1,9 @@
 <?php
 
 use QuickBooksOnline\API\Core\HttpClients\FaultHandler;
+use CRM_Civiquickbooks_ExtensionUtil as E;
+
+require E::path('vendor/autoload.php');
 
 class CRM_Quickbooks_APIHelper {
 
@@ -316,5 +319,30 @@ class CRM_Quickbooks_APIHelper {
     }
 
     return $error_message;
+  }
+
+  /**
+   * Function to get Accounts name and id.
+   * @return array
+   */
+  public static function accountsName() {
+    if (!CRM_Quickbooks_APIHelper::isAuthorized()) {
+      return [];
+    }
+    // Get the accounts name and id from QuickBooks.
+    try {
+      $query = "SELECT * From Account where AccountType = 'Bank' AND Classification = 'Asset'";
+      $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+      $result = $dataService->Query($query);
+      $accountNames = [];
+      foreach ($result as $accountNameObject) {
+        $accountNames[$accountNameObject->Id] = $accountNameObject->Name;
+      }
+
+      return $accountNames;
+    }
+    catch (Exception $e) {
+      return [];
+    }
   }
 }

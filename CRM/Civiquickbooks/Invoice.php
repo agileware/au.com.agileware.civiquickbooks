@@ -97,6 +97,12 @@ class CRM_Civiquickbooks_Invoice {
           }
 
           if ($accountsInvoice->Id) {
+            // Get invoice SyncToken to avoid Stale object error:
+            // You and XXXX were working on this at the same time. XXX
+            // finished before you did, so your work was not saved.
+            $invoiceExiting = $this->getInvoiceFromQBO($record);
+            $accountsInvoice->SyncToken = $invoiceExiting->SyncToken;
+
             $result = $dataService->Update($accountsInvoice);
 
             if ($last_error = $dataService->getLastError()) {
@@ -224,27 +230,51 @@ class CRM_Civiquickbooks_Invoice {
 
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $result = [];
-
+    $quickbooksAccountId = civicrm_api3('Setting', 'getvalue', [
+      'name' => "quickbooks_account_id",
+      'group' => 'civiquickbooks',
+    ]);
+    $paymentInstrument = CRM_Contribute_BAO_Contribution::buildOptions('payment_instrument_id', 'create');
     foreach ($payments['values'] as $payment) {
       $txnDate = $payment['trxn_date'];
       $total = sprintf('%.5f', $payment['total_amount']);
-      $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create(
-        [
-          'TotalAmt' => $total,
-          'CustomerRef' => $account_invoice->CustomerRef,
-          'CurrencyRef' => $account_invoice->CurrencyRef,
-          'TxnDate' => $txnDate,
-          'Line' => [
-            'Amount' => $total,
-            'LinkedTxn' => [
-              [
-                'TxnType' => 'Invoice',
-                'TxnId' => $account_invoice->Id,
-              ],
+      $paymentInput = [
+        'TotalAmt' => $total,
+        'CustomerRef' => $account_invoice->CustomerRef,
+        'CurrencyRef' => $account_invoice->CurrencyRef,
+        'TxnDate' => $txnDate,
+        'Line' => [
+          'Amount' => $total,
+          'LinkedTxn' => [
+            [
+              'TxnType' => 'Invoice',
+              'TxnId' => $account_invoice->Id,
             ],
           ],
-        ]
-      );
+        ],
+      ];
+      // check payment instrument present on record
+      if (!empty($payment['payment_instrument_id'])) {
+        $paymentMethodId = self::getPaymentMethod($paymentInstrument[$payment['payment_instrument_id']]);
+        if (!empty($paymentMethodId)) {
+          $paymentInput['PaymentMethodRef'] = ['value' => $paymentMethodId];
+        }
+      }
+
+      // set Account ID
+      if ($quickbooksAccountId) {
+        $paymentInput['DepositToAccountRef'] = ['value' => $quickbooksAccountId];
+      }
+
+      // set Transaction ID
+      if (!empty($payment['trxn_id'])) {
+        $paymentInput['PaymentRefNum'] = $payment['trxn_id'];
+      }
+      else if (!empty($payment['check_number'])) {
+        $paymentInput['PaymentRefNum'] = $payment['check_number'];
+      }
+
+      $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create($paymentInput);
       $result[] = $dataService->Add($QBOPayment);
     }
 
@@ -628,7 +658,10 @@ class CRM_Civiquickbooks_Invoice {
         }
 
         $lineTotal = $line_item['line_total'];
-
+        // Do not sync line items with zero quantity.
+        if (empty($line_item['qty'])) {
+          continue;
+        }
         $tmp = [
           'Id' => $i . '',
           'LineNum' => $i,
@@ -641,6 +674,9 @@ class CRM_Civiquickbooks_Invoice {
             ],
             'UnitPrice' => $lineTotal / $line_item['qty'] * 1.00,
             'Qty' => $line_item['qty'] * 1,
+            'TaxCodeRef' => [
+              'value' => $line_item_tax_ref,
+            ],
           ],
         ];
 
@@ -854,6 +890,28 @@ class CRM_Civiquickbooks_Invoice {
   }
 
   /**
+   * get Payment Method for syncing
+   * @param $name
+   */
+  public static function getPaymentMethod($name) {
+    $name = strtolower($name);
+    $paymentMethods =& \Civi::$statics[__CLASS__][__FUNCTION__];
+    if (!isset($paymentMethods[$name])) {
+      $query = 'SELECT * From PaymentMethod';
+      $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+      $result = $dataService->Query($query);
+      if (empty($result)) {
+        return;
+      }
+      foreach ($result as $paymentMethodObject) {
+        $paymentMethods[strtolower($paymentMethodObject->Name)] = $paymentMethodObject->Id;
+      }
+    }
+
+    return $paymentMethods[$name];
+  }
+
+  /**
    * Map fields for a cancelled contribution to be updated to QuickBooks.
    *
    * @param $contributionID int
@@ -945,7 +1003,9 @@ class CRM_Civiquickbooks_Invoice {
    * @throws \CiviCRM_API3_Exception
    */
   protected function findPushContributions($params, $limit) {
+    // quickbook does not accept negative amount.
     $accountInvoices = AccountInvoice::get()
+      ->addJoin('Contribution AS contribution', 'INNER', ['contribution.total_amount', '>=', 0])
       ->addWhere('plugin', '=', $this->plugin)
       ->addWhere('connector_id', '=', 0)
       ->addWhere('accounts_status_id:name', 'NOT IN', ['completed'])
