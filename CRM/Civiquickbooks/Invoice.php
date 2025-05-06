@@ -519,6 +519,8 @@ class CRM_Civiquickbooks_Invoice {
 
       $tax_codes = [];
 
+      $tax_errormsg = [];
+
       //Collect all accounting codes for all line items
       foreach ($db_line_items['values'] as $id => $line_item) {
         //get Inc Account accounting code if it is not collected previously
@@ -573,6 +575,7 @@ class CRM_Civiquickbooks_Invoice {
           }
         }
 
+
         $db_line_items['values'][$id]['sale_tax_acctgCode'] = $tax_types[$line_item['financial_type_id']]['sale_tax_acctgCode'];
 
         // We will use account type code to get state tax code id for US companies
@@ -582,8 +585,6 @@ class CRM_Civiquickbooks_Invoice {
       $i = 1;
 
       $item_errormsg = [];
-
-      $tax_errormsg = [];
 
       //looping through all line items and create an array that contains all necessary info for each line item.
       foreach ($db_line_items['values'] as $id => $line_item) {
