@@ -110,6 +110,12 @@ class CRM_Civiquickbooks_Invoice {
           else {
             $result = $dataService->Add($accountsInvoice);
 
+            if($last_error = $dataService->getLastError()) {
+              $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
+
+              throw new Exception(json_encode($error_message));
+            }
+
             if ($result->Id) {
               $this->savePushResponse($result, $record);
               $result_payments = self::pushPayments($record['contribution_id'], $result);
