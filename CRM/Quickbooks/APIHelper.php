@@ -149,7 +149,7 @@ class CRM_Quickbooks_APIHelper {
   private static function refreshAccessTokenIfRequired() {
     $QBCredentials = self::getQuickBooksCredentials();
     $now = new DateTime();
-    $now->modify("-5 minutes");
+    $now->modify("+10 minutes");
 
     $isAccessTokenExpired = self::isTokenExpired($QBCredentials);
     $isRefreshTokenExpired = self::isTokenExpired($QBCredentials, TRUE);
@@ -233,7 +233,7 @@ class CRM_Quickbooks_APIHelper {
     $isTokenExpired = FALSE;
     if (isset($QBCredentials[$tokenKey]) && !empty($QBCredentials[$tokenKey]) && $QBCredentials[$tokenKey] != 1) {
       $currentDateTime = new DateTime();
-      $currentDateTime->modify("-5 minutes");
+      $currentDateTime->modify("+10 minutes");
       $tokenExpiryDate = DateTime::createFromFormat("Y-m-d H:i:s", $QBCredentials[$tokenKey]);
 
       if ($currentDateTime > $tokenExpiryDate) {
