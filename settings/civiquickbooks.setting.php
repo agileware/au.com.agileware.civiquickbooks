@@ -310,4 +310,26 @@ return [
     ],
     'settings_pages' => ['quickbooks' => ['weight' => 1]],
   ],
+  'quickbooks_account_id' => [
+    'group_name' => E::ts('QuickBooks Online Settings'),
+    'group' => 'civiquickbooks',
+    'name' => 'quickbooks_account_id',
+    'type' => 'String',
+    'add' => '5.13',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => 'QuickBook Payment Account ID',
+    'title' =>  'QuickBook Account ID',
+    'help_text' => 'QuickBook Account ID',
+    'html_type' => 'Select',
+    'default' => '',
+    'quick_form_type' => 'Select',
+    'html_attributes' => [
+      'class' => 'crm-select2',
+    ],
+    'pseudoconstant' => [
+      'callback' => 'CRM_Quickbooks_APIHelper::accountsName',
+    ],
+    'settings_pages' => ['quickbooks' => ['weight' => 1]],
+  ],
 ];
