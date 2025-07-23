@@ -646,7 +646,7 @@ class CRM_Civiquickbooks_Invoice {
             'ItemRef' => [
               'value' => $line_item_ref,
             ],
-            'UnitPrice' => $lineTotal / $line_item['qty'] * 1.00,
+            'UnitPrice' => $line_item['unit_price'] * 1.00,
             'Qty' => $line_item['qty'] * 1,
           ],
         ];
