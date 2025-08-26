@@ -576,11 +576,15 @@ class CRM_Civiquickbooks_Contact {
    *                   to be an Organisation otherwise.
    */
   protected function getQBOContactByName($name, $givenName = NULL) {
-    $query = (
-      empty($givenName)
-      ? sprintf("SELECT * FROM Customer WHERE FullyQualifiedName = '%s'", addslashes($name))
-      : sprintf("SELECT * FROM Customer WHERE FamilyName = '%s' AND GivenName = '%s'", addslashes($name), addslashes($givenName))
-    );
+    $givenName = trim($givenName);
+    $inputParam = ['1' => [$name, 'String']];
+    $query = 'SELECT * FROM Customer WHERE FullyQualifiedName = %1';
+    if (!empty($givenName)) {
+      $inputParam['2'] = [$givenName, 'String'];
+      $query = 'SELECT * FROM Customer WHERE FamilyName = %1 AND GivenName = %2';
+    }
+    // Switch to CiviCRM to handle the single quote present in the contact name.
+    $query = CRM_Core_DAO::composeQuery($query, $inputParam);
 
     try {
       $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
