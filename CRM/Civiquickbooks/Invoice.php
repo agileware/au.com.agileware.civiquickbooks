@@ -236,7 +236,7 @@ class CRM_Civiquickbooks_Invoice {
 
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $result = [];
-    $paymentInstrument = CRM_Core_OptionGroup::values('payment_instrument');
+    $paymentInstrument = self::getCiviPaymentInstrument();
     foreach ($payments['values'] as $payment) {
       $txnDate = $payment['trxn_date'];
       $total = sprintf('%.5f', $payment['total_amount']);
@@ -909,6 +909,23 @@ class CRM_Civiquickbooks_Invoice {
     }
 
     return $paymentMethods[$name];
+  }
+
+  public static function getCiviPaymentInstrument() {
+    $paymentInstrument =& \Civi::$statics[__CLASS__][__FUNCTION__];
+    if (!isset($paymentInstrument)) {
+      $optionValues = \Civi\Api4\OptionValue::get(FALSE)
+        ->addSelect('value', 'name')
+        ->addWhere('option_group_id:name', '=', 'payment_instrument')
+        ->addOrderBy('value', 'ASC')
+        ->setLimit(25)
+        ->execute()->getArrayCopy();
+      foreach ($optionValues as $optionValue) {
+        $paymentInstrument[$optionValue['value']] = $optionValue['name'];
+      }
+    }
+
+    return $paymentInstrument;
   }
 
   /**
