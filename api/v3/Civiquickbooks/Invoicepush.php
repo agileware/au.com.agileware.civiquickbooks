@@ -26,11 +26,11 @@ function _civicrm_api3_civiquickbooks_InvoicePush_spec(&$spec) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_civiquickbooks_InvoicePush($params) {
   if (!CRM_Quickbooks_APIHelper::isAuthorized()) {
-    throw new CiviCRM_API3_Exception('Not authorized! Reauthorize QuickBooks application to continue syncing contacts and contributions updates to QuickBooks');
+    throw new CRM_Core_Exception('Not authorized! Reauthorize QuickBooks application to continue syncing contacts and contributions updates to QuickBooks');
   }
 
   $options = _civicrm_api3_get_options_from_params($params);

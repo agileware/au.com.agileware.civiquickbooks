@@ -7,7 +7,7 @@ class CRM_Civiquickbooks_Helper {
   /**
    * @param int $contactID
    *
-   * @throws \API_Exception
+   * @throws \CRM_Core_Exception
    * @throws \Civi\API\Exception\UnauthorizedException
    */
   public static function addSyncErrorTag(int $contactID) {
@@ -27,7 +27,7 @@ class CRM_Civiquickbooks_Helper {
   /**
    * @param int $contactID
    *
-   * @throws \API_Exception
+   * @throws \CRM_Core_Exception
    * @throws \Civi\API\Exception\UnauthorizedException
    */
   public static function removeSyncErrorTag(int $contactID) {

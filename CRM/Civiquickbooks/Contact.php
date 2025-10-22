@@ -154,7 +154,7 @@ class CRM_Civiquickbooks_Contact {
           'accounts_modified_date',
           date('Y-m-d H:i:s', strtotime($contact->MetaData->LastUpdatedTime)),
           'id');
-      } catch (CiviCRM_API3_Exception $e) {
+      } catch (CRM_Core_Exception $e) {
         CRM_Core_Session::setStatus(ts('Failed to store ') . $account_contact['accounts_display_name']
           . ts(' with error ') . $e->getMessage(),
           ts('Contact Pull failed'));
@@ -260,7 +260,7 @@ class CRM_Civiquickbooks_Contact {
                   // Causes: OAuth is not valid, API throttling has occured.
                   // Stop processing this run.
                   $abort_loop = TRUE;
-                  throw new CiviCRM_API3_Exception('Authentication failure doing QBO contact push, aborting', 9000 + $error_code);
+                  throw new CRM_Core_Exception('Authentication failure doing QBO contact push, aborting', 9000 + $error_code);
                   break;
 
                 default:

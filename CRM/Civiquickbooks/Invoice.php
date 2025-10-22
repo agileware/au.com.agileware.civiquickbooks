@@ -55,7 +55,7 @@ class CRM_Civiquickbooks_Invoice {
    * @return bool
    *
    * @throws \CRM_Core_Exception
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\IdsException
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
@@ -86,7 +86,7 @@ class CRM_Civiquickbooks_Invoice {
 
           if (empty($accountsInvoice)) {
             civicrm_api3('AccountInvoice', 'create', ['id' => $record['id'], 'accounts_needs_update' => 0]);
-            throw new CiviCRM_API3_Exception(E::ts('AccountInvoice object for %1 is empty', [1 => $record['id']]), 'empty_invoice');
+            throw new CRM_Core_Exception(E::ts('AccountInvoice object for %1 is empty', [1 => $record['id']]), 'empty_invoice');
           }
 
           $proceed = TRUE;
@@ -148,7 +148,7 @@ class CRM_Civiquickbooks_Invoice {
       }
       return TRUE;
     }
-    catch (CiviCRM_API3_Exception $e) {
+    catch (CRM_Core_Exception $e) {
       throw new CRM_Core_Exception('Invoice Push aborted due to: ' . $e->getMessage());
     }
   }
@@ -201,7 +201,7 @@ class CRM_Civiquickbooks_Invoice {
         throw new CRM_Core_Exception(ts('Not all records were saved: ') . json_encode($errors, JSON_PRETTY_PRINT), 'incomplete', $errors);
       }
       return TRUE;
-    } catch (CiviCRM_API3_Exception $e) {
+    } catch (CRM_Core_Exception $e) {
       throw new CRM_Core_Exception('Invoice Pull aborted due to: ' . $e->getMessage());
     }
   }
@@ -213,7 +213,7 @@ class CRM_Civiquickbooks_Invoice {
    * @param $contribution_id
    * @param $account_invoice
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    * @throws \QuickBooksOnline\API\Exception\IdsException
    */
@@ -263,7 +263,7 @@ class CRM_Civiquickbooks_Invoice {
    * @param $invoice_id
    * @param $dataService
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    * @throws \QuickBooksOnline\API\Exception\IdsException
    */
@@ -313,7 +313,7 @@ class CRM_Civiquickbooks_Invoice {
    * @param \QuickBooksOnline\API\DataService\DataService $dataService
    *
    * @return \Exception|\QuickBooksOnline\API\Data\IPPIntuitEntity|string|null
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\IdsException
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
@@ -348,7 +348,7 @@ class CRM_Civiquickbooks_Invoice {
         ]);
 
         if ($result['is_error']) {
-          throw new CiviCRM_API3_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status');
+          throw new CRM_Core_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status');
         }
 
         $record['accounts_needs_update'] = 0;
@@ -367,7 +367,7 @@ class CRM_Civiquickbooks_Invoice {
         $result = CRM_Core_DAO::setFieldValue('CRM_Contribute_DAO_Contribution', $record['contribution_id'], 'contribution_status_id', $this->contribution_status_by_value['cancelled'], 'id');
 
         if ($result == FALSE) {
-          throw new CiviCRM_API3_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status');
+          throw new CRM_Core_Exception('Contribution status update failed: id: ' . $record['contribution_id'] . ' of Invoice ' . $invoice['Id'], 'qbo_contribution_status');
         }
 
         $record['accounts_needs_update'] = 0;
@@ -425,7 +425,7 @@ class CRM_Civiquickbooks_Invoice {
    * @param array $record
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   protected function getAccountsInvoice($record) {
     $accountsInvoiceID = isset($record['accounts_invoice_id']) ? $record['accounts_invoice_id'] : NULL;
@@ -485,7 +485,7 @@ class CRM_Civiquickbooks_Invoice {
    * @return array|bool
    *   Contact Object/ array as expected by accounts package
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   protected function mapToAccounts($db_contribution, $accountsID, $SyncToken, $qb_id) {
     static $tmp = NULL;
@@ -503,7 +503,7 @@ class CRM_Civiquickbooks_Invoice {
       ]);
 
       if (empty($db_line_items['count'])) {
-        throw new CiviCRM_API3_Exception('No LineItems for Contribution: ' . $contributionID . '; push aborted.',
+        throw new CRM_Core_Exception('No LineItems for Contribution: ' . $contributionID . '; push aborted.',
           'qbo_contribution_line_item');
       }
 
@@ -565,7 +565,7 @@ class CRM_Civiquickbooks_Invoice {
             ];
 
             $tax_codes[] = $tmp;
-          } catch (CiviCRM_API3_Exception $e) {
+          } catch (CRM_Core_Exception $e) {
             $tax_errormsg[] = ts(
               'Could not load "Sales Tax Account is" relationship for FinancialType %1. Error: %2',
               [
@@ -693,7 +693,7 @@ class CRM_Civiquickbooks_Invoice {
       }
 
       if (empty($line_items)) {
-        throw new CiviCRM_API3_Exception("No valid LineItems in Contribution to push:\n" . $QBO_errormsg, 'qbo_invoice_line_items');
+        throw new CRM_Core_Exception("No valid LineItems in Contribution to push:\n" . $QBO_errormsg, 'qbo_invoice_line_items');
       }
 
       $new_invoice += [
@@ -717,7 +717,7 @@ class CRM_Civiquickbooks_Invoice {
           'group' => 'QuickBooks Online Settings',
         ]);
       } catch (Exception $e) {
-        throw new CiviCRM_API3_Exception(
+        throw new CRM_Core_Exception(
           E::ts('Error getting Invoice generation setting %1', [1 => $e->getMessage()]),
           'qbo_invoice_creation'
         );
@@ -742,7 +742,7 @@ class CRM_Civiquickbooks_Invoice {
             'group' => 'QuickBooks Online Settings',
           ]);
         } catch (Exception $e) {
-          throw new CiviCRM_API3_Exception(
+          throw new CRM_Core_Exception(
             E::ts('Error getting Invoice generation setting %1', [1 => $e->getMessage()]),
             'qbo_invoice_creation'
           );
@@ -757,7 +757,7 @@ class CRM_Civiquickbooks_Invoice {
           'group' => 'QuickBooks Online Settings',
         ]);
       } catch (Exception $e) {
-        throw new CiviCRM_API3_Exception(
+        throw new CRM_Core_Exception(
           E::ts('Error getting Invoice generation setting %1', [1 => $e->getMessage()]),
           'qbo_invoice_creation'
         );
@@ -790,7 +790,7 @@ class CRM_Civiquickbooks_Invoice {
       try {
         return \QuickBooksOnline\API\Facades\Invoice::create($new_invoice);
       } catch (Exception $e) {
-        throw new CiviCRM_API3_Exception(
+        throw new CRM_Core_Exception(
           E::ts('Error creating Invoice for %1: %2', [1 => $contributionID, 2 => $e->getMessage()]),
           'qbo_invoice_creation'
         );
@@ -805,7 +805,7 @@ class CRM_Civiquickbooks_Invoice {
    *                Assumes FullyQualifiedName if containing a colon (:)
    *
    * @return int|FALSE
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
   public static function getQBOItem($name) {
@@ -834,7 +834,7 @@ class CRM_Civiquickbooks_Invoice {
    * @param $name - Name of Tax Code.
    *
    * @return int|FALSE
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
   public static function getQBOTaxCode($name) {
@@ -898,7 +898,7 @@ class CRM_Civiquickbooks_Invoice {
    * @param $line_items
    *
    * @return array|bool
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
   protected function generateTaxDetails($line_items) {
@@ -949,7 +949,7 @@ class CRM_Civiquickbooks_Invoice {
    * @param int $limit
    *
    * @return array
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   protected function findPushContributions($params, $limit) {
     $accountInvoices = AccountInvoice::get()
@@ -993,7 +993,7 @@ class CRM_Civiquickbooks_Invoice {
    * @return array
    *   Array of any errors
    *
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   protected function savePushResponse($result, $record, $responseErrors = NULL) {
 

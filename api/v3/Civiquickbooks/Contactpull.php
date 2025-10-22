@@ -37,7 +37,7 @@ function _civicrm_api3_civiquickbooks_Contactpull_spec(&$spec) {
  */
 function civicrm_api3_civiquickbooks_Contactpull($params) {
   if (!CRM_Quickbooks_APIHelper::isAuthorized()) {
-    throw new CiviCRM_API3_Exception('Not authorized! Reauthorize QuickBooks application to continue syncing contacts and contributions updates to QuickBooks');
+    throw new CRM_Core_Exception('Not authorized! Reauthorize QuickBooks application to continue syncing contacts and contributions updates to QuickBooks');
   }
 
   $quickbooks = new CRM_Civiquickbooks_Contact();
