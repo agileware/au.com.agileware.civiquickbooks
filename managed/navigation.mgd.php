@@ -16,7 +16,7 @@ return [
         'url' => 'civicrm/admin/setting/quickbooks',
         'icon' => NULL,
         'permission' => [
-          'administer CiviCRM system',
+          'administer CiviCRM',
         ],
         'permission_operator' => 'AND',
         'parent_id.name' => 'Accounts_System',
