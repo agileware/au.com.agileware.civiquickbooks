@@ -21,7 +21,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
    * Get Login Helper to get Redirection URL and Access/Refresh Tokens.
    *
    * @return \QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2LoginHelper
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
   private function getLoginHelper() {
@@ -33,7 +33,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
   /**
    * Redirect from CiviCRM to QuickBooks for App authorization.
    *
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
   private function redirectForAuth() {
@@ -112,7 +112,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
           try {
             civicrm_api3('Setting', 'create', ['quickbooks_company_country' => $_company_country]);
-          } catch (CiviCRM_API3_Exception $e) {
+          } catch (CRM_Core_Exception $e) {
             // Handle error here.
             $errorMessage = $e->getMessage();
             $errorCode = $e->getErrorCode();

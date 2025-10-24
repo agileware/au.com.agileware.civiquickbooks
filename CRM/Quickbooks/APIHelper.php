@@ -30,7 +30,7 @@ class CRM_Quickbooks_APIHelper {
    * Generate dataservice object to verify and login into QuickBooks
    *
    * @return \QuickBooksOnline\API\DataService\DataService|null
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
   public static function getLoginDataServiceObject() {
@@ -79,7 +79,7 @@ class CRM_Quickbooks_APIHelper {
    * Generates data service object for accounting into QuickBooks.
    *
    * @return \QuickBooksOnline\API\DataService\DataService|null
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
   public static function getAccountingDataServiceObject($forRefreshToken = FALSE) {
@@ -143,7 +143,7 @@ class CRM_Quickbooks_APIHelper {
   /**
    * Refresh QuickBooks access token if required.
    *
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
   private static function refreshAccessTokenIfRequired() {
@@ -193,7 +193,7 @@ class CRM_Quickbooks_APIHelper {
    * Get all required credentials to connect with QuickBooks
    *
    * @return array
-   * @throws CiviCRM_API3_Exception
+   * @throws CRM_Core_Exception
    */
   public static function getQuickBooksCredentials() {
     $quickBooksSettings = civicrm_api3('Setting', 'get', ['group' => "QuickBooks Online Settings"]);
