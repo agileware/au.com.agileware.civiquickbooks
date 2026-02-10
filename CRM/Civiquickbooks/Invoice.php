@@ -100,8 +100,8 @@ class CRM_Civiquickbooks_Invoice {
             // Get invoice SyncToken to avoid Stale object error:
             // You and XXXX were working on this at the same time. XXX
             // finished before you did, so your work was not saved.
-            $invoiceExiting = $this->getInvoiceFromQBO($record);
-            $accountsInvoice->SyncToken = $invoiceExiting->SyncToken;
+            $invoiceExisting = $this->getInvoiceFromQBO($record, $dataService);
+            $accountsInvoice->SyncToken = $invoiceExisting->SyncToken;
 
             $result = $dataService->Update($accountsInvoice);
 
