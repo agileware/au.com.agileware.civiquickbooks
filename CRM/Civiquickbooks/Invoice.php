@@ -861,20 +861,56 @@ class CRM_Civiquickbooks_Invoice {
    * @throws \QuickBooksOnline\API\Exception\SdkException
    */
   public static function getQBOItem($name) {
-    $items =& \Civi::$statics[__CLASS__][__FUNCTION__];
+    $items = &\Civi::$statics[__CLASS__][__FUNCTION__];
+
+    if (empty($items)) {
+      // Load all items and cache them in a static variable for future use in this run.
+      $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
+      $startPosition = 0;
+      $pageSize = 100;
+
+      do {
+        // Query for both Name and FullyQualifiedName since either could be used in the mapping depending on how the QBO account is set up.
+        $query = 'SELECT Name,FullyQualifiedName,Id FROM Item';
+        $result = $dataService->Query($query, $startPosition, $pageSize);
+
+        //  If there is an error with the query, check if it's a rate limit error and throw a specific exception for that, otherwise throw a general exception with the error message.
+        if ($last_error = $dataService->getLastError()) {
+          $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
+
+          if ($last_error->getHttpStatusCode() == 429) {
+            throw new CRM_Core_Exception("QBO API rate limit exceeded while querying for Items.", 'qbo_rate_limit_exceeded', $error_message);
+          }
+
+          throw new CRM_Core_Exception(
+            'Error querying QBO for Items: ' . implode("\n", $error_message)
+          );
+        }
+
+        // If the result is empty, it means we've retrieved all items and can exit the loop.
+        if (empty($result)) {
+          break;
+        }
+
+        // Cache the Id of each item using both Name and FullyQualifiedName as keys for easy lookup later.
+        if (!empty($item->Name)) {
+          // Use null coalescing assignment operator to avoid overwriting an existing entry with the same Name, since QBO can have multiple items with the same Name but different FullyQualifiedName.
+          $items[$item->Name] ??= $item->Id;
+        }
+        if (!empty($item->FullyQualifiedName)) {
+          $items[$item->FullyQualifiedName] = $item->Id;
+        }
+
+        $startPosition += $pageSize;
+      } while (count($result) === $pageSize);
+
+      if (empty($items)) {
+        throw new CRM_Core_Exception("No Products found in QuickBooks Item list");
+      }
+    }
 
     if (!isset($items[$name])) {
-      $field = (strpos($name, ':') === FALSE) ? 'Name' : 'FullyQualifiedName';
-      $query = sprintf('SELECT %1$s,Id From Item WHERE %1$s = \'%2$s\'', $field, $name);
-
-      $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
-      $result = $dataService->Query($query, 0, 1);
-
-      if (empty($result)) {
-        throw new Exception("No Product found matching $name");
-      }
-
-      $items[$name] = $result[0]->Id;
+      throw new CRM_Core_Exception("No Product found matching $name");
     }
 
     return $items[$name];
@@ -1100,6 +1136,10 @@ class CRM_Civiquickbooks_Invoice {
 
     if (!empty($responseErrors)) {
       $record['accounts_needs_update'] = 1;
+
+      if($responseErrors->getHttpStatusCode() == 429) {
+        throw new CRM_Core_Exception("QBO API rate limit exceeded while pushing invoice for Contribution ID: {$record['contribution_id']}.", 'qbo_rate_limit_exceeded', CRM_Quickbooks_APIHelper::parseErrorResponse($responseErrors));
+      }
 
       $record['error_data'] = json_encode([$responseErrors]);
 
