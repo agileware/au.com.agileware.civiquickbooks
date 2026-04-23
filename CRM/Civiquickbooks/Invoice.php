@@ -446,7 +446,7 @@ class CRM_Civiquickbooks_Invoice {
    *
    * @param array $record
    *
-   * @return array
+   * @return object
    * @throws \CRM_Core_Exception
    */
   protected function getAccountsInvoice($record) {
@@ -504,7 +504,7 @@ class CRM_Civiquickbooks_Invoice {
    *   - contact_id
    * @param int $accountsID
    *
-   * @return array|bool
+   * @return object|bool
    *   Contact Object/ array as expected by accounts package
    *
    * @throws \CRM_Core_Exception
