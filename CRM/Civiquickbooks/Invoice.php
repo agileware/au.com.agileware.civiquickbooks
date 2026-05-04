@@ -875,39 +875,42 @@ class CRM_Civiquickbooks_Invoice {
     if (empty($items)) {
       // Load all items and cache them in a static variable for future use in this run.
       $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
-      $startPosition = 0;
+      $startPosition = 1;
       $pageSize = 100;
 
+      // Query for both Name and FullyQualifiedName since either could be used in the mapping depending on how the QBO account is set up.
+      $query = 'SELECT Name,FullyQualifiedName,Id FROM Item';
+
       do {
-        // Query for both Name and FullyQualifiedName since either could be used in the mapping depending on how the QBO account is set up.
-        $query = 'SELECT Name,FullyQualifiedName,Id FROM Item';
         $result = $dataService->Query($query, $startPosition, $pageSize);
 
-        //  If there is an error with the query, check if it's a rate limit error and throw a specific exception for that, otherwise throw a general exception with the error message.
-        if ($last_error = $dataService->getLastError()) {
-          $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-          if ($last_error->getHttpStatusCode() == 429) {
-            throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while querying for Items.", 'qbo_rate_limit_exceeded', $error_message);
-          }
-
-          throw new CRM_Core_Exception(
-            'Error querying QBO for Items: ' . implode("\n", $error_message)
-          );
-        }
-
-        // If the result is empty, it means we've retrieved all items and can exit the loop.
         if (empty($result)) {
-          break;
+          //  If there is an error with the query, check if it's a rate limit error and throw a specific exception for that, otherwise throw a general exception with the error message.
+          if ($last_error = $dataService->getLastError()) {
+            $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
+
+            if ($last_error->getHttpStatusCode() == 429) {
+              throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while querying for Items.", 'qbo_rate_limit_exceeded', $error_message);
+            }
+
+            throw new CRM_Core_Exception(
+              'Error querying QBO for Items: ' . implode("\n", $error_message)
+            );
+          } else {
+            // If the result is empty, it means we've retrieved all items and can exit the loop.
+            break;
+          }
         }
 
-        // Cache the Id of each item using both Name and FullyQualifiedName as keys for easy lookup later.
-        if (!empty($item->Name)) {
-          // Use null coalescing assignment operator to avoid overwriting an existing entry with the same Name, since QBO can have multiple items with the same Name but different FullyQualifiedName.
-          $items[$item->Name] ??= $item->Id;
-        }
-        if (!empty($item->FullyQualifiedName)) {
-          $items[$item->FullyQualifiedName] = $item->Id;
+        foreach($result as $item){
+          // Cache the Id of each item using both Name and FullyQualifiedName as keys for easy lookup later.
+          if (!empty($item->Name)) {
+            // Use null coalescing assignment operator to avoid overwriting an existing entry with the same Name, since QBO can have multiple items with the same Name but different FullyQualifiedName.
+            $items[$item->Name] ??= $item->Id;
+          }
+          if (!empty($item->FullyQualifiedName)) {
+            $items[$item->FullyQualifiedName] = $item->Id;
+          }
         }
 
         $startPosition += $pageSize;
