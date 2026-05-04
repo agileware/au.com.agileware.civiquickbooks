@@ -872,6 +872,8 @@ class CRM_Civiquickbooks_Invoice {
   public static function getQBOItem($name) {
     $items = &\Civi::$statics[__CLASS__][__FUNCTION__];
 
+    $items ??= Civi::cache('long')->get('civiquickbooks/items', []);
+
     if (empty($items)) {
       // Load all items and cache them in a static variable for future use in this run.
       $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
@@ -919,6 +921,8 @@ class CRM_Civiquickbooks_Invoice {
       if (empty($items)) {
         throw new CRM_Core_Exception("No Products found in QuickBooks Item list");
       }
+
+      Civi::cache('long')->set('civiquickbooks/items', $items, DateInterval::createFromDateString('7 days'));
     }
 
     if (!isset($items[$name])) {
@@ -971,6 +975,9 @@ class CRM_Civiquickbooks_Invoice {
   public static function getPaymentMethod($name) {
     $name = strtolower($name);
     $paymentMethods =& \Civi::$statics[__CLASS__][__FUNCTION__];
+
+    $paymentMethods ??= Civi::cache('long')->get('civiquickbooks/paymentmethods', []);
+
     if (!isset($paymentMethods[$name])) {
       $query = 'SELECT * From PaymentMethod';
       $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
@@ -981,6 +988,8 @@ class CRM_Civiquickbooks_Invoice {
       foreach ($result as $paymentMethodObject) {
         $paymentMethods[strtolower($paymentMethodObject->Name)] = $paymentMethodObject->Id;
       }
+
+      Civi::cache('long')->set('civiquickbooks/paymentmethods', $paymentMethods, DateInterval::createFromDateString('7 days'));
     }
 
     return $paymentMethods[$name];
