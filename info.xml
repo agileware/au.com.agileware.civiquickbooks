@@ -3,7 +3,7 @@
   <file>civiquickbooks</file>
   <name>QuickBooks Online Integration</name>
   <description>CiviCRM extension which integrates CiviCRM with QuickBooks Online.</description>
-  <license>AGPL-3.0</license>
+  <license>GPL-3.0</license>
   <maintainer>
     <author>Agileware</author>
     <email>support@agileware.com.au</email>
@@ -12,10 +12,10 @@
     <url desc="Main Extension Page">https://github.com/agileware/au.com.agileware.civiquickbooks</url>
     <url desc="Documentation">https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/README.md</url>
     <url desc="Support">https://agileware.com.au/contact</url>
-    <url desc="Licensing">https://www.gnu.org/licenses/agpl-3.0.html</url>
+    <url desc="Licensing">https://www.gnu.org/licenses/gpl-3.0.txt</url>
   </urls>
-  <releaseDate>2026-05-04</releaseDate>
-  <version>2.10.3</version>
+  <releaseDate>2026-06-28</releaseDate>
+  <version>2.10.4</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.51</ver>
