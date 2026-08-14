@@ -14,8 +14,8 @@
     <url desc="Support">https://agileware.com.au/contact</url>
     <url desc="Licensing">https://www.gnu.org/licenses/gpl-3.0.txt</url>
   </urls>
-  <releaseDate>2026-06-28</releaseDate>
-  <version>2.10.4</version>
+  <releaseDate>2026-08-14</releaseDate>
+  <version>2.10.5</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.51</ver>
