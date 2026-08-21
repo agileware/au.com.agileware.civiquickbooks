@@ -554,6 +554,7 @@ class CRM_Civiquickbooks_Invoice {
     if (in_array($contri_status_in_lower, $status_array)) {
       $db_line_items = civicrm_api3('LineItem', 'get', [
         'contribution_id' => $contributionID,
+        'options' => ['limit' => 0],
       ]);
 
       if (empty($db_line_items['count'])) {
