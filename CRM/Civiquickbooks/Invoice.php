@@ -676,12 +676,13 @@ class CRM_Civiquickbooks_Invoice {
         }
 
         // For US companies, this process is not needed, as the `TaxCodeRef` for each line item is either `NON` or `TAX`.
+        $line_item_tax_ref = NULL;
         if (!$this->us_company) {
           if (!empty($line_item['sale_tax_acctgCode'])) {
             try {
               $line_item_tax_ref = self::getQBOTaxCode($line_item['sale_tax_acctgCode']);
             } catch (\QuickbooksOnline\API\Exception\IdsException $e) {
-              // Don't include any line items wih a non-matching TaxCode in Quickbooks.
+              // Still push the line item, just without a TaxCodeRef applied.
               $tax_errormsg[] = ts(
                 'No matching QBOTaxCode for FinancialType %2 "Sales Tax Account is": Accounting Code: %1. Error: %3',
                 [
