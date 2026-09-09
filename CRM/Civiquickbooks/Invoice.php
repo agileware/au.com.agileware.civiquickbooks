@@ -260,6 +260,7 @@ class CRM_Civiquickbooks_Invoice {
       'contribution_id' => $contribution_id,
       'status_id' => 'Completed',
       'sequential' => 1,
+      'options' => ['limit' => 0],
     ]);
 
     if (!$payments['count']) {
