@@ -43,8 +43,8 @@ class CRM_Civiquickbooks_Invoice {
    * Push invoices to QuickBooks from the civicrm_account_contact with
    * 'needs_update' = 1.
    *
-   * We call the civicrm_accountPullPreSave hook so other modules can alter if
-   * required
+   * We call the civicrm_accountPushAlterMapped hook so other modules can
+   * alter the mapped invoice, or prevent it being pushed, if required.
    *
    * @param array $params
    *  - start_date
@@ -94,8 +94,12 @@ class CRM_Civiquickbooks_Invoice {
           $accountsInvoice = $this->getAccountsInvoice($record);
 
           if (empty($accountsInvoice)) {
+            // A cancelled/failed contribution that was never previously
+            // synced to QBO has nothing to push. This is expected, not an
+            // error, so mark it up to date and move on without recording
+            // a sync error for it.
             civicrm_api3('AccountInvoice', 'create', ['id' => $record['id'], 'accounts_needs_update' => 0]);
-            throw new CRM_Core_Exception(E::ts('AccountInvoice object for %1 is empty', [1 => $record['id']]), 'empty_invoice');
+            continue;
           }
 
           $proceed = TRUE;
@@ -114,32 +118,14 @@ class CRM_Civiquickbooks_Invoice {
 
             $result = $dataService->Update($accountsInvoice);
 
-            if ($last_error = $dataService->getLastError()) {
-              $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-              if($last_error->getHttpStatusCode() == 429) {
-                // API rate limit exceeded. Stop processing this run.
-                throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while pushing invoice for Contribution ID: {$record['contribution_id']}.", 'qbo_rate_limit_exceeded', $error_message);
-              }
-
-              throw new Exception(json_encode($error_message));
-            }
+            CRM_Quickbooks_APIHelper::checkForError($dataService, "pushing invoice for Contribution ID: {$record['contribution_id']}");
 
             $this->savePushResponse($result, $record);
           }
           else {
             $result = $dataService->Add($accountsInvoice);
 
-            if($last_error = $dataService->getLastError()) {
-              $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-              if($last_error->getHttpStatusCode() == 429) {
-                // API rate limit exceeded. Stop processing this run.
-                throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while pushing invoice for Contribution ID: {$record['contribution_id']}.", 'qbo_rate_limit_exceeded', $error_message);
-              }
-
-              throw new Exception(json_encode($error_message));
-            }
+            CRM_Quickbooks_APIHelper::checkForError($dataService, "pushing invoice for Contribution ID: {$record['contribution_id']}");
 
             if ($result->Id) {
               $this->savePushResponse($result, $record);
@@ -260,6 +246,7 @@ class CRM_Civiquickbooks_Invoice {
       'contribution_id' => $contribution_id,
       'status_id' => 'Completed',
       'sequential' => 1,
+      'options' => ['limit' => 0],
     ]);
 
     if (!$payments['count']) {
@@ -305,7 +292,14 @@ class CRM_Civiquickbooks_Invoice {
       }
 
       $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create($paymentInput);
-      $result[] = $dataService->Add($QBOPayment);
+
+      $dataService->throwExceptionOnError(FALSE);
+
+      $paymentResult = $dataService->Add($QBOPayment);
+
+      CRM_Quickbooks_APIHelper::checkForError($dataService, "pushing payment for Contribution ID: {$contribution_id}");
+
+      $result[] = $paymentResult;
     }
 
     return $result;
@@ -326,6 +320,8 @@ class CRM_Civiquickbooks_Invoice {
       $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     }
 
+    $dataService->throwExceptionOnError(FALSE);
+
     $send = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_email_invoice']);
 
     switch ($send) {
@@ -333,11 +329,17 @@ class CRM_Civiquickbooks_Invoice {
       case 'always':
         $invoice = $dataService->FindById('invoice', $invoice_id);
 
+        CRM_Quickbooks_APIHelper::checkForError($dataService, "finding QBO invoice {$invoice_id} to email");
+
         if ($invoice && (('always' == $send) || $invoice->Balance) &&
           ($customer = $dataService->FindById('customer', $invoice->CustomerRef))) {
 
-          if (@$email = $customer->PrimaryEmailAddr->Address) {
+          CRM_Quickbooks_APIHelper::checkForError($dataService, "finding QBO customer to email invoice {$invoice_id}");
+
+          if (!empty($email = $customer->PrimaryEmailAddr->Address ?? NULL)) {
             $dataService->sendEmail($invoice, $email);
+
+            CRM_Quickbooks_APIHelper::checkForError($dataService, "emailing QBO invoice {$invoice_id}");
           }
         }
 
@@ -376,17 +378,20 @@ class CRM_Civiquickbooks_Invoice {
 
     $invoice = $dataService->FindById('invoice', $record['accounts_invoice_id']);
 
-    if ($last_error = $dataService->getLastError()) {
-      $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-      throw new Exception('"' . implode("\n", $error_message) . '"');
-    }
+    CRM_Quickbooks_APIHelper::checkForError($dataService, "fetching QBO invoice {$record['accounts_invoice_id']} for Contribution ID: {$record['contribution_id']}");
 
     return $invoice;
   }
 
   protected function saveToCiviCRM($invoice, $record) {
     if ((int) $record['accounts_data'] == (int) $invoice->SyncToken) {
+      return FALSE;
+    }
+
+    $save = TRUE;
+    CRM_Accountsync_Hook::accountPullPreSave('invoice', $invoice, $save, $record);
+
+    if (!$save) {
       return FALSE;
     }
 
@@ -671,12 +676,13 @@ class CRM_Civiquickbooks_Invoice {
         }
 
         // For US companies, this process is not needed, as the `TaxCodeRef` for each line item is either `NON` or `TAX`.
+        $line_item_tax_ref = NULL;
         if (!$this->us_company) {
           if (!empty($line_item['sale_tax_acctgCode'])) {
             try {
               $line_item_tax_ref = self::getQBOTaxCode($line_item['sale_tax_acctgCode']);
             } catch (\QuickbooksOnline\API\Exception\IdsException $e) {
-              // Don't include any line items wih a non-matching TaxCode in Quickbooks.
+              // Still push the line item, just without a TaxCodeRef applied.
               $tax_errormsg[] = ts(
                 'No matching QBOTaxCode for FinancialType %2 "Sales Tax Account is": Accounting Code: %1. Error: %3',
                 [
@@ -846,7 +852,9 @@ class CRM_Civiquickbooks_Invoice {
 
       // Ensure HTML entities are not double encoded in Invoice create
       array_walk_recursive($new_invoice, function (&$item) {
-        $item = html_entity_decode($item, (ENT_QUOTES | ENT_HTML401), 'UTF-8');
+        if (is_string($item)) {
+          $item = html_entity_decode($item, (ENT_QUOTES | ENT_HTML401), 'UTF-8');
+        }
       });
 
       try {
@@ -888,21 +896,11 @@ class CRM_Civiquickbooks_Invoice {
         $result = $dataService->Query($query, $startPosition, $pageSize);
 
         if (empty($result)) {
-          //  If there is an error with the query, check if it's a rate limit error and throw a specific exception for that, otherwise throw a general exception with the error message.
-          if ($last_error = $dataService->getLastError()) {
-            $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-            if ($last_error->getHttpStatusCode() == 429) {
-              throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while querying for Items.", 'qbo_rate_limit_exceeded', $error_message);
-            }
-
-            throw new CRM_Core_Exception(
-              'Error querying QBO for Items: ' . implode("\n", $error_message)
-            );
-          } else {
-            // If the result is empty, it means we've retrieved all items and can exit the loop.
-            break;
-          }
+          // If there is an error with the query, this throws (recognising a
+          // rate limit error as a specific exception). Otherwise, the empty
+          // result means we've retrieved all items and can exit the loop.
+          CRM_Quickbooks_APIHelper::checkForError($dataService, 'querying for Items');
+          break;
         }
 
         foreach($result as $item){
@@ -950,7 +948,7 @@ class CRM_Civiquickbooks_Invoice {
     }
 
     if (!isset($codes[$name])) {
-      $query = sprintf('SELECT Name,Id From TaxCode WHERE Name = \'%1s\'', $name);
+      $query = sprintf('SELECT Name,Id From TaxCode WHERE Name = \'%s\'', addslashes($name));
 
       $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
       $result = $dataService->Query($query, 0, 1);
@@ -1073,7 +1071,7 @@ class CRM_Civiquickbooks_Invoice {
       return FALSE;
     }
 
-    $query = "SELECT Id FROM TaxCode WHERE name='" . $tax_code . "'";
+    $query = "SELECT Id FROM TaxCode WHERE name='" . addslashes($tax_code) . "'";
 
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $result = $dataService->Query($query, 0, 10);

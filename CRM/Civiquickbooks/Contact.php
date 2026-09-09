@@ -109,7 +109,9 @@ class CRM_Civiquickbooks_Contact {
 
           break;
         default:
-          break;
+          // An unrecognised exception code: fail loudly rather than falling
+          // through to the loop below with $qbo_contacts left undefined.
+          throw new CRM_Core_Exception('Failed to pull customers from Quickbooks: ' . $e->getMessage());
       }
     }
 
@@ -130,6 +132,13 @@ class CRM_Civiquickbooks_Contact {
         'error_data' => 'NULL',
       ];
 
+      $save = TRUE;
+      CRM_Accountsync_Hook::accountPullPreSave('contact', $contact, $save, $account_contact);
+
+      if (!$save) {
+        continue;
+      }
+
       $matchedAccountContact = AccountContact::get(FALSE)
         ->addWhere('plugin', '=', $this->plugin)
         ->addWhere('connector_id', '=', 0)
@@ -137,19 +146,19 @@ class CRM_Civiquickbooks_Contact {
         ->execute()
         ->first();
 
-      if (empty($matchedAccountContact)) {
-        // No existing AccountContact found; the following API call will create one.
-        // Future CIVIQBO-60 entry point for preemptive deduplication.
-        continue;
-      }
-      if ($matchedAccountContact['do_not_sync']) {
-        // This contact is marked as Do Not Sync
-        continue;
+      if (!empty($matchedAccountContact)) {
+        if ($matchedAccountContact['do_not_sync']) {
+          // This contact is marked as Do Not Sync
+          continue;
+        }
+
+        $account_contact['id'] = $matchedAccountContact['id'];
       }
 
-      $account_contact['id'] = $matchedAccountContact['id'];
-
-      //create/update account contact entity.
+      // If no existing AccountContact matched, this creates a new unlinked
+      // record (no contact_id) so the QBO customer is visible for an
+      // administrator to match or dedupe later, rather than being dropped.
+      // Future CIVIQBO-60 entry point for preemptive deduplication.
       try {
         $created = civicrm_api3('account_contact', 'create', $account_contact);
 
@@ -554,17 +563,7 @@ class CRM_Civiquickbooks_Contact {
       $dataService->throwExceptionOnError(FALSE);
 
       $customers = $dataService->Query($query, 0, 1000);
-      if ($last_error = $dataService->getLastError()) {
-        $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-        if ($last_error->getHttpStatusCode() == 429) {
-          // API rate limit exceeded. Stop processing this run.
-          throw new CRM_Civiquickbooks_RateLimitException('QBO API rate limit exceeded while pulling customers.', 'qbo_rate_limit_exceeded', $error_message);
-        } 
-
-        throw new Exception('"' . implode("\n", $error_message) . '"');
-      }
-
+      CRM_Quickbooks_APIHelper::checkForError($dataService, 'pulling customers');
     }
     //process and analyse the response result from Quickbooks
     catch(Exception $e) {
@@ -605,16 +604,7 @@ class CRM_Civiquickbooks_Contact {
       $dataService->throwExceptionOnError(FALSE);
 
       $customers = $dataService->Query($query, 0, 1);
-      if ($last_error = $dataService->getLastError()) {
-        $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-        if($last_error->getHttpStatusCode() == 429) {
-          // API rate limit exceeded. Stop processing this run.
-          throw new CRM_Civiquickbooks_RateLimitException('QBO API rate limit exceeded while pulling single customer.', 'qbo_rate_limit_exceeded', $error_message);
-        } 
-
-        throw new Exception('"' . implode("\n", $error_message) . '"');
-      }
+      CRM_Quickbooks_APIHelper::checkForError($dataService, 'pulling single customer');
 
       return is_array($customers) ? current($customers) : NULL;
     }

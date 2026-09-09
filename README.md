@@ -164,17 +164,33 @@ For more details on the QuickBooks Online environments, see:
 * https://developer.intuit.com/app/developer/qbo/docs/develop/sandboxes
 * https://developer.intuit.com/app/developer/qbo/docs/develop/sdks-and-samples-collections/php/configuration
 
+## Scheduled Jobs
+
+This extension registers four Scheduled Jobs, active by default once installed:
+
+* **Civiquickbooks Contact Push Job** - pushes updated CiviCRM contacts to QuickBooks Online as Customers.
+* **Civiquickbooks Contact Pull Job** - pulls updated Customers from QuickBooks Online into CiviCRM.
+* **Civiquickbooks Invoice Push Job** - pushes updated Contributions to QuickBooks Online as Invoices.
+* **Civiquickbooks Invoice Pull Job** - pulls updated Invoices from QuickBooks Online, updating the matching Contribution's status.
+
+These jobs only run if CiviCRM's own Scheduled Jobs / cron is configured on
+your site. You can review each job's configuration and run history under
+`Administer` > `System Settings` > `Scheduled Jobs`.
+
 # Special Notes:
 
-1. As line items that have no matched QuickBooks product/service name filled out
-   or no matched QuickBooks tax account name filled out will not be pushed in
-   the invoice, an invoice could have less items pushed. If an invoice does not
-   have even one item in it after the filtering, the invoice will not be pushed
-   successfully.
-2. As long as an invoice has at least one item in it after filtering, the
-   information about those non-pushed items will be noted down as `customer
-   memo` field. The `id` of the problematic financial type and its `acctg code`
-   will be listed. In that case, you need to fix the invoice manually.
+1. A line item whose Financial Type has no matching QuickBooks Product/Service
+   name (via `Acctg Code`, see above) is excluded from the invoice, so an
+   invoice can be pushed with fewer line items than the Contribution actually
+   has. If every line item is excluded this way, the invoice will not be
+   pushed at all, and the Financial Type(s)/Accounting Code(s) that failed to
+   match are recorded as a sync error against that Contribution, viewable on
+   the Contact's summary page.
+2. A line item whose Financial Type has no matching QuickBooks Sales Tax
+   Account name (non-US companies only, see above) is still pushed, but
+   without a Tax Code applied - there is currently no notification for this
+   case, so review your Financial Account `Acctg Code` mappings carefully to
+   avoid un-taxed invoice lines in QuickBooks.
 
 # Funding for this CiviCRM extension
 

@@ -6,7 +6,7 @@
         <title>QuickBooks Online Authentication</title>
         <!-- The access permission type should be for just administrators, as they need to login first to access to the form page.
          On that page they could have redirect button to the OAuth page, so they have already logged in. So we do not need the public accessing token anymore. -->
-        <access_arguments>access CiviCRM</access_arguments>
+        <access_arguments>administer CiviCRM</access_arguments>
     </item>
     <item>
         <path>civicrm/admin/setting/quickbooks</path>

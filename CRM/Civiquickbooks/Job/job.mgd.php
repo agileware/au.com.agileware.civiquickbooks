@@ -16,7 +16,7 @@ return [
       'api_entity' => 'Civiquickbooks',
       'api_action' => 'Contactpush',
       'run_frequency' => 'Always',
-      'parameters' => '',
+      'parameters' => 'option.limit=0',
     ],
   ],
   1 => [
@@ -44,7 +44,7 @@ return [
       'api_entity' => 'Civiquickbooks',
       'api_action' => 'Invoicepush',
       'run_frequency' => 'Always',
-      'parameters' => '',
+      'parameters' => 'option.limit=0',
     ],
   ],
   3 => [
@@ -58,7 +58,7 @@ return [
       'api_entity' => 'Civiquickbooks',
       'api_action' => 'Invoicepull',
       'run_frequency' => 'Always',
-      'parameters' => '',
+      'parameters' => 'option.limit=0',
     ],
   ],
 ];

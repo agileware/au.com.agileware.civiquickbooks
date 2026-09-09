@@ -44,4 +44,38 @@ class CRM_Civiquickbooks_Upgrader extends CRM_Extension_Upgrader_Base {
     return TRUE;
   }
 
+  public function upgrade_20205() {
+    $this->ctx->log->info('Removing default 25 result limit from QuickBooks scheduled jobs.');
+
+    $jobNames = [
+      'Civiquickbooks Contact Push Job',
+      'Civiquickbooks Invoice Push Job',
+      'Civiquickbooks Invoice Pull Job',
+    ];
+
+    foreach ($jobNames as $jobName) {
+      $job = civicrm_api3('Job', 'get', [
+        'name' => $jobName,
+        'sequential' => 1,
+      ]);
+
+      if (empty($job['count'])) {
+        continue;
+      }
+
+      $job = $job['values'][0];
+
+      if (strpos((string) $job['parameters'], 'option.limit') !== FALSE) {
+        continue;
+      }
+
+      civicrm_api3('Job', 'create', [
+        'id' => $job['id'],
+        'parameters' => trim(($job['parameters'] ?? '') . "\noption.limit=0"),
+      ]);
+    }
+
+    return TRUE;
+  }
+
 }
