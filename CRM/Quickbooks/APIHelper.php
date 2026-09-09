@@ -313,6 +313,35 @@ class CRM_Quickbooks_APIHelper {
   }
 
   /**
+   * Check a QBO DataService call's last error (if any) and throw an
+   * appropriate exception: CRM_Civiquickbooks_RateLimitException for a 429
+   * (rate limit) response, or a generic CRM_Core_Exception for anything
+   * else. Does nothing if there was no error.
+   *
+   * @param \QuickBooksOnline\API\DataService\DataService $dataService
+   * @param string $context
+   *   Short description of what was being attempted, used in the rate
+   *   limit message, e.g. "pulling customers" or "pushing invoice for
+   *   Contribution ID: 123".
+   *
+   * @throws CRM_Civiquickbooks_RateLimitException
+   * @throws CRM_Core_Exception
+   */
+  public static function checkForError($dataService, $context) {
+    if (!($last_error = $dataService->getLastError())) {
+      return;
+    }
+
+    $error_message = self::parseErrorResponse($last_error);
+
+    if ($last_error->getHttpStatusCode() == 429) {
+      throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while {$context}.", 'qbo_rate_limit_exceeded', $error_message);
+    }
+
+    throw new CRM_Core_Exception('"' . implode("\n", $error_message) . '"');
+  }
+
+  /**
    * Helper Function to convert faults errors saved by the SDK into something
    *   we can store in an Account* error_data
    *

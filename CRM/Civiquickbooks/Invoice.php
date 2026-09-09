@@ -118,32 +118,14 @@ class CRM_Civiquickbooks_Invoice {
 
             $result = $dataService->Update($accountsInvoice);
 
-            if ($last_error = $dataService->getLastError()) {
-              $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-              if($last_error->getHttpStatusCode() == 429) {
-                // API rate limit exceeded. Stop processing this run.
-                throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while pushing invoice for Contribution ID: {$record['contribution_id']}.", 'qbo_rate_limit_exceeded', $error_message);
-              }
-
-              throw new Exception(json_encode($error_message));
-            }
+            CRM_Quickbooks_APIHelper::checkForError($dataService, "pushing invoice for Contribution ID: {$record['contribution_id']}");
 
             $this->savePushResponse($result, $record);
           }
           else {
             $result = $dataService->Add($accountsInvoice);
 
-            if($last_error = $dataService->getLastError()) {
-              $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-              if($last_error->getHttpStatusCode() == 429) {
-                // API rate limit exceeded. Stop processing this run.
-                throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while pushing invoice for Contribution ID: {$record['contribution_id']}.", 'qbo_rate_limit_exceeded', $error_message);
-              }
-
-              throw new Exception(json_encode($error_message));
-            }
+            CRM_Quickbooks_APIHelper::checkForError($dataService, "pushing invoice for Contribution ID: {$record['contribution_id']}");
 
             if ($result->Id) {
               $this->savePushResponse($result, $record);
@@ -315,15 +297,7 @@ class CRM_Civiquickbooks_Invoice {
 
       $paymentResult = $dataService->Add($QBOPayment);
 
-      if ($last_error = $dataService->getLastError()) {
-        $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-        if ($last_error->getHttpStatusCode() == 429) {
-          throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while pushing payment for Contribution ID: {$contribution_id}.", 'qbo_rate_limit_exceeded', $error_message);
-        }
-
-        throw new CRM_Core_Exception('Error pushing Payment for Contribution ID: ' . $contribution_id . ': ' . implode("\n", $error_message));
-      }
+      CRM_Quickbooks_APIHelper::checkForError($dataService, "pushing payment for Contribution ID: {$contribution_id}");
 
       $result[] = $paymentResult;
     }
@@ -355,23 +329,17 @@ class CRM_Civiquickbooks_Invoice {
       case 'always':
         $invoice = $dataService->FindById('invoice', $invoice_id);
 
-        if ($last_error = $dataService->getLastError()) {
-          throw new CRM_Core_Exception('Error finding QBO Invoice to email: ' . implode("\n", CRM_Quickbooks_APIHelper::parseErrorResponse($last_error)));
-        }
+        CRM_Quickbooks_APIHelper::checkForError($dataService, "finding QBO invoice {$invoice_id} to email");
 
         if ($invoice && (('always' == $send) || $invoice->Balance) &&
           ($customer = $dataService->FindById('customer', $invoice->CustomerRef))) {
 
-          if ($last_error = $dataService->getLastError()) {
-            throw new CRM_Core_Exception('Error finding QBO Customer to email invoice: ' . implode("\n", CRM_Quickbooks_APIHelper::parseErrorResponse($last_error)));
-          }
+          CRM_Quickbooks_APIHelper::checkForError($dataService, "finding QBO customer to email invoice {$invoice_id}");
 
           if (!empty($email = $customer->PrimaryEmailAddr->Address ?? NULL)) {
             $dataService->sendEmail($invoice, $email);
 
-            if ($last_error = $dataService->getLastError()) {
-              throw new CRM_Core_Exception('Error sending QBO Invoice email: ' . implode("\n", CRM_Quickbooks_APIHelper::parseErrorResponse($last_error)));
-            }
+            CRM_Quickbooks_APIHelper::checkForError($dataService, "emailing QBO invoice {$invoice_id}");
           }
         }
 
@@ -410,11 +378,7 @@ class CRM_Civiquickbooks_Invoice {
 
     $invoice = $dataService->FindById('invoice', $record['accounts_invoice_id']);
 
-    if ($last_error = $dataService->getLastError()) {
-      $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-      throw new Exception('"' . implode("\n", $error_message) . '"');
-    }
+    CRM_Quickbooks_APIHelper::checkForError($dataService, "fetching QBO invoice {$record['accounts_invoice_id']} for Contribution ID: {$record['contribution_id']}");
 
     return $invoice;
   }
@@ -929,21 +893,11 @@ class CRM_Civiquickbooks_Invoice {
         $result = $dataService->Query($query, $startPosition, $pageSize);
 
         if (empty($result)) {
-          //  If there is an error with the query, check if it's a rate limit error and throw a specific exception for that, otherwise throw a general exception with the error message.
-          if ($last_error = $dataService->getLastError()) {
-            $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-            if ($last_error->getHttpStatusCode() == 429) {
-              throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while querying for Items.", 'qbo_rate_limit_exceeded', $error_message);
-            }
-
-            throw new CRM_Core_Exception(
-              'Error querying QBO for Items: ' . implode("\n", $error_message)
-            );
-          } else {
-            // If the result is empty, it means we've retrieved all items and can exit the loop.
-            break;
-          }
+          // If there is an error with the query, this throws (recognising a
+          // rate limit error as a specific exception). Otherwise, the empty
+          // result means we've retrieved all items and can exit the loop.
+          CRM_Quickbooks_APIHelper::checkForError($dataService, 'querying for Items');
+          break;
         }
 
         foreach($result as $item){

@@ -561,17 +561,7 @@ class CRM_Civiquickbooks_Contact {
       $dataService->throwExceptionOnError(FALSE);
 
       $customers = $dataService->Query($query, 0, 1000);
-      if ($last_error = $dataService->getLastError()) {
-        $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-        if ($last_error->getHttpStatusCode() == 429) {
-          // API rate limit exceeded. Stop processing this run.
-          throw new CRM_Civiquickbooks_RateLimitException('QBO API rate limit exceeded while pulling customers.', 'qbo_rate_limit_exceeded', $error_message);
-        } 
-
-        throw new Exception('"' . implode("\n", $error_message) . '"');
-      }
-
+      CRM_Quickbooks_APIHelper::checkForError($dataService, 'pulling customers');
     }
     //process and analyse the response result from Quickbooks
     catch(Exception $e) {
@@ -612,16 +602,7 @@ class CRM_Civiquickbooks_Contact {
       $dataService->throwExceptionOnError(FALSE);
 
       $customers = $dataService->Query($query, 0, 1);
-      if ($last_error = $dataService->getLastError()) {
-        $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
-
-        if($last_error->getHttpStatusCode() == 429) {
-          // API rate limit exceeded. Stop processing this run.
-          throw new CRM_Civiquickbooks_RateLimitException('QBO API rate limit exceeded while pulling single customer.', 'qbo_rate_limit_exceeded', $error_message);
-        } 
-
-        throw new Exception('"' . implode("\n", $error_message) . '"');
-      }
+      CRM_Quickbooks_APIHelper::checkForError($dataService, 'pulling single customer');
 
       return is_array($customers) ? current($customers) : NULL;
     }
