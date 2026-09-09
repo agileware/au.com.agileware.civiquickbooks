@@ -991,7 +991,7 @@ class CRM_Civiquickbooks_Invoice {
     }
 
     if (!isset($codes[$name])) {
-      $query = sprintf('SELECT Name,Id From TaxCode WHERE Name = \'%1s\'', $name);
+      $query = sprintf('SELECT Name,Id From TaxCode WHERE Name = \'%1s\'', addslashes($name));
 
       $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
       $result = $dataService->Query($query, 0, 1);
@@ -1114,7 +1114,7 @@ class CRM_Civiquickbooks_Invoice {
       return FALSE;
     }
 
-    $query = "SELECT Id FROM TaxCode WHERE name='" . $tax_code . "'";
+    $query = "SELECT Id FROM TaxCode WHERE name='" . addslashes($tax_code) . "'";
 
     $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     $result = $dataService->Query($query, 0, 10);
