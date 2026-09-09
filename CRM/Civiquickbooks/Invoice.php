@@ -94,8 +94,12 @@ class CRM_Civiquickbooks_Invoice {
           $accountsInvoice = $this->getAccountsInvoice($record);
 
           if (empty($accountsInvoice)) {
+            // A cancelled/failed contribution that was never previously
+            // synced to QBO has nothing to push. This is expected, not an
+            // error, so mark it up to date and move on without recording
+            // a sync error for it.
             civicrm_api3('AccountInvoice', 'create', ['id' => $record['id'], 'accounts_needs_update' => 0]);
-            throw new CRM_Core_Exception(E::ts('AccountInvoice object for %1 is empty', [1 => $record['id']]), 'empty_invoice');
+            continue;
           }
 
           $proceed = TRUE;
