@@ -137,19 +137,19 @@ class CRM_Civiquickbooks_Contact {
         ->execute()
         ->first();
 
-      if (empty($matchedAccountContact)) {
-        // No existing AccountContact found; the following API call will create one.
-        // Future CIVIQBO-60 entry point for preemptive deduplication.
-        continue;
-      }
-      if ($matchedAccountContact['do_not_sync']) {
-        // This contact is marked as Do Not Sync
-        continue;
+      if (!empty($matchedAccountContact)) {
+        if ($matchedAccountContact['do_not_sync']) {
+          // This contact is marked as Do Not Sync
+          continue;
+        }
+
+        $account_contact['id'] = $matchedAccountContact['id'];
       }
 
-      $account_contact['id'] = $matchedAccountContact['id'];
-
-      //create/update account contact entity.
+      // If no existing AccountContact matched, this creates a new unlinked
+      // record (no contact_id) so the QBO customer is visible for an
+      // administrator to match or dedupe later, rather than being dropped.
+      // Future CIVIQBO-60 entry point for preemptive deduplication.
       try {
         $created = civicrm_api3('account_contact', 'create', $account_contact);
 
