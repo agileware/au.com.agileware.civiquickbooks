@@ -12,6 +12,7 @@ use CRM_Civiquickbooks_ExtensionUtil as E;
  */
 function civiquickbooks_civicrm_config(&$config) {
   _civiquickbooks_civix_civicrm_config($config);
+  \Civi::dispatcher()->addListener('civi.api.prepare', ['CRM_Quickbooks_APIHelper', 'checkApiRateExceeded']);
 }
 
 /**

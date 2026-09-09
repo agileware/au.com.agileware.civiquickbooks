@@ -1,5 +1,6 @@
 <?php
 
+use Civi\API\Event\PrepareEvent;
 use QuickBooksOnline\API\Core\HttpClients\FaultHandler;
 
 class CRM_Quickbooks_APIHelper {
@@ -264,6 +265,51 @@ class CRM_Quickbooks_APIHelper {
     }
 
     return TRUE;
+  }
+
+  /**
+   * Check if the QBO API rate limit was previously exceeded, during api
+   * prepare. Blocks further QuickBooks sync API calls for up to an hour
+   * after a 429 response, instead of letting the next scheduled job run
+   * immediately re-trigger the same rate limit.
+   *
+   * @param \Civi\API\Event\PrepareEvent $event
+   *
+   * @throws CRM_Core_Exception
+   */
+  public static function checkApiRateExceeded(PrepareEvent $event): void {
+    if ($event->getEntityName() !== 'Civiquickbooks' || strtolower($event->getActionName()) === 'getfields') {
+      return;
+    }
+
+    $rateLimitExceededAt = Civi::settings()->get('quickbooks_oauth_rate_exceeded');
+
+    if (!$rateLimitExceededAt) {
+      return;
+    }
+
+    $retryTime = strtotime('+1 hour', $rateLimitExceededAt);
+
+    if ($retryTime > time()) {
+      throw new CRM_Core_Exception('QBO API rate limit was previously triggered. Try again after ' . date('Y-m-d H:i:s', $retryTime));
+    }
+
+    self::resetApiRateLimitExceeded();
+  }
+
+  /**
+   * Record that the QBO API rate limit has been exceeded, so subsequent
+   * scheduled job runs are blocked until the retry window has passed.
+   */
+  public static function setApiRateLimitExceeded(): void {
+    Civi::settings()->set('quickbooks_oauth_rate_exceeded', time());
+  }
+
+  /**
+   * Clear the recorded rate limit state.
+   */
+  public static function resetApiRateLimitExceeded(): void {
+    Civi::settings()->set('quickbooks_oauth_rate_exceeded', NULL);
   }
 
   /**
