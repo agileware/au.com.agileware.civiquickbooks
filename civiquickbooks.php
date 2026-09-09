@@ -175,6 +175,7 @@ function _civiquickbooks_getContactContributions($contactid) {
     "contact_id" => $contactid,
     "return"     => ["contribution_id"],
     "sequential" => TRUE,
+    "options"    => ["limit" => 0],
   ]);
   $contributions = array_column($contributions["values"], "id");
   return $contributions;
@@ -191,6 +192,7 @@ function _civiquickbooks_getErroredInvoicesOfContributions($contributions) {
     "sequential"      => TRUE,
     "contribution_id" => ["IN" => $contributions],
     "error_data"      => ["<>" => ""],
+    "options"         => ["limit" => 0],
   ]);
   return $invoices;
 }
