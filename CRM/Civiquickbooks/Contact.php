@@ -130,6 +130,13 @@ class CRM_Civiquickbooks_Contact {
         'error_data' => 'NULL',
       ];
 
+      $save = TRUE;
+      CRM_Accountsync_Hook::accountPullPreSave('contact', $contact, $save, $account_contact);
+
+      if (!$save) {
+        continue;
+      }
+
       $matchedAccountContact = AccountContact::get(FALSE)
         ->addWhere('plugin', '=', $this->plugin)
         ->addWhere('connector_id', '=', 0)

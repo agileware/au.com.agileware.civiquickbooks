@@ -43,8 +43,8 @@ class CRM_Civiquickbooks_Invoice {
    * Push invoices to QuickBooks from the civicrm_account_contact with
    * 'needs_update' = 1.
    *
-   * We call the civicrm_accountPullPreSave hook so other modules can alter if
-   * required
+   * We call the civicrm_accountPushAlterMapped hook so other modules can
+   * alter the mapped invoice, or prevent it being pushed, if required.
    *
    * @param array $params
    *  - start_date
@@ -388,6 +388,13 @@ class CRM_Civiquickbooks_Invoice {
 
   protected function saveToCiviCRM($invoice, $record) {
     if ((int) $record['accounts_data'] == (int) $invoice->SyncToken) {
+      return FALSE;
+    }
+
+    $save = TRUE;
+    CRM_Accountsync_Hook::accountPullPreSave('invoice', $invoice, $save, $record);
+
+    if (!$save) {
       return FALSE;
     }
 
