@@ -59,7 +59,7 @@ class CRM_Civiquickbooks_Page_OAuthQBO extends CRM_Core_Page {
 
     // Check if its a request from QuickBooks after redirection.
     if (isset($_GET['state']) && isset($_GET['code']) && isset($_GET['realmId'])) {
-      $stateToken = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_state_token']);;
+      $stateToken = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_state_token']);
       $state = $_GET['state'];
       $state = json_decode($state, TRUE);
 
