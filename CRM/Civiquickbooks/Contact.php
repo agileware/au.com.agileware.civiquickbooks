@@ -109,7 +109,9 @@ class CRM_Civiquickbooks_Contact {
 
           break;
         default:
-          break;
+          // An unrecognised exception code: fail loudly rather than falling
+          // through to the loop below with $qbo_contacts left undefined.
+          throw new CRM_Core_Exception('Failed to pull customers from Quickbooks: ' . $e->getMessage());
       }
     }
 
