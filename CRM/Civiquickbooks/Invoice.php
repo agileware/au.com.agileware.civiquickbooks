@@ -306,7 +306,22 @@ class CRM_Civiquickbooks_Invoice {
       }
 
       $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create($paymentInput);
-      $result[] = $dataService->Add($QBOPayment);
+
+      $dataService->throwExceptionOnError(FALSE);
+
+      $paymentResult = $dataService->Add($QBOPayment);
+
+      if ($last_error = $dataService->getLastError()) {
+        $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
+
+        if ($last_error->getHttpStatusCode() == 429) {
+          throw new CRM_Civiquickbooks_RateLimitException("QBO API rate limit exceeded while pushing payment for Contribution ID: {$contribution_id}.", 'qbo_rate_limit_exceeded', $error_message);
+        }
+
+        throw new CRM_Core_Exception('Error pushing Payment for Contribution ID: ' . $contribution_id . ': ' . implode("\n", $error_message));
+      }
+
+      $result[] = $paymentResult;
     }
 
     return $result;
@@ -327,6 +342,8 @@ class CRM_Civiquickbooks_Invoice {
       $dataService = CRM_Quickbooks_APIHelper::getAccountingDataServiceObject();
     }
 
+    $dataService->throwExceptionOnError(FALSE);
+
     $send = civicrm_api3('Setting', 'getvalue', ['name' => 'quickbooks_email_invoice']);
 
     switch ($send) {
@@ -334,11 +351,23 @@ class CRM_Civiquickbooks_Invoice {
       case 'always':
         $invoice = $dataService->FindById('invoice', $invoice_id);
 
+        if ($last_error = $dataService->getLastError()) {
+          throw new CRM_Core_Exception('Error finding QBO Invoice to email: ' . implode("\n", CRM_Quickbooks_APIHelper::parseErrorResponse($last_error)));
+        }
+
         if ($invoice && (('always' == $send) || $invoice->Balance) &&
           ($customer = $dataService->FindById('customer', $invoice->CustomerRef))) {
 
-          if (@$email = $customer->PrimaryEmailAddr->Address) {
+          if ($last_error = $dataService->getLastError()) {
+            throw new CRM_Core_Exception('Error finding QBO Customer to email invoice: ' . implode("\n", CRM_Quickbooks_APIHelper::parseErrorResponse($last_error)));
+          }
+
+          if (!empty($email = $customer->PrimaryEmailAddr->Address ?? NULL)) {
             $dataService->sendEmail($invoice, $email);
+
+            if ($last_error = $dataService->getLastError()) {
+              throw new CRM_Core_Exception('Error sending QBO Invoice email: ' . implode("\n", CRM_Quickbooks_APIHelper::parseErrorResponse($last_error)));
+            }
           }
         }
 
