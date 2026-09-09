@@ -7,7 +7,7 @@ class CRM_Civiquickbooks_Page_AJAX extends CRM_Core_Page {
    */
   public static function contactSyncErrors() {
     $syncerrors = [];
-    if (CRM_Utils_Array::value('quickbookserrorid', $_REQUEST)) {
+    if ($_REQUEST['quickbookserrorid'] ?? NULL) {
       $quickbookserrorid = CRM_Utils_Type::escape($_REQUEST['quickbookserrorid'], 'Integer');
       $accountcontact = civicrm_api3('AccountContact', 'get', [
         'id'          => $quickbookserrorid ,
@@ -30,7 +30,7 @@ class CRM_Civiquickbooks_Page_AJAX extends CRM_Core_Page {
    */
   public static function invoiceSyncErrors() {
     $syncerrors = [];
-    if (CRM_Utils_Array::value('quickbookserrorid', $_REQUEST)) {
+    if ($_REQUEST['quickbookserrorid'] ?? NULL) {
       $contactid = CRM_Utils_Type::escape($_REQUEST['quickbookserrorid'], 'Integer');
       if (CRM_Contact_BAO_Contact_Permission::allow($contactid, CRM_Core_Permission::VIEW)) {
         $contributions = _civiquickbooks_getContactContributions($contactid);
