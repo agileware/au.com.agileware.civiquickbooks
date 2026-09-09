@@ -851,7 +851,9 @@ class CRM_Civiquickbooks_Invoice {
 
       // Ensure HTML entities are not double encoded in Invoice create
       array_walk_recursive($new_invoice, function (&$item) {
-        $item = html_entity_decode($item, (ENT_QUOTES | ENT_HTML401), 'UTF-8');
+        if (is_string($item)) {
+          $item = html_entity_decode($item, (ENT_QUOTES | ENT_HTML401), 'UTF-8');
+        }
       });
 
       try {
