@@ -18,7 +18,7 @@
   <version>2.10.6</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.51</ver>
+    <ver>6.11</ver>
   </compatibility>
   <requires>
     <ext>nz.co.fuzion.accountsync</ext>
