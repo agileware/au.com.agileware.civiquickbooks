@@ -1,5 +1,6 @@
 name: civix upgrade
 on:
+  workflow_dispatch: {}
   push: {}
   schedule:
     - cron: '23 18 * * 3' # Thursday 4:23am AEDT
