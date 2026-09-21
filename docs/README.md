@@ -60,7 +60,7 @@ new keys.  See the [Configuration](#configuration) section below.
 
 CiviQuickBooks Online Settings page is shown below.
 
-![](doc/civiquickbooks-settings.png)
+![](img/civiquickbooks-settings.png)
 
 #### Authorise CiviQuickBooks access to your QuickBooks Online account.
 
@@ -86,7 +86,7 @@ Financial Account codes to correctly code each Invoice in QuickBooks Online.
    (civicrm/admin/financial/financialAccount) and update the `Acctg Code` of
    corresponding Financial account to be the same as each QuickBooks
    Product/Service name:
-   ![Product Name -> Acctg Code](doc/product_name-to-acctg_code.png)
+   ![Product Name -> Acctg Code](img/product_name-to-acctg_code.png)
 4. When setting up Contributions in CiviCRM, ensure that the Financial Type for
    the Contribution is set to use the correct Financial Account as the Income
    Account.

@@ -10,7 +10,7 @@
   </maintainer>
   <urls>
     <url desc="Main Extension Page">https://github.com/agileware/au.com.agileware.civiquickbooks</url>
-    <url desc="Documentation">https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/README.md</url>
+    <url desc="Documentation">https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/README.md</url>
     <url desc="Support">https://agileware.com.au/contact</url>
     <url desc="Licensing">https://www.gnu.org/licenses/gpl-3.0.txt</url>
   </urls>
