@@ -23,7 +23,7 @@ CiviQuickBooks version 2 implements the OAuth 2.0 protocol for QuickBooks Online
 upgrading from a previous version you will need to generate new keys. See the
 [Configuration](#configuration) section below.
 
-The extension is licensed under the terms in [LICENSE.txt](../LICENSE.txt).
+The extension is licensed under the terms in [LICENSE.txt](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/LICENSE.txt).
 
 ## Requirements
 
@@ -66,7 +66,7 @@ The extension is licensed under the terms in [LICENSE.txt](../LICENSE.txt).
 
 CiviQuickBooks Online Settings page is shown below.
 
-![](img/civiquickbooks-settings.png)
+![](https://github.com/agileware/au.com.agileware.civiquickbooks/raw/master/docs/img/civiquickbooks-settings.png)
 
 **Note**: changing the Client ID or Client Secret on this page clears any stored access/refresh
 tokens, so you will need to re-authorise (see below) after doing so.
@@ -99,7 +99,7 @@ Financial Account codes to correctly code each Invoice in QuickBooks Online.
    (civicrm/admin/financial/financialAccount) and update the `Acctg Code` of
    corresponding Financial account to be the same as each QuickBooks
    Product/Service name:
-   ![Product Name -> Acctg Code](img/product_name-to-acctg_code.png)
+   ![Product Name -> Acctg Code](https://github.com/agileware/au.com.agileware.civiquickbooks/raw/master/docs/img/product_name-to-acctg_code.png)
 4. When setting up Contributions in CiviCRM, ensure that the Financial Type for
    the Contribution is set to use the correct Financial Account as the Income
    Account.
@@ -283,4 +283,4 @@ Support your Australian [CiviCRM](https://civicrm.org) developers, [contact
 Agileware](https://agileware.com.au/contact) today!
 
 
-![Agileware](logo/agileware-logo.png)
+![Agileware](https://github.com/agileware/au.com.agileware.civiquickbooks/raw/master/docs/logo/agileware-logo.png)
