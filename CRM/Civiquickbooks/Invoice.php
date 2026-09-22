@@ -737,10 +737,10 @@ class CRM_Civiquickbooks_Invoice {
         'group_name' => 'Contribute Preferences',
       ]);
 
-      $invoice_prefix = civicrm_api3('Setting', 'getvalue', array(
+      $invoice_prefix = civicrm_api3('Setting', 'getvalue', [
         'name' => "quickbooks_invoice_prefix",
         'group' => 'QuickBooks Online Settings',
-      ));
+      ]);
 
       if (!empty($invoice_settings['due_date']) && !empty($invoice_settings['due_date_period'])) {
         $time_adjust_str = '+' . $invoice_settings['due_date'] . ' ' . $invoice_settings['due_date_period'];

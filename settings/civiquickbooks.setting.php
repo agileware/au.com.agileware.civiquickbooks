@@ -52,10 +52,10 @@ return [
     'description' => E::ts('Development or Production mode.'),
     'help_text' => E::ts('Use Development to test with your sandbox.'),
     'html_type' => 'select',
-    'options' => array(
+    'options' => [
       'Production' => E::ts('Production'),
       'Development' => E::ts('Development'),
-    ),
+    ],
     'html_attributes' => [
       'class' => 'crm-select2',
     ],
