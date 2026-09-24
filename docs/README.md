@@ -141,6 +141,12 @@ item to have a specified Tax account.
 
 #### For US Companies:
 
+If none of your Contributions are taxable, you can skip this section entirely -
+whenever a financial type has no `sales tax financial account` configured, the
+extension automatically sends a `NON` (non-taxable) tax code for that line item,
+which already satisfies QuickBooks Online's requirement that every item have a
+tax code.
+
 1. For US companies, each line item or product/service in an invoice can only be
    marked with `NON` (for non-taxable) or `TAX` (taxable), and the entire
    invoice will have a single tax rate selected as a state tax or a combination
@@ -151,9 +157,13 @@ item to have a specified Tax account.
       with a `sales tax financial account`
       - All those associated financial accounts need to have `TAX` or `NON` as
         the `acctg code` field.
-      - All those associated financial accounts need to have `Tax Rate Name` of
-        desired tax rate account in QuickBooks as the `account type code` field
-        in CiviCRM. e.g. `California` as the `financial type code`.
+      - All those associated financial accounts need to have the name of the
+        desired QuickBooks `TaxCode` (not to be confused with a `Tax Rate`) as
+        the `account type code` field in CiviCRM. e.g. `California`. For US
+        companies using QuickBooks Online's Automated Sales Tax, this is
+        usually the name of the state, and is generated automatically by
+        QuickBooks rather than being listed anywhere for you to copy from -
+        the QuickBooks API can be queried to confirm the exact name.
       - Make sure that all the financial types of line items have the same value
         of `account type code` in the `sales tax financial account`. The
         extension will pick the first line item that is taxable and with a
