@@ -18,10 +18,12 @@
         <path>civicrm/ajax/civiquickbooks/sync/contact/errors</path>
         <page_callback>CRM_Civiquickbooks_Page_AJAX::contactSyncErrors</page_callback>
         <access_arguments>access CiviCRM</access_arguments>
+        <is_ajax>true</is_ajax>
     </item>
     <item>
         <path>civicrm/ajax/civiquickbooks/sync/invoice/errors</path>
         <page_callback>CRM_Civiquickbooks_Page_AJAX::invoiceSyncErrors</page_callback>
         <access_arguments>access CiviCRM</access_arguments>
+        <is_ajax>true</is_ajax>
     </item>
 </menu>
