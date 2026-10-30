@@ -284,11 +284,14 @@ class CRM_Civiquickbooks_Invoice {
 
 
       // Set Transaction ID
-      if (!empty($payment['trxn_id'])) {
-        $paymentInput['PaymentRefNum'] = $payment['trxn_id'];
+      $paymentRefNum = $payment['trxn_id'] ?? '';
+      if (empty($paymentRefNum)) {
+        $paymentRefNum = $payment['check_number'] ?? '';
       }
-      else if (!empty($payment['check_number'])) {
-        $paymentInput['PaymentRefNum'] = $payment['check_number'];
+      if (!empty($paymentRefNum)) {
+        // QuickBooks rejects a Payment reference number over 21 characters
+        // ("doc_num" field), and Stripe charge IDs are 27 characters.
+        $paymentInput['PaymentRefNum'] = mb_substr($paymentRefNum, 0, 21);
       }
 
       $QBOPayment = \QuickBooksOnline\API\Facades\Payment::create($paymentInput);
