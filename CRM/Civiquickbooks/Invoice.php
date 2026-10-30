@@ -776,15 +776,18 @@ class CRM_Civiquickbooks_Invoice {
       $new_invoice += [
         'TxnDate' => $receive_date,
         'DueDate' => $due_date,
-        'CustomerMemo' => [
-          'value' => $db_contribution['contribution_source'],
-        ],
         'Line' => $line_items,
         'CustomerRef' => [
           'value' => $qb_id,
         ],
         'GlobalTaxCalculation' => 'TaxExcluded',
       ];
+
+      // Use the contribution source as the memo, if there is one. The SDK
+      // rejects a memo reference with an empty value.
+      if (trim((string) ($db_contribution['contribution_source'] ?? '')) !== '') {
+        $new_invoice['CustomerMemo'] = ['value' => $db_contribution['contribution_source']];
+      }
 
       // check the setting 'Where should Invoice Numbers be generated?' and
       // populate the new invoice accordingly
