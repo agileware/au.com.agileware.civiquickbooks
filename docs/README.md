@@ -203,6 +203,15 @@ The `QuickBooks Online Settings` page also provides the following options:
   the customer to pay online via credit card / ACH from within QuickBooks Online.
 * **Customer Memo Override** - optional text to use as the Invoice's Customer Memo instead of the
   Contribution's Source.
+* **Queue all contributions since Day zero?** - an action, shown below the Account Sync "Day zero
+  for contributions" option. Account Sync only queues a contribution when it is saved, so contributions
+  that existed before the sync was set up are never queued. When this page is saved with this box
+  checked, every contribution received on or after Day zero that is not already queued is queued for
+  sync, along with its contact. Test contributions, zero amounts, statuses not enabled for push,
+  Pending contributions without Pay Later and contributions paid through a payment processor on the
+  Account Sync skip list are skipped. It runs in batches with a progress screen, so a large number of
+  contributions is fine. The box is cleared as it starts, and the Contact Push and Invoice Push jobs
+  then send the queued records.
 * **Activate QBO logging?** - enables additional logging of QuickBooks Online API activity, for
   troubleshooting.
 

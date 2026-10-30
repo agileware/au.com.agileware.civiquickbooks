@@ -43,11 +43,24 @@ function civiquickbooks_civicrm_enable() {
  */
 function civiquickbooks_civicrm_alterSettingsMetaData(array &$settingsMetaData): void {
   $weight = 100;
+  $dayZeroWeight = NULL;
+  $queueIndex = NULL;
   foreach ($settingsMetaData as $index => $setting) {
     if (($setting['group'] ?? '') === 'accountsync') {
       $settingsMetaData[$index]['settings_pages'] = ['quickbooks' => ['weight' => $weight]];
     }
+    if (($setting['name'] ?? '') === 'account_sync_contribution_day_zero') {
+      $dayZeroWeight = $weight;
+    }
+    elseif (($setting['name'] ?? '') === 'quickbooks_queue_contributions') {
+      $queueIndex = $index;
+    }
     $weight++;
+  }
+
+  // Show the "queue contributions" option directly below Day zero.
+  if ($dayZeroWeight !== NULL && $queueIndex !== NULL) {
+    $settingsMetaData[$queueIndex]['settings_pages'] = ['quickbooks' => ['weight' => $dayZeroWeight + 0.5]];
   }
 }
 
