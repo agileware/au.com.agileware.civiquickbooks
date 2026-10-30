@@ -525,6 +525,15 @@ class CRM_Civiquickbooks_Invoice {
       }
     }
     else {
+      if (empty($qb_id)) {
+        throw new CRM_Core_Exception(
+          E::ts('Contact %1 has no QuickBooks customer ID. Run the Contact Push job and check that contact for sync errors before pushing this invoice.', [
+            1 => $db_contribution['contact_id'],
+          ]),
+          'qbo_contact_not_synced'
+        );
+      }
+
       $accountsInvoice = $this->mapToAccounts($db_contribution, $accountsInvoiceID, $SyncToken, $qb_id);
       return $accountsInvoice;
     }
