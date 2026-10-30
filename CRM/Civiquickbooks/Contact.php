@@ -473,6 +473,8 @@ class CRM_Civiquickbooks_Contact {
         [                                 ], // Finally, fall back
       ];
 
+      // Phone Types can be customised, disabled or deleted on each site, so do
+      // not filter on them here (a missing type name makes the API throw).
       foreach ( $criteria_set as $criteria ) {
         $phones = civicrm_api3(
           'Phone',
@@ -480,9 +482,6 @@ class CRM_Civiquickbooks_Contact {
           $criteria + [
             'contact_id' => $contact,
             'options' => [ 'sort' => 'is_billing DESC, is_primary DESC, phone_type_id ASC, id DESC' ],
-            // We can only make limited assertions about what phone types are
-            // available, so exclude the default types we're sure are incorrect.
-            'phone_type_id' => [ 'NOT IN' => ['Fax','Pager','Voicemail'] ],
             'sequential' => 1
           ]
         );

@@ -52,10 +52,50 @@ class CRM_Civiquickbooks_Form_Settings extends CRM_Admin_Form_Setting {
   public function postProcess() {
     parent::postProcess();
     $this->saveSettings();
+    $this->queueContributions();
 
     header('Location: ' . $_SERVER['REQUEST_URI']);
   }
 
+
+  /**
+   * Queue contributions since Day zero if that option was checked.
+   *
+   * The option is an action, not a lasting setting, so it is cleared before the
+   * work starts. The work then runs in batches through a queue runner, which
+   * shows progress and returns to this page when it is done.
+   */
+  protected function queueContributions() {
+    if (empty($this->_submitValues['quickbooks_queue_contributions'])) {
+      return;
+    }
+
+    Civi::settings()->set('quickbooks_queue_contributions', FALSE);
+
+    try {
+      $runner = CRM_Civiquickbooks_ContributionQueue::getRunner();
+    }
+    catch (Exception $e) {
+      CRM_Core_Session::setStatus(
+        E::ts('Could not queue contributions: %1', [1 => $e->getMessage()]),
+        E::ts('Contributions not queued'),
+        'error'
+      );
+      return;
+    }
+
+    if (!$runner) {
+      CRM_Core_Session::setStatus(
+        E::ts('There are no contributions on or after Day zero to queue.'),
+        E::ts('Contributions queued'),
+        'info'
+      );
+      return;
+    }
+
+    // Redirects to the progress screen, and does not return.
+    $runner->runAllViaWeb();
+  }
 
   /**
    * Get the settings we are going to allow to be set on this form.
