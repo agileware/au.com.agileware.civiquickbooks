@@ -22,6 +22,9 @@ class CRM_Civiquickbooks_Invoice {
 
   protected $contribution_status_by_value;
 
+  // TRUE once a payment push failure has been saved against the record being processed.
+  protected $paymentStateSaved = FALSE;
+
   public function __construct() {
     $this->contribution_status = civicrm_api3('Contribution', 'getoptions', [
       'field' => 'contribution_status_id',
@@ -90,7 +93,11 @@ class CRM_Civiquickbooks_Invoice {
           usleep($delay * 1e6);
         }
         $next_loop_start = microtime(TRUE) + 1;
+        $this->paymentStateSaved = FALSE;
         try {
+          // Payments that failed to push last time, after the invoice was already created.
+          $pendingPayments = self::getPendingPayments($record);
+
           $accountsInvoice = $this->getAccountsInvoice($record);
 
           if (empty($accountsInvoice)) {
@@ -121,6 +128,10 @@ class CRM_Civiquickbooks_Invoice {
             CRM_Quickbooks_APIHelper::checkForError($dataService, "pushing invoice for Contribution ID: {$record['contribution_id']}");
 
             $this->savePushResponse($result, $record);
+
+            if ($pendingPayments) {
+              $this->pushPaymentsTracked($record, $result, $pendingPayments);
+            }
           }
           else {
             $result = $dataService->Add($accountsInvoice);
@@ -129,8 +140,7 @@ class CRM_Civiquickbooks_Invoice {
 
             if ($result->Id) {
               $this->savePushResponse($result, $record);
-              $result_payments = self::pushPayments($record['contribution_id'], $result);
-              self::sendEmail($result->Id);
+              $this->pushPaymentsTracked($record, $result, ['pushed' => [], 'email' => TRUE]);
             }
           }
 
@@ -154,10 +164,13 @@ class CRM_Civiquickbooks_Invoice {
           }
 
           // save the error message to the record so it can be displayed in the UI
-          civicrm_api3('AccountInvoice', 'create', [
-            'id' => $record['id'],
-            'error_data' => json_encode([date('c'), ['message' => $messages]]),
-          ]);
+          // (a payment push failure has already been saved, with what is needed to retry it)
+          if (!$this->paymentStateSaved) {
+            civicrm_api3('AccountInvoice', 'create', [
+              'id' => $record['id'],
+              'error_data' => json_encode([date('c'), ['message' => $messages]]),
+            ]);
+          }
         }
       }
 
@@ -231,17 +244,96 @@ class CRM_Civiquickbooks_Invoice {
   }
 
   /**
+   * Read the payment push state saved by pushPaymentsTracked() from a record.
+   *
+   * @param array $record
+   *   An AccountInvoice record.
+   *
+   * @return array|NULL
+   *   NULL if no payments are waiting to be pushed, otherwise 'pushed' (the
+   *   IDs of payments already sent to QuickBooks) and 'email' (whether the
+   *   invoice email is still to be sent).
+   */
+  protected static function getPendingPayments($record) {
+    if (empty($record['accounts_invoice_id']) || empty($record['error_data'])) {
+      return NULL;
+    }
+
+    $error_data = is_array($record['error_data']) ? $record['error_data'] : json_decode($record['error_data'], TRUE);
+    $state = is_array($error_data) ? ($error_data[1] ?? NULL) : NULL;
+
+    if (!is_array($state) || empty($state['payments_pending'])) {
+      return NULL;
+    }
+
+    return [
+      'pushed' => $state['payments_pushed'] ?? [],
+      'email' => !empty($state['email_pending']),
+    ];
+  }
+
+  /**
+   * Push the payments for an invoice that now exists in QuickBooks, then send
+   * the invoice email if it is due.
+   *
+   * If pushing the payments fails, the record is flagged so the next push
+   * retries only the payments (the invoice is already in QuickBooks), without
+   * sending any payment twice.
+   *
+   * @param array $record
+   *   The AccountInvoice record.
+   * @param object $invoice
+   *   The invoice as returned by QuickBooks.
+   * @param array $pending
+   *   'pushed' and 'email' as returned by getPendingPayments().
+   *
+   * @throws \Exception
+   */
+  protected function pushPaymentsTracked($record, $invoice, $pending) {
+    $pushed = $pending['pushed'];
+
+    try {
+      self::pushPayments($record['contribution_id'], $invoice, $pushed);
+    }
+    catch (Exception $e) {
+      civicrm_api3('AccountInvoice', 'create', [
+        'id' => $record['id'],
+        'accounts_needs_update' => 1,
+        'error_data' => json_encode([
+          date('c'),
+          [
+            'message' => ts('Invoice created in QuickBooks but pushing its payments failed: %1', [1 => $e->getMessage()]),
+            'payments_pending' => TRUE,
+            'payments_pushed' => $pushed,
+            'email_pending' => $pending['email'],
+          ],
+        ]),
+      ]);
+      $this->paymentStateSaved = TRUE;
+
+      throw $e;
+    }
+
+    if ($pending['email']) {
+      self::sendEmail($invoice->Id);
+    }
+  }
+
+  /**
    * Find Payment entities for given contribution ID and record against
    * AccountInvoice
    *
    * @param $contribution_id
    * @param $account_invoice
+   * @param array $pushed
+   *   IDs of payments already pushed, which are skipped. IDs of payments
+   *   pushed by this call are added, including when it fails part way.
    *
    * @throws \CRM_Core_Exception
    * @throws \QuickBooksOnline\API\Exception\SdkException
    * @throws \QuickBooksOnline\API\Exception\IdsException
    */
-  public static function pushPayments($contribution_id, $account_invoice) {
+  public static function pushPayments($contribution_id, $account_invoice, array &$pushed = []) {
     $payments = civicrm_api3('Payment', 'get', [
       'contribution_id' => $contribution_id,
       'status_id' => 'Completed',
@@ -257,6 +349,10 @@ class CRM_Civiquickbooks_Invoice {
     $result = [];
     $paymentInstrument = self::getCiviPaymentInstrument();
     foreach ($payments['values'] as $payment) {
+      if (in_array($payment['id'], $pushed)) {
+        continue;
+      }
+
       $txnDate = $payment['trxn_date'];
       $total = sprintf('%.5f', $payment['total_amount']);
       $paymentInput = [
@@ -303,6 +399,7 @@ class CRM_Civiquickbooks_Invoice {
       CRM_Quickbooks_APIHelper::checkForError($dataService, "pushing payment for Contribution ID: {$contribution_id}");
 
       $result[] = $paymentResult;
+      $pushed[] = $payment['id'];
     }
 
     return $result;
