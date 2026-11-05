@@ -1,0 +1,26 @@
+# Installation
+
+## Requirements
+
+* CiviCRM 6.11+
+* The [Account Sync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync) extension,
+  declared as a dependency in `info.xml` and required for CiviQuickBooks to function
+
+## Steps
+
+1. Ensure the CiviContribute component is enabled
+2. Download the [latest version of this
+   extension](https://github.com/agileware/au.com.agileware.civiquickbooks/releases)
+3. Unzip in the CiviCRM extension directory, as defined in `System Settings /
+   Directories`.
+4. Download the CiviCRM extension, **[Account
+   Sync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync/archive/master.tar.gz)**.
+5. In CiviCRM, go to `System Settings / Extensions` and enable both extensions,
+   **Account Sync** and **QuickBooks Online Integration**.
+6. An `Accounts Integration` menu will now be available under the `Contributions` menu. It contains
+   `Quickbooks Settings`, the sync error lists and the other Account Sync pages.
+7. Click `Quickbooks Settings` to display the `QuickBooks Online Settings` page. Its address is
+   `civicrm/admin/setting/quickbooks`, for example:
+    * WordPress: `/wp-admin/admin.php?page=CiviCRM&q=civicrm/admin/setting/quickbooks&reset=1`
+    * Drupal: `/civicrm/admin/setting/quickbooks?reset=1`
+8. Continue with [Configuration](configuration.md) to connect to QuickBooks Online.

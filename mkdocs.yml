@@ -7,6 +7,15 @@ theme:
 
 nav:
   - 'Introduction': README.md
+  - 'How it works': how-it-works.md
+  - 'Installation': installation.md
+  - 'Configuration': configuration.md
+  - 'Mapping financial accounts': financial-account-mapping.md
+  - 'App assessment questionnaire': app-assessment-questionnaire.md
+  - 'Initial sync': initial-sync.md
+  - 'Usage': usage.md
+  - 'Troubleshooting': troubleshooting.md
+  - 'Changes in this version': changelog.md
 
 markdown_extensions:
   - attr_list
