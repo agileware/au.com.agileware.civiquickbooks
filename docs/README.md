@@ -91,7 +91,11 @@ step to queue existing Contributions. See [How it works](how-it-works.md) for th
 
 * CiviCRM 6.11 or later
 * The [Account Sync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync) extension
-* A QuickBooks Online company (AU, US, UK or CA) and an Intuit Developer account
+* A QuickBooks Online company (AU, US, UK or CA)
+* An Intuit Developer Account, sign up at <https://developer.intuit.com/>. This account must be
+  added as a user of `Admin` user type to the QuickBooks Online company being integrated.
+* An Intuit App, created in that Intuit Developer Account, to provide the OAuth 2.0 Client ID and
+  Client Secret. See [Configuration](configuration.md#create-an-intuit-app-and-get-your-keys).
 * CiviCRM Scheduled Jobs (cron) running on your site
 
 CiviQuickBooks version 2 uses OAuth 2.0. If you are upgrading from version 1 you need to generate
