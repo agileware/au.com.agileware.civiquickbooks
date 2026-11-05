@@ -25,8 +25,11 @@
    Sync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync/archive/master.tar.gz)**.
 5. In CiviCRM, go to `System Settings / Extensions` and enable both extensions,
    **Account Sync** and **QuickBooks Online Integration**.
-6. An `Accounts Integration` menu will now be available under the `Contributions` menu. It contains
-   `Quickbooks Settings`, the sync error lists and the other Account Sync pages.
+6. `Quickbooks Settings` will now be available directly under the `Contributions` menu. The sync
+   error lists and the other Account Sync pages are in the `Accounts Integration` menu, also under
+   `Contributions`. If you are upgrading from an earlier version, `Quickbooks Settings` was in the
+   `Accounts Integration` menu and moves to `Contributions` the next time the CiviCRM caches are
+   cleared, unless you have customised that menu item in the menu editor.
 7. Click `Quickbooks Settings` to display the `QuickBooks Online Settings` page. Its address is
    `civicrm/admin/setting/quickbooks`, for example:
     * WordPress: `/wp-admin/admin.php?page=CiviCRM&q=civicrm/admin/setting/quickbooks&reset=1`

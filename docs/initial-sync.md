@@ -48,7 +48,7 @@ sync.
 
 **Step 4. Review the settings**
 
-Open `Contributions` > `Accounts Integration` > `Quickbooks Settings` and check:
+Open `Contributions` > `Quickbooks Settings` and check:
 
 1. **Send Email for new Invoices** - set this to `Never` for the initial sync. The default is `Only if
    the invoice is unpaid`, and QuickBooks would then email every customer a new Invoice for each unpaid
