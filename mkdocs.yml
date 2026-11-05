@@ -10,8 +10,8 @@ nav:
   - 'How it works': how-it-works.md
   - 'Installation': installation.md
   - 'Configuration': configuration.md
-  - 'Mapping financial accounts': financial-account-mapping.md
   - 'App assessment questionnaire': app-assessment-questionnaire.md
+  - 'Mapping financial accounts': financial-account-mapping.md
   - 'Initial sync': initial-sync.md
   - 'Usage': usage.md
   - 'Troubleshooting': troubleshooting.md

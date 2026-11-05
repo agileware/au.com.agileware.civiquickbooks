@@ -11,11 +11,18 @@ To use this extension, you need to generate a QuickBooks Online consumer key and
    section and select `Create new app`.
 3. Use the `Select APIs` button in the `Just start coding` card, then select the
    Accounting API.
-4. From the App dashboard, select the `OAuth 2.0 keys`
-5. In the `Production Keys` section, copy the `Client ID` and `Client Secret`
+4. **Complete Intuit's App assessment questionnaire.** Intuit requires this before it will give
+   your app Production keys. It asks about your organisation, how the app uses Intuit data and how
+   it handles security and errors, and takes 20 to 30 minutes. See the
+   [App assessment questionnaire](app-assessment-questionnaire.md) page for every question and the
+   answers that are accurate for CiviQuickBooks. Until it is approved you can only use the app with
+   Development keys and a QuickBooks sandbox company (see
+   [Production or Development](#are-you-using-a-quickbooks-online-production-or-development-account)).
+5. From the App dashboard, select the `OAuth 2.0 keys`
+6. In the `Production Keys` section, copy the `Client ID` and `Client Secret`
    keys.
-6. Paste these values into the CiviQuickBooks Online Settings page and submit.
-7. Copy the Redirect URI that is present into the `Production Keys` section of
+7. Paste these values into the CiviQuickBooks Online Settings page and submit.
+8. Copy the Redirect URI that is present into the `Production Keys` section of
    your App in the Intuit Developer site.
 
 The CiviQuickBooks Online Settings page looks like this:

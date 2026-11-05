@@ -22,8 +22,11 @@ Install and enable **Account Sync** and **QuickBooks Online Integration** as des
 
 **Step 2. Connect to QuickBooks**
 
-Create the Intuit app, enter the Client ID and Client Secret, add the Redirect URI to the Intuit app,
-and click **Authorize**, as described in [Configuration](configuration.md#configuration). Confirm that the `Access
+Create the Intuit app, complete Intuit's [App assessment
+questionnaire](app-assessment-questionnaire.md) (needed for Production keys, and Intuit may take some
+time to approve it, so start early), enter the Client ID and Client Secret, add the Redirect URI to
+the Intuit app, and click **Authorize**, as described in
+[Configuration](configuration.md#create-an-intuit-app-and-get-your-keys). Confirm that the `Access
 Token Expiry Date` shows a date.
 
 **Step 3. Map Products/Services and tax codes**

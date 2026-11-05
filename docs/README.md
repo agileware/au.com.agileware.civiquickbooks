@@ -81,7 +81,9 @@ step to queue existing Contributions. See [How it works](how-it-works.md) for th
 ## Quick start
 
 1. Install **Account Sync** and **QuickBooks Online Integration**. See [Installation](installation.md).
-2. Create an Intuit app, enter its keys and click **Authorize**. See [Configuration](configuration.md).
+2. Create an Intuit app, complete Intuit's [App assessment
+   questionnaire](app-assessment-questionnaire.md), enter the app's keys and click **Authorize**.
+   See [Configuration](configuration.md).
 3. Map your Financial Accounts to QuickBooks Products/Services and tax codes. See
    [Mapping financial accounts](financial-account-mapping.md).
 4. Follow the [initial sync guide](initial-sync.md) to bring your existing Contributions across
@@ -96,6 +98,8 @@ step to queue existing Contributions. See [How it works](how-it-works.md) for th
   added as a user of `Admin` user type to the QuickBooks Online company being integrated.
 * An Intuit App, created in that Intuit Developer Account, to provide the OAuth 2.0 Client ID and
   Client Secret. See [Configuration](configuration.md#create-an-intuit-app-and-get-your-keys).
+* A completed Intuit App assessment questionnaire, which Intuit requires before it issues the app's
+  Production keys. See the [App assessment questionnaire](app-assessment-questionnaire.md).
 * CiviCRM Scheduled Jobs (cron) running on your site
 
 CiviQuickBooks version 2 uses OAuth 2.0. If you are upgrading from version 1 you need to generate
@@ -108,8 +112,8 @@ new keys, as described in [Configuration](configuration.md).
 | [How it works](how-it-works.md) | The queueing model, and exactly what is sent to QuickBooks for each Contact, Contribution and Payment |
 | [Installation](installation.md) | Requirements and installing the extension |
 | [Configuration](configuration.md) | Connecting to QuickBooks, Production vs Development, all settings, and queueing existing Contributions |
+| [App assessment questionnaire](app-assessment-questionnaire.md) | The questionnaire Intuit requires before issuing Production keys, with suggested answers for CiviQuickBooks |
 | [Mapping financial accounts](financial-account-mapping.md) | Matching Financial Accounts to QuickBooks Products/Services and tax codes (AU and US) |
-| [App assessment questionnaire](app-assessment-questionnaire.md) | Suggested answers for Intuit's app assessment when going to Production |
 | [Initial sync: step by step](initial-sync.md) | A safe, ordered walkthrough from fresh install to your first synced Invoices |
 | [Usage](usage.md) | Scheduled Jobs, the sync status on the Contact page, System Status checks and API rate limits |
 | [Troubleshooting](troubleshooting.md) | What common error messages mean, and special notes on mapping behaviour |
