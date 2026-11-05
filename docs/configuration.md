@@ -2,7 +2,13 @@
 
 ## Create an Intuit app and get your keys
 
-To use this extension, you need to generate a QuickBooks Online consumer key and secret.
+To use this extension, you need to generate a QuickBooks Online consumer key and secret. These come
+from an Intuit app that belongs to **your own organisation**. Do not borrow another organisation's app,
+including your developer's own test app: usage limits on connections apply per app, so a shared app
+would be limited and could incur charges, whereas an app of your own keeps you independent.
+
+Setting up the app takes several steps on the Intuit Developer site, and the Production keys are
+locked until you have completed two tasks (steps 5 and 6).
 
 1. You will need an Intuit Developer Account, sign up at
    (https://developer.intuit.com/). This account must be added as a user of `Admin` user type to the
@@ -11,19 +17,36 @@ To use this extension, you need to generate a QuickBooks Online consumer key and
    section and select `Create new app`.
 3. Use the `Select APIs` button in the `Just start coding` card, then select the
    Accounting API.
-4. **Complete Intuit's App assessment questionnaire.** Intuit requires this before it will give
-   your app Production keys. It asks about your organisation, how the app uses Intuit data and how
-   it handles security and errors, and takes 20 to 30 minutes. See the
+4. Open your app's dashboard (**My Hub** > **Dashboard**). It lists **Development Keys** and
+   **Production Keys**. The Production keys show a message such as "Complete these tasks in order to
+   unlock your production credentials", followed by the two tasks below. Complete them in order.
+5. **Fill in the production app details.** Intuit's form changes from time to time, but expect to be
+   asked for the following:
+
+    | Field | What to enter |
+    |---|---|
+    | Whether you are a US-based organisation | Answer for your organisation. |
+    | User license agreement URL (and other administrative URLs) | Your organisation's website address. Intuit requires them, but CiviQuickBooks does not use them. |
+    | Host domain | The domain name of your CiviCRM site. |
+    | Launch URL, Disconnect URL and Connect/Reconnect URL | All three are the address of the `QuickBooks Online Settings` page on your CiviCRM site (see [Installation](installation.md), step 7). For example, on WordPress: `https://example.org/wp-admin/admin.php?page=CiviCRM&q=civicrm/admin/setting/quickbooks&reset=1`, or on Drupal: `https://example.org/civicrm/admin/setting/quickbooks?reset=1`. |
+    | What the app is used for | Invoicing and payments. |
+    | Regulated industries that use the app | None of the above. |
+    | Countries | The country or countries your organisation operates in. |
+
+6. **Complete Intuit's App assessment questionnaire.** It asks about your organisation, how the app
+   uses Intuit data and how it handles security and errors, and takes 20 to 40 minutes. See the
    [App assessment questionnaire](app-assessment-questionnaire.md) page for every question and the
-   answers that are accurate for CiviQuickBooks. Until it is approved you can only use the app with
+   answers that are accurate for CiviQuickBooks. Until it is complete you can only use the app with
    Development keys and a QuickBooks sandbox company (see
    [Production or Development](#are-you-using-a-quickbooks-online-production-or-development-account)).
-5. From the App dashboard, select the `OAuth 2.0 keys`
-6. In the `Production Keys` section, copy the `Client ID` and `Client Secret`
-   keys.
-7. Paste these values into the CiviQuickBooks Online Settings page and submit.
-8. Copy the Redirect URI that is present into the `Production Keys` section of
-   your App in the Intuit Developer site.
+7. Back on the app dashboard, the Production keys are now available. Select the `OAuth 2.0 keys`
+   and, in the `Production Keys` section, copy the `Client ID` and `Client Secret`.
+8. Paste these values into the CiviQuickBooks Online Settings page and submit. Copy each value in
+   full, with no extra spaces: a partly copied key is the usual cause of an "Invalid authorization
+   code" error when you authorise (see below).
+9. Copy the Redirect URI that is shown on the CiviQuickBooks Online Settings page into your Production
+   app on the Intuit Developer site: open the app's **Settings**, go to the **Redirect URIs** tab,
+   paste it in and save (the Save button is at the top right).
 
 The CiviQuickBooks Online Settings page looks like this:
 
@@ -43,6 +66,12 @@ tokens, so you will need to re-authorise (see below) after doing so.
 6. To confirm QuickBooks Online authentication a date will be shown in the
    `Access Token Expiry Date` field. If no date is shown then authentication has
    failed. Repeat the process.
+
+If QuickBooks shows an error such as `Invalid authorization code for access`, the Client ID or Client
+Secret on the settings page is wrong. Go back to the app's Production keys on the Intuit Developer
+site, copy **both** values again, paste them into the settings page, submit, and click `Authorize`
+again. Check that you copied the Production keys, not the Development keys, to match the `Environment`
+setting.
 
 Once authorised, the extension records which QuickBooks Online company country (AU, US, UK, CA,
 etc.) your connected company uses; this is detected automatically from QuickBooks and is not a
@@ -68,15 +97,21 @@ The `QuickBooks Online Settings` page also provides the following options:
 * **Send Email for new Invoices** - whether QuickBooks Online should email the customer when a new
   Invoice is created: `Never`, `Only if the invoice is unpaid` (the default), or `Always`. See the
   warning in the [initial sync](initial-sync.md#initial-sync-step-by-step) before pushing existing Contributions.
+  Many organisations choose `Never`, because CiviCRM already sends its own receipt or invoice and a
+  second email from QuickBooks Online is not wanted.
 * **Where should Invoice Numbers be generated?** - `CiviCRM` (the default; the Invoice's `DocNumber`
   is set from the Contribution ID using the Invoice Prefix below) or `QuickBooks` (QuickBooks Online
   assigns the number automatically).
 * **Invoice Prefix** - the `sprintf()` format used to generate the Invoice `DocNumber` when Invoice
   Numbers are generated by CiviCRM, e.g. the default `Civi-%07d` produces `Civi-0001234` for
   Contribution ID 1234, and `INV_%d` produces `INV_1234`. QuickBooks limits an Invoice number to 21
-  characters, so keep the prefix short.
+  characters, so keep the prefix short. If your site already issues CiviCRM invoice numbers (by
+  default `INV_` followed by the Contribution ID), use the matching format, for example `INV_%d`, so
+  that each Invoice has the same number in both systems and numbering carries on from where it is.
+  `%d` adds no zero padding, whereas `%07d` pads to seven digits.
 * **Allow Online Credit Card Payment** / **Allow ACH Payment** - whether the pushed Invoice permits
-  the customer to pay online via credit card / ACH from within QuickBooks Online.
+  the customer to pay online via credit card / ACH from within QuickBooks Online. The defaults are
+  right if your customers pay through CiviCRM, because CiviCRM sends the Payment to QuickBooks.
 * **Customer Memo Override** - optional text to use as the Invoice's Customer Memo instead of the
   Contribution's Source. If this is empty, the Contribution's Source is used as the memo, and if the
   Contribution has no Source the Invoice is pushed without a memo.

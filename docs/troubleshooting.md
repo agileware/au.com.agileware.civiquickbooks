@@ -10,6 +10,7 @@ Errors are shown in the Scheduled Job log, on the lists at `Contributions` > `Ac
 | `No valid LineItems in Contribution to push` | Every line item was left off because of a Product/Service mismatch. See the previous entry. |
 | `Business Validation Error: You cannot enter more than 21 characters in the doc_num field` | A reference or Invoice number sent to QuickBooks is too long. Payment references are cut to 21 characters automatically; if this is about the Invoice number, shorten the Invoice Prefix. |
 | `Invoice created in QuickBooks but pushing its payments failed` | The Invoice exists in QuickBooks but a Payment did not go through. The Invoice stays queued, and the next Invoice Push retries only the Payments not yet sent. The rest of the message says why. |
+| `Invalid authorization code for access` when you click `Authorize` | The Client ID or Client Secret on the settings page is wrong or incomplete. Copy both Production keys again from the Intuit Developer site, submit, and authorise again. |
 | `Authentication failure` or a System Status message about the refresh token | The QuickBooks authorisation has expired or been revoked. Click `Authorize` again on the settings page. |
 | `QBO API rate limit exceeded` | QuickBooks is limiting requests. Wait, then run the job again; it continues where it stopped. |
 | A Contact is marked `do not sync` | It failed to push more than 3 times. Fix the cause, then use `Retry sync` on the Contact Errors list or the link on the Contact Summary page. |
@@ -35,3 +36,6 @@ again when you are done, as the logs contain customer data.
    avoid un-taxed invoice lines in QuickBooks.
 3. Contributions and Contacts are queued by Account Sync, not by this extension. If something is not
    being sent, check first that it has been queued (see [How it works](how-it-works.md#how-it-works)).
+4. Only CiviCRM Contributions are synchronised. Orders taken in another system, such as a separate
+   online shop, are not Contributions and are not sent by this extension. They need their own
+   QuickBooks connector.
