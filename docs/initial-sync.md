@@ -11,6 +11,11 @@ QuickBooks.
   this is your first time, trying it on a Development company first is a good idea.
 * Make sure CiviCRM's Scheduled Jobs (cron) run on your site, or be ready to run the jobs by hand in
   step 9.
+* The four Scheduled Jobs are active as soon as the extension is installed, and run each time your
+  cron runs (every 15 minutes on some sites). Disable them under `Administer` > `System Settings` >
+  `Scheduled Jobs` until step 11, so they cannot run against half-finished settings or start pushing
+  part way through your mapping. Jobs that run before the connection is authorised log `not
+  authorized` errors.
 * Everything that is pushed becomes real accounting data. A Contribution is pushed as an Invoice, and
   as a Payment if it has been paid. Records that have been sent are not sent again, and they are not removed from
   QuickBooks if you change your mind, so test with a few records first (step 6).
@@ -22,8 +27,10 @@ Install and enable **Account Sync** and **QuickBooks Online Integration** as des
 
 **Step 2. Connect to QuickBooks**
 
-Create the Intuit app, enter the Client ID and Client Secret, add the Redirect URI to the Intuit app,
-and click **Authorize**, as described in [Configuration](configuration.md#configuration). Confirm that the `Access
+Create the Intuit app, complete Intuit's [App assessment
+questionnaire](app-assessment-questionnaire.md) (needed for Production keys), enter the Client ID and Client Secret, add the Redirect URI to
+the Intuit app, and click **Authorize**, as described in
+[Configuration](configuration.md#create-an-intuit-app-and-get-your-keys). Confirm that the `Access
 Token Expiry Date` shows a date.
 
 **Step 3. Map Products/Services and tax codes**
@@ -41,7 +48,7 @@ sync.
 
 **Step 4. Review the settings**
 
-Open `Contributions` > `Accounts Integration` > `Quickbooks Settings` and check:
+Open `Contributions` > `Quickbooks Settings` and check:
 
 1. **Send Email for new Invoices** - set this to `Never` for the initial sync. The default is `Only if
    the invoice is unpaid`, and QuickBooks would then email every customer a new Invoice for each unpaid
@@ -111,7 +118,11 @@ and it continues with the records that remain.
   **Retry sync** on the error list.
 * Open a few synced Contacts. The `QuickBooks Sync Status` block on the Contact Summary page shows
   whether the Contact is synced, and any error.
-* In QuickBooks, check some of the Customers and Invoices against CiviCRM. For a paid Contribution,
+* A job can finish with `Success` even though nothing reached QuickBooks, for example when no
+  Product/Service matches your Financial Accounts (step 3). If you see no results, check the mapping
+  and the error lists first.
+* In QuickBooks, look under **Sales** > **Invoices** and the Customers list. Pushed Invoices do not
+  appear under bank transactions. Check some of the Customers and Invoices against CiviCRM. For a paid Contribution,
   the Invoice should show as paid, with a linked Payment whose reference is the transaction ID (cut
   to 21 characters if it is longer).
 
@@ -119,5 +130,5 @@ and it continues with the records that remain.
 
 1. If you used a recent Day zero for the test, set it to the real date and repeat steps 7 to 10.
 2. Set **Send Email for new Invoices** to what you want for day to day use.
-3. Make sure all four Scheduled Jobs are enabled and running on your site's cron. From now on, new
+3. Re-enable the four Scheduled Jobs you disabled at the start, and make sure they are enabled and running on your site's cron. From now on, new
    Contributions are queued automatically when they are saved, and the jobs send them.

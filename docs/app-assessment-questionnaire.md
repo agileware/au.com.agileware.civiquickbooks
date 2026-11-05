@@ -1,5 +1,14 @@
 # App assessment questionnaire
 
+This page is part of setting up your Intuit app. The order is:
+
+1. Create an Intuit Developer Account and an Intuit app
+   ([Configuration](configuration.md#create-an-intuit-app-and-get-your-keys), steps 1 to 5, which include filling in the production app details).
+2. **Complete the App assessment questionnaire on this page** (step 6).
+3. Once Intuit approves it, copy the app's Production keys into CiviCRM and authorise
+   ([Configuration](configuration.md#create-an-intuit-app-and-get-your-keys), steps 7 to 9, then
+   [Authorise](configuration.md#authorise-civiquickbooks-access-to-your-quickbooks-online-account)).
+
 When you create a new app on the Intuit Developer site and want to use its **Production** keys,
 Intuit asks you to complete an *App assessment questionnaire*. This section lists the questions you
 are likely to see and the answers that are accurate for a CiviQuickBooks app: a private app,
@@ -9,7 +18,15 @@ company using the Accounting API.
 Notes before you start:
 
 * The questionnaire is opened from your app on the Intuit Developer site. Choose your app from the
-  drop down at the top, then work through the tabs on the left. Plan on 20 to 30 minutes.
+  drop down at the top, then work through the tabs on the left. Intuit estimates up to 40 minutes. With the answers on this
+  page to hand, allow about 20.
+* The questionnaire is split into several tabs. Move between them with **Next tab**, and only press
+  **Submit** on the last one. Pressing Submit early leaves later questions unanswered and can look as
+  though a question is missing.
+* Some questions use a two-sided list: tick the option, then click the arrow to move it into the
+  chosen list.
+* Intuit does not make your answers easy to view again afterwards, so keep a copy of what you submit
+  (a screenshot of each tab, or a PDF export).
 * It must be completed by someone who is authorised to answer on behalf of your organisation.
 * The number and wording of questions depends on the app and may change over time, so you may see
   more, fewer or differently worded questions than those below. Intuit's
@@ -27,13 +44,13 @@ Notes before you start:
 | 3 | Have you reviewed and confirmed that you will comply with the [security policies](https://developer.intuit.com/app/developer/qbo/docs/go-live/publish-app/security-requirements)? | `Yes, I confirm that my app will comply with the security policies found above.` Read the linked policies first. |
 | 4 | Apps that use Intuit APIs need to be relevant and clearly related to QuickBooks, accounting, payments, workflows, finance and other acceptable uses. Is your app designed to enhance, streamline or improve your or others' QuickBooks experience, or to facilitate a business process (e.g. syncing QBO data to another service)? | `Yes`. The extension syncs CiviCRM contributions with QuickBooks Online. |
 | 5 | Are you or any of your representatives on any sanctions lists, or located or doing business in jurisdictions subject to comprehensive embargoes or sanctions? | **Your call.** Typically `No`. |
-| 6 | Does your application involve any generative AI functionality? | `No`. The extension has no generative AI features. |
+| 6 | Does your application involve any generative AI functionality? | `No`. The extension has no generative AI features. If you are also asked whether your app uses QuickBooks data for training purposes, answer `No`. |
 
 ## App Information
 
 | # | Question | Suggested answer |
 |---|---|---|
-| 1 | Which of the following is true about your app (at least one option must be checked)? | Tick **You built your app from scratch and wrote the code that lets it interact with Intuit APIs and data**. Leave the other options unticked. Your organisation does not ask its users to create an additional Intuit app, and the app is not a platform for other developers. |
+| 1 | Which of the following is true about your app (at least one option must be checked)? | Tick **You built your app from scratch and wrote the code that lets it interact with Intuit APIs and data**. Leave the other options unticked. In particular, avoid the option about creating the app only to obtain keys for another platform that integrates with QuickBooks: it asks for further information. Your organisation does not ask its users to create an additional Intuit app, and the app is not a platform for other developers. |
 | 2 | What platform(s) does your app utilize and make API calls from? | `Web/SaaS`. CiviCRM runs on your web server and makes the API calls from there. |
 | 3 | How does your app interact with Intuit product data? | `It reads data from Intuit product(s)` and `It writes data to Intuit product(s)`. The extension pushes Customers, Invoices and Payments, and reads Invoices back. It does not delete data. |
 | 4 | Are you building a private app for your team or business? Or, do you plan to make it publicly available? | `We're building a private app`. |
@@ -66,9 +83,9 @@ Notes before you start:
 
 | # | Question | Suggested answer |
 |---|---|---|
-| 1 | Which customer-facing version of QuickBooks Online is your app designed for? | Select every version your organisation might use. The extension does not depend on a particular version. |
+| 1 | Which customer-facing version of QuickBooks Online is your app designed for? | Select the version your QuickBooks Online company uses (for example `Simple Start`), and any others you might move to. The extension does not depend on a particular version. |
 | 2 | Can your app handle situations where users gain or lose access to version-specific features? Tell us how you plan to handle this situation. | `Yes`. The extension only uses core Customer, Invoice, Payment, Item and Tax Code features, which are not version specific. Failures are recorded as sync errors and shown to administrators. |
-| 3 | Does your app utilize any of the following features? (Select all that you've verified and thoroughly tested) | Tick only the features you have actually tested. Typically none. |
+| 3 | Does your app utilize any of the following features? (Select all that you've verified and thoroughly tested) | Tick the sales tax option for companies outside the US, even if your organisation is not currently registered for GST or sales tax: the extension sends tax codes for non-US companies, and your organisation may register later. Leave the other features unticked unless you have tested them. |
 | 4 | Do you use webhooks for your app? Is the endpoint URL active and functional? | `No`. The extension polls QuickBooks from Scheduled Jobs. |
 | 5 | Do you use the CDC (Change Data Capture) operation for your app? | `No`. |
 
@@ -101,4 +118,5 @@ Notes before you start:
   opens. Intuit's [support page](https://help.developer.intuit.com/s/contactsupport) is the place to
   start.
 * After approval, copy the **Production** `Client ID` and `Client Secret` into the settings page, as
-  described in [Configuration](configuration.md#configuration).
+  described in [Configuration](configuration.md#create-an-intuit-app-and-get-your-keys) (step 7 onward), then
+  [authorise the connection](configuration.md#authorise-civiquickbooks-access-to-your-quickbooks-online-account).

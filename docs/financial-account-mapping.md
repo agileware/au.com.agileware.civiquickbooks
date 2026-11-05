@@ -1,17 +1,28 @@
 # Mapping financial accounts
 
-QuickBooks needs every Invoice line to have a Product/Service and a tax code. CiviCRM supplies them through the `Acctg Code` of the Financial Accounts attached to each Financial Type. This is the step that most often decides whether an Invoice is pushed, so it is worth getting right before your first sync.
+QuickBooks needs every Invoice line to have a Product/Service and, for a company registered for GST or sales tax, a tax code. CiviCRM supplies them through the `Acctg Code` of the Financial Accounts attached to each Financial Type. This is the step that most often decides whether an Invoice is pushed, so it is worth getting right before your first sync.
 
 ## Map your QuickBooks product/service to CiviCRM Financial account codes
 
 Each QuickBooks Product/Service has a unique name. This is used in the CiviCRM
 Financial Account codes to correctly code each Invoice in QuickBooks Online.
 
-1. Open the QuickBooks Company, go to product/service settings page
-   ([https://sandbox.qbo.intuit.com/app/items](https://sandbox.qbo.intuit.com/app/items)).
-2. Identify each QuickBooks Product/Service that you want to sync with CiviCRM.
-3. Open the CiviCRM Financial Account setting page
-   (civicrm/admin/financial/financialAccount) and update the `Acctg Code` of
+These are QuickBooks **Products and services** (also called items), not the accounts in your QuickBooks
+Chart of Accounts. Copying your CiviCRM Financial Accounts into the Chart of Accounts does not create
+them. A QuickBooks company with no items shows "Get started with products and services", with
+**Create items** and **Import items** buttons.
+
+1. Open the QuickBooks company and go to **Sales** > **Products and services**. You can also open
+   it directly at [https://qbo.intuit.com/app/items](https://qbo.intuit.com/app/items) (for a
+   Development/sandbox company,
+   [https://sandbox.qbo.intuit.com/app/items](https://sandbox.qbo.intuit.com/app/items)).
+2. Identify each QuickBooks Product/Service that you want to sync with CiviCRM, and create any that
+   do not exist yet. You do not need one for every CiviCRM Financial Account, only for the Income
+   Accounts of the Financial Types used by the Contributions you will sync. For example, a membership
+   organisation might need only five: donations, member dues, event fees, and two conference
+   accounts.
+3. Open the CiviCRM Financial Account setting page (`Administer` > `CiviContribute` >
+   `Financial Accounts`, or civicrm/admin/financial/financialAccount) and update the `Acctg Code` of
    corresponding Financial account to be the same as each QuickBooks
    Product/Service name:
    ![Product Name -> Acctg Code](https://github.com/agileware/au.com.agileware.civiquickbooks/raw/master/docs/img/product_name-to-acctg_code.png)
@@ -33,8 +44,9 @@ away. Clearing the CiviCRM caches may refresh it sooner.
 
 ## Map your QuickBooks tax code to the Sales Tax Account's Acctg Code
 
-When the extension pushes an invoice to QuickBooks Online, it requires every
-item to have a specified Tax account.
+If your QuickBooks company is registered for GST or sales tax, each Invoice line should carry a tax
+code. If your organisation is **not** registered, you can skip this whole section: a line item with no
+Sales Tax Account is still pushed, just without a tax code.
 
 ### For AU Companies:
 
@@ -57,8 +69,9 @@ item to have a specified Tax account.
 5. During sync, the Contribution line item will be assigned with corresponding
    Tax account.
 6. When a CiviCRM `Acctg Code` does not match any QuickBooks Tax account name,
-   which means that the there is no tax account in QuickBooks has the same name,
-   that particular line item will **NOT** be pushed through the invoice.
+   which means that there is no tax account in QuickBooks with the same name,
+   that line item is still pushed, but without a tax code, and the mismatch is not
+   reported (see [Special notes](troubleshooting.md#special-notes)).
 
 ### For US Companies:
 
