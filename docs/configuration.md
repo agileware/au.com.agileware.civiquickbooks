@@ -14,7 +14,8 @@ locked until you have completed two tasks (steps 5 and 6).
    (https://developer.intuit.com/). This account must be added as a user of `Admin` user type to the
    QuickBooks Online company being integrated.
 2. Once your developer account is created and linked, Go to the `My Apps`
-   section and select `Create new app`.
+   section and select `Create new app`. Intuit's developer platform is offered in several tiers:
+   choose the **Builder** tier.
 3. Use the `Select APIs` button in the `Just start coding` card, then select the
    Accounting API.
 4. Open your app's dashboard (**My Hub** > **Dashboard**). It lists **Development Keys** and
@@ -28,6 +29,7 @@ locked until you have completed two tasks (steps 5 and 6).
     | Whether you are a US-based organisation | Answer for your organisation. |
     | User license agreement URL (and other administrative URLs) | Your organisation's website address. Intuit requires them, but CiviQuickBooks does not use them. |
     | Host domain | The domain name of your CiviCRM site. |
+    | Server or static IP address (if asked) | The IP address of the server that hosts your CiviCRM site. Your hosting provider can tell you what it is. |
     | Launch URL, Disconnect URL and Connect/Reconnect URL | All three are the address of the `QuickBooks Online Settings` page on your CiviCRM site (see [Installation](installation.md), step 7). For example, on WordPress: `https://example.org/wp-admin/admin.php?page=CiviCRM&q=civicrm/admin/setting/quickbooks&reset=1`, or on Drupal: `https://example.org/civicrm/admin/setting/quickbooks?reset=1`. |
     | What the app is used for | Invoicing and payments. |
     | Regulated industries that use the app | None of the above. |
