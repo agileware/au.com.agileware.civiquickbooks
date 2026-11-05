@@ -75,18 +75,18 @@ Most behaviour is a setting on the QuickBooks Online Settings page, not a code c
 The [Account Sync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync) extension notices
 when a Contribution is saved and queues it, together with its Contact. CiviQuickBooks then sends
 queued Contacts first, then Invoices (and Payments), and reads changes back from QuickBooks. Nothing
-is sent until it has been queued, which is why the [initial sync guide](initial-sync.md) includes a
-step to queue existing Contributions. See [How it works](how-it-works.md) for the details.
+is sent until it has been queued, which is why the [initial sync guide](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/initial-sync.md) includes a
+step to queue existing Contributions. See [How it works](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/how-it-works.md) for the details.
 
 ## Quick start
 
-1. Install **Account Sync** and **QuickBooks Online Integration**. See [Installation](installation.md).
+1. Install **Account Sync** and **QuickBooks Online Integration**. See [Installation](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/installation.md).
 2. Create an Intuit app, complete Intuit's [App assessment
-   questionnaire](app-assessment-questionnaire.md), enter the app's keys and click **Authorize**.
-   See [Configuration](configuration.md).
+   questionnaire](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/app-assessment-questionnaire.md), enter the app's keys and click **Authorize**.
+   See [Configuration](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/configuration.md).
 3. Map your Financial Accounts to QuickBooks Products/Services and tax codes. See
-   [Mapping financial accounts](financial-account-mapping.md).
-4. Follow the [initial sync guide](initial-sync.md) to bring your existing Contributions across
+   [Mapping financial accounts](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/financial-account-mapping.md).
+4. Follow the [initial sync guide](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/initial-sync.md) to bring your existing Contributions across
    safely, trying a few records first.
 
 ## Requirements
@@ -97,34 +97,34 @@ step to queue existing Contributions. See [How it works](how-it-works.md) for th
 * An Intuit Developer Account, sign up at <https://developer.intuit.com/>. This account must be
   added as a user of `Admin` user type to the QuickBooks Online company being integrated.
 * An Intuit App, created in that Intuit Developer Account, to provide the OAuth 2.0 Client ID and
-  Client Secret. See [Configuration](configuration.md#create-an-intuit-app-and-get-your-keys).
+  Client Secret. See [Configuration](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/configuration.md#create-an-intuit-app-and-get-your-keys).
 * A completed Intuit App assessment questionnaire, which Intuit requires before it issues the app's
-  Production keys. See the [App assessment questionnaire](app-assessment-questionnaire.md).
+  Production keys. See the [App assessment questionnaire](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/app-assessment-questionnaire.md).
 * CiviCRM Scheduled Jobs (cron) running on your site
 
 CiviQuickBooks version 2 uses OAuth 2.0. If you are upgrading from version 1 you need to generate
-new keys, as described in [Configuration](configuration.md).
+new keys, as described in [Configuration](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/configuration.md).
 
 ## Documentation
 
 | Page | What it covers |
 |---|---|
-| [How it works](how-it-works.md) | The queueing model, and exactly what is sent to QuickBooks for each Contact, Contribution and Payment |
-| [Installation](installation.md) | Requirements and installing the extension |
-| [Configuration](configuration.md) | Connecting to QuickBooks, Production vs Development, all settings, and queueing existing Contributions |
-| [App assessment questionnaire](app-assessment-questionnaire.md) | The questionnaire Intuit requires before issuing Production keys, with suggested answers for CiviQuickBooks |
-| [Mapping financial accounts](financial-account-mapping.md) | Matching Financial Accounts to QuickBooks Products/Services and tax codes (AU and US) |
-| [Initial sync: step by step](initial-sync.md) | A safe, ordered walkthrough from fresh install to your first synced Invoices |
-| [Usage](usage.md) | Scheduled Jobs, the sync status on the Contact page, System Status checks and API rate limits |
-| [Troubleshooting](troubleshooting.md) | What common error messages mean, and special notes on mapping behaviour |
-| [Changes in this version](changelog.md) | What changed in the current release |
+| [How it works](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/how-it-works.md) | The queueing model, and exactly what is sent to QuickBooks for each Contact, Contribution and Payment |
+| [Installation](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/installation.md) | Requirements and installing the extension |
+| [Configuration](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/configuration.md) | Connecting to QuickBooks, Production vs Development, all settings, and queueing existing Contributions |
+| [App assessment questionnaire](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/app-assessment-questionnaire.md) | The questionnaire Intuit requires before issuing Production keys, with suggested answers for CiviQuickBooks |
+| [Mapping financial accounts](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/financial-account-mapping.md) | Matching Financial Accounts to QuickBooks Products/Services and tax codes (AU and US) |
+| [Initial sync: step by step](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/initial-sync.md) | A safe, ordered walkthrough from fresh install to your first synced Invoices |
+| [Usage](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/usage.md) | Scheduled Jobs, the sync status on the Contact page, System Status checks and API rate limits |
+| [Troubleshooting](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/troubleshooting.md) | What common error messages mean, and special notes on mapping behaviour |
+| [Changes in this version](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/changelog.md) | What changed in the current release |
 | [Contributing](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/CONTRIBUTING.md) | Versioning and release process |
 
 ## Support and licence
 
 The extension is licensed under the terms in
 [LICENSE.txt](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/LICENSE.txt).
-For help, see the [Troubleshooting](troubleshooting.md) page, or
+For help, see the [Troubleshooting](https://github.com/agileware/au.com.agileware.civiquickbooks/blob/master/docs/troubleshooting.md) page, or
 [contact Agileware](https://agileware.com.au/contact).
 
 # Funding for this CiviCRM extension
