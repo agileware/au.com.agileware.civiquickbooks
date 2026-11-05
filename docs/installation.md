@@ -5,6 +5,11 @@
 * CiviCRM 6.11+
 * The [Account Sync](https://github.com/eileenmcnaughton/nz.co.fuzion.accountsync) extension,
   declared as a dependency in `info.xml` and required for CiviQuickBooks to function
+* An Intuit Developer Account, sign up at <https://developer.intuit.com/>. This account must be
+  added as a user of `Admin` user type to the QuickBooks Online company being integrated.
+* An Intuit App, created in that Intuit Developer Account, to provide the OAuth 2.0 Client ID and
+  Client Secret. See [Create an Intuit app and get your
+  keys](configuration.md#create-an-intuit-app-and-get-your-keys).
 
 ## Steps
 
