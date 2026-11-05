@@ -10,6 +10,9 @@
 * An Intuit App, created in that Intuit Developer Account, to provide the OAuth 2.0 Client ID and
   Client Secret. See [Create an Intuit app and get your
   keys](configuration.md#create-an-intuit-app-and-get-your-keys).
+* A completed Intuit **App assessment questionnaire**, which Intuit requires before it issues the
+  app's Production keys. See the [App assessment questionnaire](app-assessment-questionnaire.md)
+  page. It takes 20 to 30 minutes, so do it early.
 
 ## Steps
 

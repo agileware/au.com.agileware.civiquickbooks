@@ -1,5 +1,14 @@
 # App assessment questionnaire
 
+This page is part of setting up your Intuit app. The order is:
+
+1. Create an Intuit Developer Account and an Intuit app
+   ([Configuration](configuration.md#create-an-intuit-app-and-get-your-keys), steps 1 to 3).
+2. **Complete the App assessment questionnaire on this page.**
+3. Once Intuit approves it, copy the app's Production keys into CiviCRM and authorise
+   ([Configuration](configuration.md#create-an-intuit-app-and-get-your-keys), steps 5 to 8, then
+   [Authorise](configuration.md#authorise-civiquickbooks-access-to-your-quickbooks-online-account)).
+
 When you create a new app on the Intuit Developer site and want to use its **Production** keys,
 Intuit asks you to complete an *App assessment questionnaire*. This section lists the questions you
 are likely to see and the answers that are accurate for a CiviQuickBooks app: a private app,
@@ -101,4 +110,5 @@ Notes before you start:
   opens. Intuit's [support page](https://help.developer.intuit.com/s/contactsupport) is the place to
   start.
 * After approval, copy the **Production** `Client ID` and `Client Secret` into the settings page, as
-  described in [Configuration](configuration.md#configuration).
+  described in [Configuration](configuration.md#create-an-intuit-app-and-get-your-keys) (step 6 onward), then
+  [authorise the connection](configuration.md#authorise-civiquickbooks-access-to-your-quickbooks-online-account).
