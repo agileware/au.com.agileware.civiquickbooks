@@ -28,8 +28,14 @@ Each Contact's Contact Summary page shows a "QuickBooks Sync Status", which is o
 * **Contact is synced with QuickBooks**.
 * **Contact failed to sync with QuickBooks**, with a **Retry sync** link: the last push failed.
   Fix the cause, then click the link to clear the error and queue the Contact again.
-* **Contact is excluded from sync with QuickBooks (Do not sync)**: the Contact will not be pushed,
-  for example because it matches a QuickBooks Customer that is already linked to another Contact.
+* **Contact is excluded from sync with QuickBooks (Do not sync)**, with a **Resume sync** link: the
+  Contact will not be pushed, for example because it matches a QuickBooks Customer that is already
+  linked to another Contact. Merge or rename any duplicates first, then click the link (and confirm)
+  to clear the flag and any error and queue the Contact again.
+
+The links are only shown to users with the `administer CiviCRM` permission, which is what the
+underlying Account Sync API requires. Other users see the status without a link (a Contact that is
+not queued shows "Contact is not queued for sync with QuickBooks").
 
 If the Contact or any of their Contributions have a sync error, a "Contact Sync Errors" and/or
 "Invoice Sync Errors" indicator is also shown; clicking it shows the underlying error message(s)

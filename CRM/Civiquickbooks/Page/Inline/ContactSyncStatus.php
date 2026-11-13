@@ -49,6 +49,8 @@ class CRM_Civiquickbooks_Page_Inline_ContactSyncStatus extends CRM_Core_Page {
 
     $page->assign('syncStatus', $syncStatus);
     $page->assign('accountContactID', $accountContactID);
+    // The links save through the AccountContact API, which needs this permission.
+    $page->assign('canManageSync', CRM_Core_Permission::check('administer CiviCRM'));
     $page->assign('contactID', $contactID);
 
   }
