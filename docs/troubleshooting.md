@@ -14,7 +14,7 @@ Errors are shown in the Scheduled Job log, on the lists at `Contributions` > `Ac
 | `Invalid authorization code for access` when you click `Authorize` | The Client ID or Client Secret on the settings page is wrong or incomplete. Copy both Production keys again from the Intuit Developer site, submit, and authorise again. |
 | `Authentication failure` or a System Status message about the refresh token | The QuickBooks authorisation has expired or been revoked. Click `Authorize` again on the settings page. |
 | `QBO API rate limit exceeded` | QuickBooks is limiting requests. Wait, then run the job again; it continues where it stopped. |
-| A Contact is marked `do not sync` | It failed to push more than 3 times. Fix the cause, then use `Retry sync` on the Contact Errors list or the link on the Contact Summary page. |
+| A Contact failed to push and is not being retried | A Contact whose push fails is left out of later Contact Pushes until its error is cleared. Fix the cause, then use `Retry sync` on the Contact Errors list or the `Retry sync` link in the Contact's `QuickBooks Sync Status`. |
 | `Matches QBO Contact ..., which is already synced to ... Deduplication is required.` | Two CiviCRM Contacts match the same QuickBooks Customer. Merge or rename the Contacts. |
 
 Turning on **Activate QBO logging?** records the requests and responses to the CiviCRM log directory,

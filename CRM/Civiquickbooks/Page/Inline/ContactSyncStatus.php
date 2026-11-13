@@ -17,28 +17,40 @@ class CRM_Civiquickbooks_Page_Inline_ContactSyncStatus extends CRM_Core_Page {
    */
   public static function addContactSyncStatusBlock(&$page, $contactID) {
 
-    $syncStatus = 0;
+    // One of: not_queued, queued, synced, error, do_not_sync.
+    $syncStatus = 'not_queued';
+    $accountContactID = NULL;
 
-    try{
+    try {
       $account_contact = civicrm_api3('account_contact', 'getsingle', [
         'contact_id' => $contactID,
-        'return'     => 'accounts_contact_id, accounts_needs_update, connector_id, error_data, id, contact_id',
+        'return'     => 'accounts_contact_id, accounts_needs_update, connector_id, error_data, do_not_sync, id, contact_id',
         'plugin'     => _civiquickbooks_account_plugin_name(),
       ]);
+      $accountContactID = $account_contact['id'];
 
-      if (!empty($account_contact['accounts_contact_id'])) {
-        $syncStatus = 1;
+      // A failed push leaves the contact queued, so check for an error first.
+      if (!empty($account_contact['do_not_sync'])) {
+        $syncStatus = 'do_not_sync';
+      }
+      elseif (!empty($account_contact['error_data'])) {
+        $syncStatus = 'error';
       }
       elseif (!empty($account_contact['accounts_needs_update'])) {
-        $syncStatus = 2;
+        $syncStatus = 'queued';
       }
-
+      elseif (!empty($account_contact['accounts_contact_id'])) {
+        $syncStatus = 'synced';
+      }
     }
-    catch(Exception $e) {
-
+    catch (Exception $e) {
+      // No AccountContact record yet.
     }
 
     $page->assign('syncStatus', $syncStatus);
+    $page->assign('accountContactID', $accountContactID);
+    // The links save through the AccountContact API, which needs this permission.
+    $page->assign('canManageSync', CRM_Core_Permission::check('administer CiviCRM'));
     $page->assign('contactID', $contactID);
 
   }

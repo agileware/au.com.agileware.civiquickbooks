@@ -192,11 +192,10 @@ class CRM_Civiquickbooks_Contact {
         ->addWhere('plugin', '=', $this->plugin)
         ->addWhere('connector_id', '=', $params['connector_id'])
         ->addWhere('do_not_sync', '=', FALSE)
+        // A contact whose last push failed is left out until its error is
+        // cleared, by "Retry sync" on Account Sync's Contact Errors list or by
+        // the "Retry sync" link on the Contact Summary page.
         ->addWhere('error_data', 'IS NULL')
-        // Sort contact records without error data first. This should ensure valid
-        // records to be processed before API limits are hit trying to process
-        // records that have previously failed.
-        ->addOrderBy('error_data', 'ASC')
         ->addOrderBy('contact_id.modified_date', 'ASC');
 
       // If we specified a CiviCRM contact ID just push that contact.
@@ -230,10 +229,6 @@ class CRM_Civiquickbooks_Contact {
       foreach ($records as $account_contact) {
         if($abort_loop)
           break;
-
-        $error_data = json_decode($account_contact['error_data'], TRUE);
-
-        $failure_count = $error_data['failures'] ?? 0;
 
         try {
           $id = isset($account_contact['accounts_contact_id']) ? $account_contact['accounts_contact_id'] : NULL;
@@ -285,7 +280,10 @@ class CRM_Civiquickbooks_Contact {
                   break;
 
                 default:
-                  $account_contact['error_data'] = json_encode(['failures' => ++$failure_count, 'error' => $error_message]);
+                  $account_contact['error_data'] = json_encode(['error' => $error_message]);
+                  // Show the error on Account Sync's Contact Errors list, even if
+                  // an earlier error on this contact was retried or resolved.
+                  $account_contact['is_error_resolved'] = 0;
                   throw new Exception('"' . implode("\n", $error_message) . '"');
                   break;
               }
@@ -311,7 +309,8 @@ class CRM_Civiquickbooks_Contact {
             }
           }
           catch (\QuickbooksOnline\API\Exception\IdsException $e) {
-            $account_contact['error_data'] = json_encode(['failures' => ++$failure_count, 'error' => [$e->getCode(), $e->getMessage()]]);
+            $account_contact['error_data'] = json_encode(['error' => [$e->getCode(), $e->getMessage()]]);
+            $account_contact['is_error_resolved'] = 0;
 
             throw $e;
           }
@@ -322,10 +321,6 @@ class CRM_Civiquickbooks_Contact {
 
             // This will update the last sync date.
             unset($account_contact['last_sync_date']);
-
-            if($failure_count > 3) {
-              $account_contact['do_not_sync'] = 1;
-            }
 
             civicrm_api3('account_contact', 'create', $account_contact);
           }

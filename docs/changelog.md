@@ -1,5 +1,17 @@
 # Changes in this version
 
+* A Contact whose push failed was described as retried up to 3 times and then marked `do not sync`.
+  In fact it was never retried. The docs now describe the real behaviour (it waits for `Retry sync`),
+  and the unused failure counter has been removed.
+* Contact and Invoice push failures are now always shown on the Account Sync `Contact Errors` and
+  `Invoice Errors` lists. Previously a failure after an earlier `Retry sync` was hidden.
+* The Contact Summary `QuickBooks Sync Status` now shows when a Contact failed to sync or is set to
+  `do not sync`, instead of reporting it as queued. Its link clears the error and updates the
+  existing record, so it now really retries the Contact.
+* New **Resume sync** link on the Contact Summary for a Contact set to `do not sync`. It asks for
+  confirmation, then clears the flag and any error and queues the Contact.
+* The Contact Summary sync links are now only shown to users with the `administer CiviCRM`
+  permission. Previously other users saw links that could not work for them.
 * The phone sent to QuickBooks no longer depends on CiviCRM Phone Types. Previously the Contact Push
   failed on sites where the Fax, Pager or Voicemail types had been removed.
 * An Invoice for a Contact without a QuickBooks ID now fails with a clear message naming the Contact,

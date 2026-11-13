@@ -21,16 +21,30 @@ your site. You can review each job's configuration and run history under
 
 ## Sync status on the Contact page
 
-A Contact who has been synchronised, or is queued to be synchronised, with QuickBooks Online shows
-a "QuickBooks Sync Status" summary on their Contact Summary page, along with a link to manually
-queue the Contact to be re-synchronised. If the Contact or any of their Contributions have a sync
-error, a "Contact Sync Errors" and/or "Invoice Sync Errors" indicator is also shown; clicking it
-shows the underlying error message(s) reported by QuickBooks Online.
+Each Contact's Contact Summary page shows a "QuickBooks Sync Status", which is one of:
+
+* **Queue Sync to QuickBooks** (a link): the Contact is not queued. Click it to queue the Contact.
+* **Contact is queued for sync with QuickBooks**: the next Contact Push will send it.
+* **Contact is synced with QuickBooks**.
+* **Contact failed to sync with QuickBooks**, with a **Retry sync** link: the last push failed.
+  Fix the cause, then click the link to clear the error and queue the Contact again.
+* **Contact is excluded from sync with QuickBooks (Do not sync)**, with a **Resume sync** link: the
+  Contact will not be pushed, for example because it matches a QuickBooks Customer that is already
+  linked to another Contact. Merge or rename any duplicates first, then click the link (and confirm)
+  to clear the flag and any error and queue the Contact again.
+
+The links are only shown to users with the `administer CiviCRM` permission, which is what the
+underlying Account Sync API requires. Other users see the status without a link (a Contact that is
+not queued shows "Contact is not queued for sync with QuickBooks").
+
+If the Contact or any of their Contributions have a sync error, a "Contact Sync Errors" and/or
+"Invoice Sync Errors" indicator is also shown; clicking it shows the underlying error message(s)
+reported by QuickBooks Online.
 
 Contacts whose push to QuickBooks Online fails are tagged with a reserved "Quickbooks Sync Error"
-tag, which is automatically removed once the Contact syncs successfully. A Contact that fails to
-push more than 3 times in a row is automatically marked as excluded from future syncing (`do not
-sync`) until an administrator investigates and re-queues it.
+tag, which is automatically removed once the Contact syncs successfully. A Contact whose push fails
+is not retried automatically: it is left out of later Contact Pushes until its error is cleared with
+`Retry sync`, either on the `Contact Errors` list or on the Contact Summary page.
 
 ## System-wide status check
 
