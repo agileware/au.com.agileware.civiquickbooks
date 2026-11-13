@@ -101,7 +101,8 @@ Go to `Administer` > `System Settings` > `Scheduled Jobs` and run these jobs in 
 `Execute Now` on each:
 
 1. **Civiquickbooks Contact Push Job** - creates the QuickBooks Customers. Run it until the job log
-   shows no failures.
+   shows no failures. A Contact that fails is not retried by later runs, so fix it and use
+   **Retry sync** (see Step 10).
 2. **Civiquickbooks Invoice Push Job** - creates the Invoices, and records a Payment against each paid
    Invoice. This can only push Invoices for Contacts that already have a QuickBooks ID.
 

@@ -169,6 +169,7 @@ class CRM_Civiquickbooks_Invoice {
             civicrm_api3('AccountInvoice', 'create', [
               'id' => $record['id'],
               'error_data' => json_encode([date('c'), ['message' => $messages]]),
+              'is_error_resolved' => 0,
             ]);
           }
         }
@@ -299,6 +300,7 @@ class CRM_Civiquickbooks_Invoice {
       civicrm_api3('AccountInvoice', 'create', [
         'id' => $record['id'],
         'accounts_needs_update' => 1,
+        'is_error_resolved' => 0,
         'error_data' => json_encode([
           date('c'),
           [
@@ -1274,6 +1276,9 @@ class CRM_Civiquickbooks_Invoice {
       }
 
       $record['error_data'] = json_encode([$responseErrors]);
+      // Show the error on Account Sync's Invoice Errors list, even if an
+      // earlier error on this invoice was retried or resolved.
+      $record['is_error_resolved'] = 0;
 
       if (gettype($record['accounts_data']) == 'array') {
         $record['accounts_data'] = json_encode($record['accounts_data']);
