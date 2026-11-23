@@ -329,7 +329,7 @@ return [
     'group' => 'civiquickbooks',
     'name' => 'quickbooks_link_existing_customer',
     'type' => 'Boolean',
-    'add' => '2.12',
+    'add' => '2.11',
     'default' => 1,
     'title' => E::ts('Link existing QuickBooks customers with the same name?'),
     'is_domain' => 1,
