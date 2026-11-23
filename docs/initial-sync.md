@@ -91,9 +91,12 @@ Organization or Household) and links them, so that the Contact is updated rather
 being created. If the Customer found is already linked to a different Contact, the second Contact is
 marked `do not sync` and listed as an error for you to deduplicate.
 
-Names must match exactly. QuickBooks needs each Customer to have a unique name, so a Contact that has
-the same display name as an existing Customer, but was not matched, fails to push with a QuickBooks
-duplicate name error. Rename one of them, or merge the duplicate Contacts, and queue the Contact again.
+Names must match exactly. QuickBooks needs each name to be unique across its Customers, Vendors,
+Employees and Other names. If a Contact with no QuickBooks ID has the same display name as an existing
+Customer that the Contact Pull did not match, for example an inactive Customer, the Contact Push links
+the Contact to that Customer. If a Vendor or Employee has the name, the Contact fails to push, because
+a Vendor cannot be used as a Customer. Rename the Vendor or Employee in QuickBooks, then use `Retry
+sync`. See [Customer names, Vendors and "name already exists" errors](duplicate-names.md).
 
 **Step 9. Push Contacts, then Invoices**
 

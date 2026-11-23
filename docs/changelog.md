@@ -1,5 +1,14 @@
 # Changes in this version
 
+* A Contact whose name is already used in QuickBooks (error 6240, `The name supplied already exists`)
+  is now handled by the Contact Push. If an existing Customer, active or inactive, has the name, the
+  Contact is linked to it and the Customer is reactivated if needed. This is controlled by the new
+  **Link existing QuickBooks customers with the same name?** setting, which is on by default, including
+  on existing sites. If a Vendor or Employee has the
+  name, the error now names it and says to rename it in QuickBooks, instead of showing a bare QuickBooks
+  message. Nothing is changed in QuickBooks in that case. New documentation page
+  [Customer names, Vendors and "name already exists" errors](duplicate-names.md) explains the
+  difference between Customers and Vendors and how to fix each case.
 * A Contact whose push failed was described as retried up to 3 times and then marked `do not sync`.
   In fact it was never retried. The docs now describe the real behaviour (it waits for `Retry sync`),
   and the unused failure counter has been removed.

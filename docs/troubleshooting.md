@@ -15,6 +15,7 @@ Errors are shown in the Scheduled Job log, on the lists at `Contributions` > `Ac
 | `Authentication failure` or a System Status message about the refresh token | The QuickBooks authorisation has expired or been revoked. Click `Authorize` again on the settings page. |
 | `QBO API rate limit exceeded` | QuickBooks is limiting requests. Wait, then run the job again; it continues where it stopped. |
 | A Contact failed to push and is not being retried | A Contact whose push fails is left out of later Contact Pushes until its error is cleared. Fix the cause, then use `Retry sync` on the Contact Errors list or the `Retry sync` link in the Contact's `QuickBooks Sync Status`. |
+| `The name supplied already exists` (QuickBooks error 6240), or a message saying a `Vendor`, `Employee` or `Customer` "named ... already" uses the name | QuickBooks allows each name to be used once across its Customers, Vendors, Employees and Other names. If an existing Customer has the name, the Contact Push links to it by itself. If a Vendor or Employee has it, rename that record in QuickBooks, then `Retry sync`. See [Customer names, Vendors and "name already exists" errors](duplicate-names.md). |
 | `Matches QBO Contact ..., which is already synced to ... Deduplication is required.` | Two CiviCRM Contacts match the same QuickBooks Customer. Merge or rename the Contacts. |
 
 Turning on **Activate QBO logging?** records the requests and responses to the CiviCRM log directory,

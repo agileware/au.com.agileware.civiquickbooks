@@ -14,6 +14,7 @@ nav:
   - 'Mapping financial accounts': financial-account-mapping.md
   - 'Initial sync': initial-sync.md
   - 'Usage': usage.md
+  - 'Customer names and Vendors': duplicate-names.md
   - 'Troubleshooting': troubleshooting.md
   - 'Changes in this version': changelog.md
 

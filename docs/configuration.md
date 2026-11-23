@@ -117,6 +117,13 @@ The `QuickBooks Online Settings` page also provides the following options:
 * **Customer Memo Override** - optional text to use as the Invoice's Customer Memo instead of the
   Contribution's Source. If this is empty, the Contribution's Source is used as the memo, and if the
   Contribution has no Source the Invoice is pushed without a memo.
+* **Link existing QuickBooks customers with the same name?** - on by default, including on sites that
+  upgrade and have never saved this page. When QuickBooks refuses a new Customer because its name is
+  already used, the Contact Push links the Contact to the existing Customer with that name (making it
+  active again if it was inactive) instead of reporting an error. Untick it if different people can
+  share a name at your organisation, because the match is on the display name only. A Vendor or
+  Employee that holds the name is never linked, whatever this setting is. See
+  [Customer names, Vendors and "name already exists" errors](duplicate-names.md).
 * **Activate QBO logging?** - enables additional logging of QuickBooks Online API activity, for
   troubleshooting. The log includes each response's `intuit_tid`, which Intuit support can use to
   trace a request.
