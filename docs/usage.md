@@ -5,7 +5,9 @@
 This extension registers four Scheduled Jobs, active by default once installed:
 
 * **Civiquickbooks Contact Push Job** - pushes CiviCRM contacts flagged as needing an update to
-  QuickBooks Online as Customers.
+  QuickBooks Online as Customers. If QuickBooks says the name is already in use, it links the Contact
+  to the existing Customer, or explains what holds the name (see
+  [Customer names, Vendors and "name already exists" errors](duplicate-names.md)).
 * **Civiquickbooks Contact Pull Job** - first matches queued Contacts that have no QuickBooks ID to
   existing QuickBooks Customers of the same name, then pulls Customers updated in QuickBooks Online
   since the previous day into CiviCRM, matching or creating Account Sync records for later review.

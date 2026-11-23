@@ -280,6 +280,33 @@ class CRM_Civiquickbooks_Contact {
                   break;
 
                 default:
+                  // QuickBooks refuses a new Customer whose name is already
+                  // used by another record. Link to the existing Customer if
+                  // that is what holds the name, otherwise explain what does.
+                  if (empty($QBOContact->Id) && $this->isDuplicateNameError($last_error)) {
+                    try {
+                      $resolution = $this->resolveDuplicateName(
+                        $dataService,
+                        $account_contact,
+                        $QBOContact,
+                        // On unless an administrator turned it off. A site that
+                        // never saved this setting gets its default, which is on.
+                        (bool) Civi::settings()->get('quickbooks_link_existing_customer')
+                      );
+                    }
+                    catch (CRM_Civiquickbooks_RateLimitException $e) {
+                      $abort_loop = TRUE;
+                      throw $e;
+                    }
+
+                    if (!empty($resolution['result'])) {
+                      $result = $resolution['result'];
+                      break;
+                    }
+
+                    $error_message = $resolution['error'];
+                  }
+
                   $account_contact['error_data'] = json_encode(['error' => $error_message]);
                   // Show the error on Account Sync's Contact Errors list, even if
                   // an earlier error on this contact was retried or resolved.
@@ -348,6 +375,203 @@ class CRM_Civiquickbooks_Contact {
     } catch (Exception $e) {
       throw new CRM_Core_Exception('Contact Push aborted due to: ' . $e->getMessage());
     }
+  }
+
+  /**
+   * Is this QuickBooks fault a "Duplicate Name Exists" (error 6240) error?
+   *
+   * QuickBooks keeps a single list of names shared by Customers, Vendors,
+   * Employees and Other Names, active or inactive, so creating a Customer fails
+   * when anything in that list already uses its display name.
+   *
+   * @param \QuickBooksOnline\API\Core\HttpClients\FaultHandler $error
+   *
+   * @return bool
+   */
+  protected function isDuplicateNameError($error) {
+    return (bool) preg_match('/<Error[^>]*\scode="6240"/', (string) $error->getResponseBody());
+  }
+
+  /**
+   * Find the Customers, Vendors and Employees that use a display name,
+   * including inactive ones. Other Names cannot be queried through the API.
+   *
+   * @param \QuickBooksOnline\API\DataService\DataService $dataService
+   * @param string $displayName
+   *
+   * @return array[]
+   *   Each element has 'type' (Customer, Vendor or Employee) and 'record'.
+   *
+   * @throws \CRM_Civiquickbooks_RateLimitException
+   * @throws \CRM_Core_Exception
+   */
+  protected function findNameHolders($dataService, $displayName) {
+    $holders = [];
+
+    foreach (['Customer', 'Vendor', 'Employee'] as $type) {
+      $rows = $dataService->Query(sprintf(
+        "SELECT * FROM %s WHERE DisplayName = '%s' AND Active IN (true, false) MAXRESULTS 5",
+        $type,
+        addslashes($displayName)
+      ));
+
+      CRM_Quickbooks_APIHelper::checkForError($dataService, 'looking up a duplicate name');
+
+      foreach ((array) $rows as $row) {
+        $holders[] = ['type' => $type, 'record' => $row];
+      }
+    }
+
+    return $holders;
+  }
+
+  /**
+   * Deal with a new Customer being refused because its name is already used.
+   *
+   * If an existing QuickBooks Customer (active or inactive) holds the name, it
+   * is reactivated if needed, linked to the Contact and updated from CiviCRM.
+   * If a Vendor or Employee holds it, nothing is changed in QuickBooks and the
+   * error says what to do instead.
+   *
+   * @param \QuickBooksOnline\API\DataService\DataService $dataService
+   * @param array $account_contact
+   * @param \QuickBooksOnline\API\Data\IPPCustomer $QBOContact
+   *   The Customer that was refused.
+   * @param bool $link
+   *   Whether an existing Customer may be linked (the "Link existing
+   *   QuickBooks customers" setting). If not, a Customer holding the name is
+   *   reported like any other record, and nothing is changed.
+   *
+   * @return array
+   *   ['result' => the QuickBooks Customer as saved] when linked, otherwise
+   *   ['error' => string[]] explaining what to do.
+   *
+   * @throws \CRM_Civiquickbooks_RateLimitException
+   */
+  protected function resolveDuplicateName($dataService, $account_contact, $QBOContact, $link = TRUE) {
+    $name = $QBOContact->DisplayName;
+
+    try {
+      $holders = $this->findNameHolders($dataService, $name);
+    }
+    catch (CRM_Civiquickbooks_RateLimitException $e) {
+      throw $e;
+    }
+    catch (CRM_Core_Exception $e) {
+      return ['error' => [E::ts(
+        'QuickBooks says the name "%1" is already in use, and looking up what uses it failed: %2',
+        [1 => $name, 2 => $e->getMessage()]
+      )]];
+    }
+
+    $customer = NULL;
+    $other = NULL;
+    foreach ($holders as $holder) {
+      if ($holder['type'] == 'Customer') {
+        $customer = $holder['record'];
+        break;
+      }
+      $other = $other ?: $holder;
+    }
+
+    if (!$customer) {
+      return ['error' => [$this->describeNonCustomerNameHolder($name, $other)]];
+    }
+
+    if (!$link) {
+      $inactive = (strtolower((string) $customer->Active) === 'false');
+
+      return ['error' => [E::ts(
+        'QuickBooks already has %1 Customer named "%2" (QuickBooks ID %3). It was not linked to this Contact because "Link existing QuickBooks customers with the same name?" is turned off on the QuickBooks Online Settings page. Turn that setting on, or rename the Customer in QuickBooks, then use Retry sync on this Contact.',
+        [1 => $inactive ? E::ts('an inactive') : E::ts('a'), 2 => $name, 3 => $customer->Id]
+      )]];
+    }
+
+    // The Customer must not already belong to another CiviCRM Contact.
+    $linked = AccountContact::get(FALSE)
+      ->addSelect('id', 'contact_id', 'contact_id.display_name')
+      ->addWhere('plugin', '=', $this->plugin)
+      ->addWhere('connector_id', '=', 0)
+      ->addWhere('accounts_contact_id', '=', $customer->Id)
+      ->addWhere('id', '!=', $account_contact['id'])
+      ->execute()
+      ->first();
+
+    if ($linked) {
+      if (!empty($linked['contact_id'])) {
+        return ['error' => [E::ts(
+          'The QuickBooks Customer "%1" (ID %2) is already linked to CiviCRM Contact %3 (%4), so it was not linked to this Contact. Merge the duplicate Contacts, or change the display name of one of them, then use Retry sync.',
+          [1 => $name, 2 => $customer->Id, 3 => $linked['contact_id'], 4 => $linked['contact_id.display_name']]
+        )]];
+      }
+
+      return ['error' => [E::ts(
+        'The QuickBooks Customer "%1" (ID %2) already exists in Account Sync as an unmatched QuickBooks customer (Account Contact record %3), so it was not linked to this Contact. Delete that unmatched record, then use Retry sync.',
+        [1 => $name, 2 => $customer->Id, 3 => $linked['id']]
+      )]];
+    }
+
+    $reactivate = (strtolower((string) $customer->Active) === 'false');
+
+    $QBOContact->Id = $customer->Id;
+    $QBOContact->SyncToken = $customer->SyncToken;
+    if ($reactivate) {
+      $QBOContact->Active = TRUE;
+    }
+
+    $result = $dataService->Update($QBOContact);
+
+    if ($last_error = $dataService->getLastError()) {
+      $error_message = CRM_Quickbooks_APIHelper::parseErrorResponse($last_error);
+
+      if ($last_error->getHttpStatusCode() == 429) {
+        throw new CRM_Civiquickbooks_RateLimitException('QBO API rate limit exceeded during contact push, aborting', 'qbo_rate_limit_exceeded', $error_message);
+      }
+
+      return ['error' => array_merge([E::ts(
+        'The name "%1" belongs to an existing QuickBooks Customer (ID %2), but linking this Contact to it failed:',
+        [1 => $name, 2 => $customer->Id]
+      )], $error_message)];
+    }
+
+    Civi::log()->info(E::ts(
+      'QuickBooks Contact Push: linked Contact %1 to the existing QuickBooks Customer %2 ("%3")%4.',
+      [1 => $account_contact['contact_id'], 2 => $customer->Id, 3 => $name, 4 => $reactivate ? E::ts(' and reactivated it') : '']
+    ));
+
+    return ['result' => $result];
+  }
+
+  /**
+   * Explain how to fix a name clash with something that is not a Customer.
+   *
+   * @param string $name
+   * @param array|null $holder
+   *   The Vendor or Employee holding the name, from findNameHolders(), or
+   *   NULL if nothing was found.
+   *
+   * @return string
+   */
+  protected function describeNonCustomerNameHolder($name, $holder) {
+    if (!$holder) {
+      return E::ts(
+        'QuickBooks says the name "%1" is already in use, but no Customer, Vendor or Employee with that name was found. It may belong to an Other Name record, or differ only in spacing or punctuation. Ask your QuickBooks administrator to find it and rename it, then use Retry sync.',
+        [1 => $name]
+      );
+    }
+
+    $record = $holder['record'];
+    $inactive = (strtolower((string) $record->Active) === 'false');
+
+    return E::ts(
+      'QuickBooks already has %1 %2 named "%3" (QuickBooks ID %4), and QuickBooks does not allow a Customer to share a name with a %2. In QuickBooks, rename that %2 (for example to "%3 (%2)"), then use Retry sync on this Contact. Nothing was changed in QuickBooks.',
+      [
+        1 => $inactive ? E::ts('an inactive') : E::ts('a'),
+        2 => $holder['type'],
+        3 => $name,
+        4 => $record->Id,
+      ]
+    );
   }
 
   /**

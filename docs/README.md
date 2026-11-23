@@ -28,7 +28,8 @@ copies numbers between the two.
 * **Contacts to Customers, Contributions to Invoices.** Paid Contributions get a Payment recorded
   against the Invoice too, with the transaction ID as the reference.
 * **Matches existing Customers.** If a QuickBooks Customer already has the same name as a CiviCRM
-  Contact, they are linked rather than duplicated.
+  Contact, they are linked rather than duplicated, even if the Customer is inactive. If a Vendor
+  holds the name, the error says exactly what to rename.
 * **Account-code driven.** The `Acctg Code` on your CiviCRM Financial Accounts decides which
   QuickBooks Product/Service and tax code each line item uses.
 * **Works in four QuickBooks regions.** Developed and tested with QuickBooks Online Australia,
